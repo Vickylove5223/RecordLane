@@ -8,10 +8,9 @@ export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
-// OAuth Configuration with PKCE - supports both environment variables and backend
+// OAuth Configuration with PKCE (simplified for demo)
 export const OAUTH_CONFIG = {
-  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '', // From environment or backend
-  clientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || '', // From environment
+  clientId: 'demo-client-id',
   scope: YOUTUBE_SCOPES,
   responseType: 'code',
   accessType: 'offline',
@@ -20,11 +19,6 @@ export const OAUTH_CONFIG = {
   codeChallenge: '',
   codeChallengeMethod: 'S256',
   state: '',
-};
-
-// Check if YouTube is configured
-export const isYouTubeConfigured = (): boolean => {
-  return !!(import.meta.env.VITE_GOOGLE_CLIENT_ID || OAUTH_CONFIG.clientId);
 };
 
 // Environment-specific configuration - RecordLane URLs
@@ -155,7 +149,7 @@ export const CACHE_CONFIG = {
 // Development Configuration
 export const DEV_CONFIG = {
   enableDebugLogs: process.env.NODE_ENV === 'development',
-  mockAPI: false, // Disable demo mode - use real backend
+  mockAPI: true, // Enable demo mode
   skipOnboarding: false,
   allowPopupFallback: true,
   enableRedirectFallback: false,

@@ -1,6 +1,6 @@
+import backend from '~backend/client';
 import { ErrorHandler } from '../utils/errorHandler';
 
-// Simplified token service for demo purposes
 export interface TokenData {
   access_token: string;
   refresh_token?: string;
@@ -34,6 +34,8 @@ export class TokenService {
   private static readonly USER_INFO_KEY = 'recordlane-user-info';
   
   private static refreshListeners: Array<(success: boolean, token?: string) => void> = [];
+  private static isRefreshing = false;
+  private static refreshPromise: Promise<string | null> | null = null;
 
   // Store tokens with enhanced metadata
   static storeTokens(tokenData: TokenData): void {
@@ -96,17 +98,31 @@ export class TokenService {
     }
   }
 
-  // Get valid access token
+  // Get valid access token with automatic refresh
   static async getValidAccessToken(): Promise<string | null> {
     try {
-      const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
-      if (!accessToken) {
-        console.debug('No stored access token found');
+      const tokenData = this.getStoredTokenData();
+      if (!tokenData) {
+        console.debug('No stored token data found');
         return null;
       }
 
-      // For demo purposes, just return the token if it exists
-      return accessToken;
+      // Check if token is expired
+      if (this.isTokenExpired()) {
+        console.log('Token is expired, attempting refresh');
+        return await this.refreshAccessToken();
+      }
+
+      // Check if token is near expiry and refresh proactively
+      if (this.isTokenNearExpiry(5 * 60 * 1000)) { // 5 minutes
+        console.log('Token is near expiry, proactively refreshing');
+        // Don't await this refresh, return current token
+        this.refreshAccessToken().catch(error => {
+          console.warn('Proactive token refresh failed:', error);
+        });
+      }
+
+      return tokenData.accessToken;
     } catch (error) {
       console.error('Failed to get valid access token:', error);
       ErrorHandler.logError('token-get-valid', error);
@@ -114,31 +130,65 @@ export class TokenService {
     }
   }
 
-  // Refresh access token (simplified for demo)
+  // Refresh access token with deduplication
   static async refreshAccessToken(): Promise<string | null> {
+    // Prevent multiple simultaneous refresh attempts
+    if (this.isRefreshing && this.refreshPromise) {
+      console.log('Token refresh already in progress, waiting...');
+      return await this.refreshPromise;
+    }
+
+    this.isRefreshing = true;
+    
+    this.refreshPromise = this._performTokenRefresh();
+    
     try {
-      const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-      if (!refreshToken) {
+      const result = await this.refreshPromise;
+      return result;
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
+  }
+
+  private static async _performTokenRefresh(): Promise<string | null> {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!tokenData?.refreshToken) {
         console.log('No refresh token available');
         this.clearTokens();
         this.notifyRefreshListeners(false);
         return null;
       }
 
-      // Simulate refresh
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Refreshing access token...');
       
-      const newToken = 'refreshed-token-' + Date.now();
-      localStorage.setItem(this.ACCESS_TOKEN_KEY, newToken);
+      const response = await backend.auth.refreshToken({
+        refreshToken: tokenData.refreshToken,
+      });
       
-      console.log('Token refresh successful (simulated)');
-      this.notifyRefreshListeners(true, newToken);
+      // Store the new tokens
+      this.storeTokens({
+        access_token: response.access_token,
+        refresh_token: tokenData.refreshToken, // Keep existing refresh token
+        expires_in: response.expires_in,
+        token_type: response.token_type,
+        scope: response.scope,
+        id_token: response.id_token,
+      });
       
-      return newToken;
+      console.log('Token refresh successful');
+      this.notifyRefreshListeners(true, response.access_token);
+      
+      return response.access_token;
     } catch (error) {
       console.error('Token refresh failed:', error);
+      ErrorHandler.logError('token-refresh', error);
+      
+      // Clear tokens on refresh failure
       this.clearTokens();
       this.notifyRefreshListeners(false);
+      
       return null;
     }
   }
@@ -231,8 +281,8 @@ export class TokenService {
 
   // Check if we have stored tokens
   static hasStoredTokens(): boolean {
-    const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
-    return !!accessToken;
+    const tokenData = this.getStoredTokenData();
+    return !!tokenData?.accessToken;
   }
 
   // Get token expiry info
@@ -261,5 +311,7 @@ export class TokenService {
   // Cleanup resources
   static cleanup(): void {
     this.refreshListeners = [];
+    this.isRefreshing = false;
+    this.refreshPromise = null;
   }
 }

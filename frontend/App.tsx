@@ -37,19 +37,21 @@ function AppInner() {
     // Mark app initialization start
     markStart('app-init');
 
-    // Initialize application with simplified approach
+    // Initialize application
     const initializeApp = async () => {
       try {
-        // Initialize error handling (synchronous)
-        ErrorHandler.initialize();
-        
-        // Initialize cache system (synchronous)
-        GlobalCacheManager.getInstance('app-cache');
-        
-        // Check browser compatibility (synchronous)
-        checkBrowserCompatibility();
+        // Warm up critical services
+        await Promise.all([
+          // Pre-initialize error handling
+          ErrorHandler.initialize(),
+          
+          // Pre-warm cache system
+          GlobalCacheManager.getInstance('app-cache'),
+          
+          // Check browser compatibility
+          checkBrowserCompatibility(),
+        ]);
 
-        // Set initialized immediately
         setIsInitialized(true);
         markEnd('app-init');
 
@@ -61,8 +63,7 @@ function AppInner() {
       }
     };
 
-    // Use setTimeout to ensure the UI renders first
-    setTimeout(initializeApp, 100);
+    initializeApp();
 
     // Set up performance monitoring with reduced frequency
     const unsubscribe = performanceMonitor.addObserver((newMetrics) => {
@@ -138,28 +139,32 @@ function AppInner() {
   );
 }
 
-function checkBrowserCompatibility(): void {
-  // Check for required APIs
-  const requiredAPIs = {
-    'MediaRecorder': typeof MediaRecorder !== 'undefined',
-    'getUserMedia': !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-    'getDisplayMedia': !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
-    'WebCrypto': !!(window.crypto && window.crypto.subtle),
-    'fetch': typeof fetch !== 'undefined',
-    'localStorage': typeof localStorage !== 'undefined',
-  };
+function checkBrowserCompatibility(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // Check for required APIs
+    const requiredAPIs = {
+      'MediaRecorder': typeof MediaRecorder !== 'undefined',
+      'getUserMedia': !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+      'getDisplayMedia': !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
+      'WebCrypto': !!(window.crypto && window.crypto.subtle),
+      'fetch': typeof fetch !== 'undefined',
+      'localStorage': typeof localStorage !== 'undefined',
+    };
 
-  const missingAPIs = Object.entries(requiredAPIs)
-    .filter(([, supported]) => !supported)
-    .map(([api]) => api);
+    const missingAPIs = Object.entries(requiredAPIs)
+      .filter(([, supported]) => !supported)
+      .map(([api]) => api);
 
-  if (missingAPIs.length > 0) {
-    const error = new Error(`Browser missing required APIs: ${missingAPIs.join(', ')}`);
-    ErrorHandler.logError('browser-compatibility-error', error, { missingAPIs });
-    
-    // Don't throw - we'll handle this gracefully in the UI
-    console.warn('Browser compatibility issues detected:', missingAPIs);
-  }
+    if (missingAPIs.length > 0) {
+      const error = new Error(`Browser missing required APIs: ${missingAPIs.join(', ')}`);
+      ErrorHandler.logError('browser-compatibility-error', error, { missingAPIs });
+      
+      // Don't reject - we'll handle this gracefully in the UI
+      console.warn('Browser compatibility issues detected:', missingAPIs);
+    }
+
+    resolve();
+  });
 }
 
 export default function App() {

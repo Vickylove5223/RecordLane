@@ -2,20 +2,17 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoadingSpinner } from '@/components/ui/spinner';
-import { Settings, Circle, Youtube, Wrench } from 'lucide-react';
+import { Settings, Circle } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
-import { isYouTubeConfigured } from '../../config';
 import FloatingRecordButton from '../recording/FloatingRecordButton';
-import { YouTubeSetupModal } from '../setup/YouTubeSetupModal';
 
 export default function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
   const { state: recordingState } = useRecording();
   const [showSettings, setShowSettings] = useState(false);
-  const [showYouTubeSetup, setShowYouTubeSetup] = useState(false);
 
   const handleSettingsClick = () => {
     dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
@@ -44,19 +41,6 @@ export default function TopNav() {
           </div>
         )}
 
-        {/* YouTube Setup Button - Show when not configured */}
-        {!isYouTubeConfigured() && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowYouTubeSetup(true)}
-            className="text-orange-600 border-orange-200 hover:bg-orange-50"
-          >
-            <Wrench className="h-4 w-4 mr-2" />
-            Setup YouTube
-          </Button>
-        )}
-
         <Button
           variant="ghost"
           size="sm"
@@ -79,12 +63,6 @@ export default function TopNav() {
           <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
         )}
       </div>
-
-      {/* YouTube Setup Modal */}
-      <YouTubeSetupModal
-        isOpen={showYouTubeSetup}
-        onClose={() => setShowYouTubeSetup(false)}
-      />
     </header>
   );
 }
