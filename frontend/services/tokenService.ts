@@ -1,5 +1,5 @@
 import { ErrorHandler } from '../utils/errorHandler';
-import { TOKEN_CONFIG, ERROR_MESSAGES } from '../config';
+import { TOKEN_CONFIG, ERROR_MESSAGES, GOOGLE_CLIENT_ID } from '../config';
 
 // Enhanced token management with automatic refresh
 
@@ -9,6 +9,7 @@ export interface TokenData {
   expires_in: number;
   token_type: string;
   scope: string;
+  id_token?: string;
 }
 
 export interface StoredTokenData {
@@ -18,6 +19,14 @@ export interface StoredTokenData {
   tokenType: string;
   scope: string;
   issuedAt: number;
+  idToken?: string;
+}
+
+export interface TokenExpiryInfo {
+  expiresAt: number;
+  expiresIn: number;
+  isNearExpiry: boolean;
+  isExpired: boolean;
 }
 
 export class TokenService {
@@ -28,6 +37,7 @@ export class TokenService {
   
   private static refreshPromise: Promise<string | null> | null = null;
   private static refreshListeners: Array<(success: boolean, token?: string) => void> = [];
+  private static proactiveRefreshInterval?: NodeJS.Timeout;
 
   // Store tokens with enhanced metadata
   static storeTokens(tokenData: TokenData): void {
@@ -42,6 +52,7 @@ export class TokenService {
         tokenType: tokenData.token_type || 'Bearer',
         scope: tokenData.scope || '',
         issuedAt: now,
+        idToken: tokenData.id_token,
       };
 
       // Store individual tokens for backward compatibility
@@ -59,6 +70,10 @@ export class TokenService {
         expiresIn: tokenData.expires_in,
         expiresAt: new Date(expiresAt).toISOString(),
       });
+
+      // Set up proactive refresh
+      this.scheduleProactiveRefresh(expiresAt);
+      
     } catch (error) {
       console.error('Failed to store tokens:', error);
       ErrorHandler.logError('token-storage', error);
@@ -96,13 +111,14 @@ export class TokenService {
     try {
       const tokenData = this.getStoredTokenData();
       if (!tokenData) {
+        console.log('No stored token data found');
         return null;
       }
 
       const now = Date.now();
       const timeUntilExpiry = tokenData.expiresAt - now;
 
-      // If token is not expired, return it
+      // If token is not expired and not close to expiry, return it
       if (timeUntilExpiry > TOKEN_CONFIG.refreshThreshold) {
         return tokenData.accessToken;
       }
@@ -112,6 +128,7 @@ export class TokenService {
         timeUntilExpiry,
         threshold: TOKEN_CONFIG.refreshThreshold,
         hasRefreshToken: !!tokenData.refreshToken,
+        isExpired: timeUntilExpiry <= 0,
       });
 
       return await this.refreshAccessToken();
@@ -138,73 +155,150 @@ export class TokenService {
   }
 
   private static async performTokenRefresh(): Promise<string | null> {
-    try {
-      const tokenData = this.getStoredTokenData();
-      if (!tokenData?.refreshToken) {
-        console.log('No refresh token available, user needs to re-authenticate');
-        this.clearTokens();
-        this.notifyRefreshListeners(false);
-        return null;
-      }
+    let attempt = 0;
+    const maxRetries = TOKEN_CONFIG.maxRefreshRetries;
 
-      console.log('Attempting to refresh access token...');
-
-      const response = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          client_id: tokenData.scope.includes('youtube') ? 
-            '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com' : 
-            tokenData.accessToken.substring(0, 10), // Fallback
-          refresh_token: tokenData.refreshToken,
-          grant_type: 'refresh_token',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Token refresh failed:', response.status, errorText);
-        
-        if (response.status === 400) {
-          // Invalid refresh token, user needs to re-authenticate
-          console.log('Refresh token is invalid, clearing tokens');
+    while (attempt < maxRetries) {
+      try {
+        const tokenData = this.getStoredTokenData();
+        if (!tokenData?.refreshToken) {
+          console.log('No refresh token available, user needs to re-authenticate');
           this.clearTokens();
           this.notifyRefreshListeners(false);
-          throw ErrorHandler.createError('TOKEN_REFRESH_FAILED', ERROR_MESSAGES.TOKEN_REFRESH_FAILED);
+          return null;
         }
+
+        console.log(`Attempting to refresh access token (attempt ${attempt + 1}/${maxRetries})...`);
+
+        const response = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            client_id: GOOGLE_CLIENT_ID,
+            refresh_token: tokenData.refreshToken,
+            grant_type: 'refresh_token',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Token refresh failed:', response.status, errorText);
+          
+          // Parse error response
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { error: 'unknown_error', error_description: errorText };
+          }
+
+          // Handle specific error cases
+          if (response.status === 400) {
+            if (errorData.error === 'invalid_grant') {
+              console.log('Refresh token is invalid or expired, clearing tokens');
+              this.clearTokens();
+              this.notifyRefreshListeners(false);
+              throw ErrorHandler.createError('REFRESH_TOKEN_EXPIRED', ERROR_MESSAGES.REFRESH_TOKEN_EXPIRED);
+            }
+          }
+
+          // For server errors, retry
+          if (response.status >= 500 && attempt < maxRetries - 1) {
+            console.log(`Server error ${response.status}, retrying in ${TOKEN_CONFIG.refreshRetryDelay}ms...`);
+            await this.delay(TOKEN_CONFIG.refreshRetryDelay);
+            attempt++;
+            continue;
+          }
+          
+          throw new Error(`Token refresh failed: ${response.status} ${errorData.error_description || errorData.error}`);
+        }
+
+        const refreshData = await response.json();
         
-        throw new Error(`Token refresh failed: ${response.status} ${errorText}`);
+        // Validate refresh response
+        if (!refreshData.access_token) {
+          throw new Error('No access token in refresh response');
+        }
+
+        // Create new token data
+        const newTokenData: TokenData = {
+          access_token: refreshData.access_token,
+          refresh_token: refreshData.refresh_token || tokenData.refreshToken, // Keep old refresh token if new one not provided
+          expires_in: refreshData.expires_in || 3600,
+          token_type: refreshData.token_type || 'Bearer',
+          scope: refreshData.scope || tokenData.scope,
+          id_token: refreshData.id_token,
+        };
+
+        // Store the new tokens
+        this.storeTokens(newTokenData);
+        
+        console.log('Token refresh successful');
+        this.notifyRefreshListeners(true, newTokenData.access_token);
+        
+        return newTokenData.access_token;
+
+      } catch (error) {
+        console.error(`Token refresh attempt ${attempt + 1} failed:`, error);
+        
+        // If this is the last attempt or a non-retryable error
+        if (attempt >= maxRetries - 1 || this.isNonRetryableRefreshError(error)) {
+          ErrorHandler.logError('token-refresh-failed', error, { attempt: attempt + 1, maxRetries });
+          
+          // Clear tokens on final failure
+          this.clearTokens();
+          this.notifyRefreshListeners(false);
+          
+          return null;
+        }
+
+        // Wait before retrying
+        await this.delay(TOKEN_CONFIG.refreshRetryDelay * (attempt + 1));
+        attempt++;
       }
+    }
 
-      const refreshData = await response.json();
-      
-      // Create new token data
-      const newTokenData: TokenData = {
-        access_token: refreshData.access_token,
-        refresh_token: refreshData.refresh_token || tokenData.refreshToken, // Keep old refresh token if new one not provided
-        expires_in: refreshData.expires_in || 3600,
-        token_type: refreshData.token_type || 'Bearer',
-        scope: refreshData.scope || tokenData.scope,
-      };
+    return null;
+  }
 
-      // Store the new tokens
-      this.storeTokens(newTokenData);
-      
-      console.log('Token refresh successful');
-      this.notifyRefreshListeners(true, newTokenData.access_token);
-      
-      return newTokenData.access_token;
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-      ErrorHandler.logError('token-refresh', error);
-      
-      // Clear tokens on refresh failure
-      this.clearTokens();
-      this.notifyRefreshListeners(false);
-      
-      return null;
+  private static isNonRetryableRefreshError(error: any): boolean {
+    const nonRetryableCodes = [
+      'REFRESH_TOKEN_EXPIRED',
+      'invalid_grant',
+      'invalid_client',
+      'unauthorized_client',
+    ];
+
+    return nonRetryableCodes.some(code => 
+      error.code === code || 
+      error.message?.includes(code) || 
+      error.error === code
+    );
+  }
+
+  private static delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Schedule proactive refresh
+  private static scheduleProactiveRefresh(expiresAt: number): void {
+    // Clear existing interval
+    if (this.proactiveRefreshInterval) {
+      clearInterval(this.proactiveRefreshInterval);
+    }
+
+    const now = Date.now();
+    const timeUntilProactiveRefresh = expiresAt - now - TOKEN_CONFIG.proactiveRefreshThreshold;
+
+    if (timeUntilProactiveRefresh > 0) {
+      setTimeout(() => {
+        console.log('Proactively refreshing token...');
+        this.refreshAccessToken().catch(error => {
+          console.error('Proactive token refresh failed:', error);
+        });
+      }, timeUntilProactiveRefresh);
     }
   }
 
@@ -287,6 +381,12 @@ export class TokenService {
       localStorage.removeItem(this.TOKEN_DATA_KEY);
       localStorage.removeItem(this.USER_INFO_KEY);
       
+      // Clear proactive refresh
+      if (this.proactiveRefreshInterval) {
+        clearInterval(this.proactiveRefreshInterval);
+        this.proactiveRefreshInterval = undefined;
+      }
+      
       console.log('All tokens cleared');
     } catch (error) {
       console.error('Failed to clear tokens:', error);
@@ -307,7 +407,7 @@ export class TokenService {
   }
 
   // Get token expiry info
-  static getTokenExpiry(): { expiresAt: number; expiresIn: number; isNearExpiry: boolean; isExpired: boolean } | null {
+  static getTokenExpiry(): TokenExpiryInfo | null {
     try {
       const tokenData = this.getStoredTokenData();
       if (!tokenData) return null;
@@ -349,22 +449,11 @@ export class TokenService {
       return;
     }
 
-    // Check token status every minute
-    setInterval(() => {
-      const tokenData = this.getStoredTokenData();
-      if (!tokenData) return;
-
-      const now = Date.now();
-      const timeUntilExpiry = tokenData.expiresAt - now;
-
-      // If token will expire soon and we have a refresh token, proactively refresh
-      if (timeUntilExpiry <= TOKEN_CONFIG.refreshThreshold && timeUntilExpiry > 0) {
-        console.log('Proactively refreshing token before expiry');
-        this.refreshAccessToken().catch(error => {
-          console.error('Proactive token refresh failed:', error);
-        });
-      }
-    }, 60 * 1000); // Check every minute
+    // Check if we have tokens and schedule proactive refresh
+    const tokenData = this.getStoredTokenData();
+    if (tokenData) {
+      this.scheduleProactiveRefresh(tokenData.expiresAt);
+    }
 
     // Monitor page visibility to refresh token when page becomes visible
     document.addEventListener('visibilitychange', () => {
@@ -375,6 +464,16 @@ export class TokenService {
         });
       }
     });
+  }
+
+  // Cleanup resources
+  static cleanup(): void {
+    if (this.proactiveRefreshInterval) {
+      clearInterval(this.proactiveRefreshInterval);
+      this.proactiveRefreshInterval = undefined;
+    }
+    this.refreshListeners = [];
+    this.refreshPromise = null;
   }
 }
 

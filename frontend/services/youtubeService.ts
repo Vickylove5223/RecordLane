@@ -11,7 +11,8 @@ import {
   POPUP_CONFIG,
   DEV_CONFIG,
   YOUTUBE_SCOPES,
-  TOKEN_CONFIG
+  TOKEN_CONFIG,
+  PKCE_CONFIG
 } from '../config';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
@@ -145,12 +146,12 @@ export class YouTubeService {
 
   static async disconnect(): Promise<void> {
     try {
-      const accessToken = TokenService.getValidAccessToken();
+      const accessToken = await TokenService.getValidAccessToken();
       
       if (accessToken) {
         try {
           // Revoke the token
-          await fetch(`https://oauth2.googleapis.com/revoke?token=${await accessToken}`, {
+          await fetch(`https://oauth2.googleapis.com/revoke?token=${accessToken}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           });
@@ -281,27 +282,20 @@ export class YouTubeService {
       const codeChallenge = await this.generateCodeChallenge(codeVerifier);
       const state = this.generateState();
 
+      // Store PKCE data in sessionStorage
       sessionStorage.setItem('oauth_code_verifier', codeVerifier);
       sessionStorage.setItem('oauth_state', state);
+      sessionStorage.setItem('oauth_redirect_uri', getRedirectUri());
 
       const authUrl = this.buildAuthUrl(codeChallenge, state);
 
       let authCode: string;
-      try {
-        authCode = await this.openOAuthPopup(authUrl, state);
-      } catch (popupError) {
-        if (this.isPopupBlockedError(popupError)) {
-          console.warn('Popup blocked, trying redirect fallback');
-          if (DEV_CONFIG.enableRedirectFallback) {
-            authCode = await this.redirectOAuthFlow(authUrl);
-          } else {
-            throw ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED, popupError);
-          }
-        } else {
-          throw popupError;
-        }
-      }
+      let receivedState: string;
 
+      console.log('Starting OAuth flow with PKCE...');
+      authCode = await this.openOAuthPopup(authUrl, state);
+
+      console.log('Authorization code received, exchanging for tokens...');
       const tokenResponse = await this.exchangeCodeForToken(authCode, codeVerifier);
       
       // Store tokens using enhanced TokenService
@@ -311,14 +305,22 @@ export class YouTubeService {
         expires_in: tokenResponse.expires_in,
         token_type: tokenResponse.token_type || 'Bearer',
         scope: tokenResponse.scope || YOUTUBE_SCOPES,
+        id_token: tokenResponse.id_token,
       });
       
       return tokenResponse;
     } catch (error) {
+      // Cleanup session storage on error
       sessionStorage.removeItem('oauth_code_verifier');
       sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_redirect_uri');
       console.error('OAuth flow failed:', error);
       throw error;
+    } finally {
+      // Cleanup session storage
+      sessionStorage.removeItem('oauth_code_verifier');
+      sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_redirect_uri');
     }
   }
 
@@ -333,23 +335,31 @@ export class YouTubeService {
       scope: YOUTUBE_SCOPES,
       state: state,
       code_challenge: codeChallenge,
-      code_challenge_method: 'S256',
+      code_challenge_method: PKCE_CONFIG.codeChallengeMethod,
       access_type: 'offline',
       prompt: 'consent',
       include_granted_scopes: 'true',
     });
     
     const url = `${AUTH_ENDPOINT}?${params.toString()}`;
-    console.log('Generated auth URL:', url);
+    console.log('Generated auth URL (without sensitive params):', url.replace(/code_challenge=[^&]*/, 'code_challenge=REDACTED'));
     return url;
   }
 
   private static async openOAuthPopup(authUrl: string, expectedState: string): Promise<string> {
     return new Promise((resolve, reject) => {
+      // Calculate popup position to center it
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const popupWidth = POPUP_CONFIG.width;
+      const popupHeight = POPUP_CONFIG.height;
+      const left = (screenWidth - popupWidth) / 2;
+      const top = (screenHeight - popupHeight) / 2;
+
       const popup = window.open(
         authUrl, 
         POPUP_CONFIG.windowName, 
-        `width=${POPUP_CONFIG.width},height=${POPUP_CONFIG.height},scrollbars=${POPUP_CONFIG.scrollbars},resizable=${POPUP_CONFIG.resizable}`
+        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=${POPUP_CONFIG.scrollbars},resizable=${POPUP_CONFIG.resizable},status=no,menubar=no,toolbar=no,location=no`
       );
       
       if (!popup) {
@@ -357,7 +367,9 @@ export class YouTubeService {
       }
 
       const timeout = setTimeout(() => {
-        popup.close();
+        if (!popup.closed) {
+          popup.close();
+        }
         reject(ErrorHandler.createError('POPUP_TIMEOUT', ERROR_MESSAGES.POPUP_TIMEOUT));
       }, POPUP_CONFIG.timeout);
 
@@ -380,6 +392,7 @@ export class YouTubeService {
           const url = new URL(currentUrl);
           const redirectUri = getRedirectUri();
           
+          // Check if we're back on our domain
           if (url.origin === new URL(redirectUri).origin) {
             clearInterval(pollTimer);
             clearTimeout(timeout);
@@ -401,6 +414,7 @@ export class YouTubeService {
             }
             
             if (code) {
+              console.log('Authorization code received successfully');
               resolve(code);
             } else {
               reject(ErrorHandler.createError('OAUTH_ERROR', 'No authorization code received'));
@@ -408,50 +422,104 @@ export class YouTubeService {
           }
         } catch (error) {
           // Ignore cross-origin errors during polling
+          if (error.name !== 'SecurityError') {
+            console.warn('Unexpected error during popup polling:', error);
+          }
         }
       }, POPUP_CONFIG.pollInterval);
     });
   }
 
-  private static async redirectOAuthFlow(authUrl: string): Promise<string> {
-    sessionStorage.setItem('oauth_return_url', window.location.href);
-    window.location.href = authUrl;
-    return new Promise(() => {});
-  }
-
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<any> {
+    const redirectUri = getRedirectUri();
+    
     const tokenData = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       code,
       code_verifier: codeVerifier,
       grant_type: 'authorization_code',
-      redirect_uri: getRedirectUri(),
+      redirect_uri: redirectUri,
+    });
+    
+    console.log('Exchanging authorization code for tokens...', {
+      redirectUri,
+      hasCode: !!code,
+      hasCodeVerifier: !!codeVerifier,
     });
     
     const response = await fetch(TOKEN_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+      },
       body: tokenData,
     });
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Token exchange failed:', errorText);
+      console.error('Token exchange failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+      });
       
-      if (errorText.includes('redirect_uri_mismatch')) {
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: 'unknown_error', error_description: errorText };
+      }
+      
+      if (errorData.error === 'redirect_uri_mismatch') {
         throw ErrorHandler.createError('REDIRECT_URI_MISMATCH', ERROR_MESSAGES.REDIRECT_URI_MISMATCH);
       }
       
-      throw new Error(`Failed to exchange code for token: ${response.status} ${errorText}`);
+      if (errorData.error === 'invalid_grant') {
+        throw ErrorHandler.createError('INVALID_GRANT', ERROR_MESSAGES.INVALID_GRANT);
+      }
+      
+      throw new Error(`Token exchange failed: ${response.status} ${errorData.error_description || errorData.error}`);
     }
     
-    return response.json();
+    const tokenResponse = await response.json();
+    console.log('Token exchange successful:', {
+      hasAccessToken: !!tokenResponse.access_token,
+      hasRefreshToken: !!tokenResponse.refresh_token,
+      expiresIn: tokenResponse.expires_in,
+      tokenType: tokenResponse.token_type,
+      scope: tokenResponse.scope,
+    });
+    
+    return tokenResponse;
   }
 
-  private static generateCodeVerifier = () => this.base64URLEncode(crypto.getRandomValues(new Uint8Array(32)));
-  private static generateCodeChallenge = async (v: string) => this.base64URLEncode(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v))));
-  private static base64URLEncode = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  private static generateState = () => this.base64URLEncode(crypto.getRandomValues(new Uint8Array(16)));
+  // PKCE utility methods
+  private static generateCodeVerifier(): string {
+    const array = new Uint8Array(PKCE_CONFIG.codeVerifierLength / 2);
+    crypto.getRandomValues(array);
+    return this.base64URLEncode(array);
+  }
+
+  private static async generateCodeChallenge(verifier: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return this.base64URLEncode(new Uint8Array(digest));
+  }
+
+  private static base64URLEncode(array: Uint8Array): string {
+    return btoa(String.fromCharCode(...array))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+  }
+
+  private static generateState(): string {
+    const array = new Uint8Array(PKCE_CONFIG.stateLength);
+    crypto.getRandomValues(array);
+    return this.base64URLEncode(array);
+  }
 
   static handleOAuthCallback() {
     // Check if we're handling an OAuth callback
@@ -462,8 +530,12 @@ export class YouTubeService {
       const error = urlParams.get('error');
       
       if (code || error) {
-        console.log('OAuth callback detected:', { code: !!code, error, state });
-        // The popup handling will take care of this
+        console.log('OAuth callback detected:', { 
+          hasCode: !!code, 
+          error, 
+          state,
+          currentUrl: window.location.href,
+        });
       }
     }
   }
@@ -477,7 +549,8 @@ export class YouTubeService {
       if (response.status === 401) {
         throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
       }
-      throw new Error(`Failed to get user info: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to get user info: ${response.status} ${errorText}`);
     }
     
     return response.json();
@@ -499,7 +572,8 @@ export class YouTubeService {
       if (response.status === 401) {
         throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
       }
-      throw new Error(`Failed to initiate resumable upload: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to initiate resumable upload: ${response.status} ${errorText}`);
     }
     
     const location = response.headers.get('Location');

@@ -7,6 +7,8 @@ export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.a
 export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
   'https://www.googleapis.com/auth/youtube.force-ssl',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
 // OAuth Configuration with PKCE
@@ -29,20 +31,21 @@ export const getRedirectUri = (): string => {
   }
   
   const origin = window.location.origin;
+  const hostname = window.location.hostname;
   
   // For Leap development environment - RecordLane
   if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
     return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
-  // Development URLs
-  if (origin.includes('.lp.dev')) {
+  // Development URLs (any *.lp.dev domain)
+  if (hostname.includes('.lp.dev')) {
     return origin;
   }
   
   // Local development
-  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-    return origin;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3000';
   }
   
   // Production fallback
@@ -52,12 +55,12 @@ export const getRedirectUri = (): string => {
 // Popup configuration for OAuth
 export const POPUP_CONFIG = {
   width: 500,
-  height: 600,
+  height: 700,
   scrollbars: 'yes',
   resizable: 'yes',
   centerscreen: 'yes',
-  windowName: 'google_oauth',
-  pollInterval: 1000,
+  windowName: 'google_oauth_popup',
+  pollInterval: 500,
   timeout: 5 * 60 * 1000,
 };
 
@@ -138,6 +141,8 @@ export const ERROR_MESSAGES = {
   CODE_EXCHANGE_FAILED: 'Failed to exchange authorization code. Please try again.',
   TOKEN_REFRESH_FAILED: 'Failed to refresh authentication token. Please sign in again.',
   AUTH_TOKEN_INVALID: 'Authentication token is invalid. Please sign in again.',
+  INVALID_GRANT: 'Invalid grant. Please re-authenticate.',
+  REFRESH_TOKEN_EXPIRED: 'Refresh token has expired. Please sign in again.',
 };
 
 // Cache Configuration
@@ -154,7 +159,7 @@ export const DEV_CONFIG = {
   mockAPI: false,
   skipOnboarding: false,
   allowPopupFallback: true,
-  enableRedirectFallback: true,
+  enableRedirectFallback: false, // Disabled for PKCE flow
 };
 
 // Analytics Configuration
@@ -172,4 +177,12 @@ export const TOKEN_CONFIG = {
   maxRefreshRetries: 3,
   refreshRetryDelay: 1000,
   autoRefreshEnabled: true,
+  proactiveRefreshThreshold: 15 * 60 * 1000, // 15 minutes before expiry
+};
+
+// PKCE Configuration
+export const PKCE_CONFIG = {
+  codeVerifierLength: 128,
+  codeChallengeMethod: 'S256',
+  stateLength: 32,
 };
