@@ -24,67 +24,37 @@ import {
   MicOff,
   AlertTriangle,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Settings
 } from 'lucide-react';
 import { useRecording, RecordingMode, RecordingOptions } from '../../contexts/RecordingContext';
 import { RecordingService } from '../../services/recordingService';
+import { useApp } from '../../contexts/AppContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function FloatingRecordButton() {
-  const { startRecording, options, updateOptions, state: recordingState } = useRecording();
+  const { startRecording, options, updateOptions, state: recordingState, permissionStatus } = useRecording();
+  const { dispatch } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [permissionStatus, setPermissionStatus] = useState<{
-    camera: boolean;
-    microphone: boolean;
-    screenCapture: boolean;
-    checking: boolean;
-  }>({
-    camera: false,
-    microphone: false,
-    screenCapture: false,
-    checking: false,
-  });
   const { toast } = useToast();
-
-  // Check permissions when menu opens or options change
-  useEffect(() => {
-    if (isMenuOpen) {
-      checkPermissions();
-    }
-  }, [isMenuOpen, options.mode, options.microphone]);
-
-  const checkPermissions = async () => {
-    setPermissionStatus(prev => ({ ...prev, checking: true }));
-    
-    try {
-      const permissions = await RecordingService.checkPermissions(options.mode, options.microphone);
-      setPermissionStatus({
-        ...permissions,
-        checking: false,
-      });
-    } catch (error) {
-      console.error('Permission check failed:', error);
-      setPermissionStatus({
-        camera: false,
-        microphone: false,
-        screenCapture: false,
-        checking: false,
-      });
-    }
-  };
 
   const handleModeSelect = async (mode: RecordingMode) => {
     setIsMenuOpen(false);
     
     try {
-      // The context now handles detailed error toasts.
-      // We just call startRecording and the context will manage state and feedback.
-      await startRecording({ ...options, mode });
+      // Update options and start recording
+      const updatedOptions = { ...options, mode };
+      updateOptions({ mode });
+      await startRecording(updatedOptions);
     } catch (error) {
-      // The error is already handled and toasted by the context.
-      // We can add component-specific logic here if needed, but for now, just log it for debugging.
+      // Error is already handled and toasted by the context
       console.log(`Recording start failed at component level for mode: ${mode}`, error);
     }
+  };
+
+  const handleSettingsClick = () => {
+    setIsMenuOpen(false);
+    dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
   };
 
   const getPermissionIcon = (hasPermission: boolean, checking: boolean) => {
@@ -92,9 +62,28 @@ export default function FloatingRecordButton() {
     return hasPermission ? <CheckCircle className="h-3 w-3 text-green-500" /> : <AlertTriangle className="h-3 w-3 text-red-500" />;
   };
 
-  const getPermissionText = (hasPermission: boolean, checking: boolean) => {
-    if (checking) return "Checking...";
-    return hasPermission ? "Allowed" : "Denied";
+  const getModePermissionStatus = (mode: RecordingMode) => {
+    switch (mode) {
+      case 'screen':
+        return permissionStatus.screen === 'granted' || permissionStatus.screen === 'prompt';
+      case 'camera':
+        return permissionStatus.camera === 'granted';
+      case 'screen-camera':
+        return (permissionStatus.screen === 'granted' || permissionStatus.screen === 'prompt') && 
+               permissionStatus.camera === 'granted';
+      default:
+        return false;
+    }
+  };
+
+  const getPermissionStatusText = (mode: RecordingMode) => {
+    const hasPermission = getModePermissionStatus(mode);
+    
+    if (mode === 'screen' && permissionStatus.screen === 'prompt') {
+      return 'Available';
+    }
+    
+    return hasPermission ? 'Ready' : 'Need Permission';
   };
 
   const isStarting = recordingState === 'starting';
@@ -144,7 +133,10 @@ export default function FloatingRecordButton() {
               <div className="text-xs text-muted-foreground">Capture your screen</div>
             </div>
             <div className="flex items-center ml-2">
-              {getPermissionIcon(permissionStatus.screenCapture, permissionStatus.checking)}
+              <span className="text-xs text-muted-foreground mr-1">
+                {getPermissionStatusText('screen')}
+              </span>
+              {getPermissionIcon(getModePermissionStatus('screen'), permissionStatus.screen === 'checking')}
             </div>
           </DropdownMenuItem>
 
@@ -158,7 +150,10 @@ export default function FloatingRecordButton() {
               <div className="text-xs text-muted-foreground">Record with webcam</div>
             </div>
             <div className="flex items-center ml-2">
-              {getPermissionIcon(permissionStatus.camera, permissionStatus.checking)}
+              <span className="text-xs text-muted-foreground mr-1">
+                {getPermissionStatusText('camera')}
+              </span>
+              {getPermissionIcon(getModePermissionStatus('camera'), permissionStatus.camera === 'checking')}
             </div>
           </DropdownMenuItem>
 
@@ -172,7 +167,11 @@ export default function FloatingRecordButton() {
               <div className="text-xs text-muted-foreground">Screen with PiP camera</div>
             </div>
             <div className="flex items-center ml-2">
-              {getPermissionIcon(permissionStatus.camera && permissionStatus.screenCapture, permissionStatus.checking)}
+              <span className="text-xs text-muted-foreground mr-1">
+                {getPermissionStatusText('screen-camera')}
+              </span>
+              {getPermissionIcon(getModePermissionStatus('screen-camera'), 
+                permissionStatus.camera === 'checking' || permissionStatus.screen === 'checking')}
             </div>
           </DropdownMenuItem>
 
@@ -203,7 +202,7 @@ export default function FloatingRecordButton() {
                   <span>Microphone</span>
                   {options.microphone && (
                     <div className="ml-2">
-                      {getPermissionIcon(permissionStatus.microphone, permissionStatus.checking)}
+                      {getPermissionIcon(permissionStatus.microphone === 'granted', permissionStatus.microphone === 'checking')}
                     </div>
                   )}
                 </div>
@@ -249,7 +248,15 @@ export default function FloatingRecordButton() {
 
           <DropdownMenuSeparator />
 
-          {/* Permission Status Summary */}
+          {/* Settings */}
+          <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
+            <Settings className="h-4 w-4 mr-3" />
+            <span>Settings</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          {/* Security Status */}
           <div className="px-2 py-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Browser Security:</span>

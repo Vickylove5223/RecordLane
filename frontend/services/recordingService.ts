@@ -12,12 +12,16 @@ export class RecordingService {
   private isRecording = false;
   private retryAttempts = 0;
   private maxRetries = 3;
+  private startTime = 0;
 
   async startRecording(options: RecordingOptions): Promise<void> {
     try {
+      console.log('Starting recording with options:', options);
+      
       this.recordedChunks = [];
       this.retryAttempts = 0;
       this.isRecording = false;
+      this.startTime = Date.now();
       
       // Check browser support first
       if (!this.checkBrowserSupport()) {
@@ -35,8 +39,28 @@ export class RecordingService {
       
       // Start recording
       if (this.mediaRecorder) {
+        // Set up data available handler before starting
+        this.mediaRecorder.ondataavailable = (event) => {
+          console.log('Data available:', event.data.size, 'bytes');
+          if (event.data && event.data.size > 0) {
+            this.recordedChunks.push(event.data);
+            console.log('Total chunks:', this.recordedChunks.length, 'Total size:', this.getTotalSize());
+          }
+        };
+
+        this.mediaRecorder.onstart = () => {
+          console.log('MediaRecorder started successfully');
+          this.isRecording = true;
+        };
+
+        this.mediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+          ErrorHandler.logError('mediarecorder-runtime-error', event);
+        };
+
+        // Start with timeslice to ensure data is collected regularly
         this.mediaRecorder.start(1000); // 1 second timeslice
-        this.isRecording = true;
+        
         console.log('Recording started successfully');
       } else {
         throw new Error('MediaRecorder not initialized');
@@ -63,6 +87,10 @@ export class RecordingService {
       
       throw ErrorHandler.createError('RECORDING_FAILED', ERROR_MESSAGES.RECORDING_FAILED, error);
     }
+  }
+
+  private getTotalSize(): number {
+    return this.recordedChunks.reduce((total, chunk) => total + chunk.size, 0);
   }
 
   private async checkAndRequestPermissions(options: RecordingOptions): Promise<void> {
@@ -125,20 +153,40 @@ export class RecordingService {
 
       const timeout = setTimeout(() => {
         reject(ErrorHandler.createError('STOP_TIMEOUT', 'Recording stop timeout'));
-      }, 10000); // 10 second timeout
+      }, 15000); // 15 second timeout
 
-      this.mediaRecorder.onstop = () => {
+      let dataCollectionComplete = false;
+
+      const finalizeRecording = () => {
+        if (dataCollectionComplete) return;
+        dataCollectionComplete = true;
+        
         clearTimeout(timeout);
+        
         try {
-          console.log('Recording stopped, creating blob from', this.recordedChunks.length, 'chunks');
+          console.log('Finalizing recording with', this.recordedChunks.length, 'chunks');
+          console.log('Total recording size:', this.getTotalSize(), 'bytes');
           
           if (this.recordedChunks.length === 0) {
             reject(ErrorHandler.createError('NO_DATA', 'No recording data available'));
             return;
           }
 
-          const blob = new Blob(this.recordedChunks, { type: 'video/webm;codecs=vp8,opus' });
-          console.log('Created blob with size:', blob.size, 'bytes');
+          // Create blob with proper MIME type
+          const mimeType = this.getOptimalMimeType();
+          const blob = new Blob(this.recordedChunks, { type: mimeType });
+          
+          console.log('Created blob:', {
+            size: blob.size,
+            type: blob.type,
+            chunkCount: this.recordedChunks.length,
+            duration: Date.now() - this.startTime,
+          });
+          
+          if (blob.size === 0) {
+            reject(ErrorHandler.createError('EMPTY_RECORDING', 'Recording is empty'));
+            return;
+          }
           
           this.isRecording = false;
           resolve(blob);
@@ -147,6 +195,20 @@ export class RecordingService {
           ErrorHandler.logError('recording-blob-creation', error);
           reject(ErrorHandler.createError('BLOB_CREATION_FAILED', 'Failed to create recording file'));
         }
+      };
+
+      // Handle data available one more time to catch any remaining data
+      this.mediaRecorder.ondataavailable = (event) => {
+        console.log('Final data chunk:', event.data.size, 'bytes');
+        if (event.data && event.data.size > 0) {
+          this.recordedChunks.push(event.data);
+        }
+      };
+
+      this.mediaRecorder.onstop = () => {
+        console.log('MediaRecorder stopped');
+        // Give a small delay to ensure all data is collected
+        setTimeout(finalizeRecording, 500);
       };
 
       this.mediaRecorder.onerror = (event) => {
@@ -158,16 +220,11 @@ export class RecordingService {
 
       try {
         if (this.mediaRecorder.state !== 'inactive') {
+          console.log('Stopping MediaRecorder...');
           this.mediaRecorder.stop();
         } else {
-          // Already stopped, resolve immediately if we have data
-          clearTimeout(timeout);
-          if (this.recordedChunks.length > 0) {
-            const blob = new Blob(this.recordedChunks, { type: 'video/webm;codecs=vp8,opus' });
-            resolve(blob);
-          } else {
-            reject(ErrorHandler.createError('NO_DATA', 'No recording data available'));
-          }
+          // Already stopped, finalize immediately
+          finalizeRecording();
         }
       } catch (error) {
         clearTimeout(timeout);
@@ -175,6 +232,24 @@ export class RecordingService {
         reject(ErrorHandler.createError('STOP_FAILED', 'Failed to stop recording'));
       }
     });
+  }
+
+  private getOptimalMimeType(): string {
+    const mimeTypes = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=h264,opus',
+      'video/webm',
+      'video/mp4',
+    ];
+
+    for (const mimeType of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        return mimeType;
+      }
+    }
+
+    return 'video/webm'; // Fallback
   }
 
   cleanup(): void {
@@ -228,6 +303,7 @@ export class RecordingService {
         this.mediaRecorder.onstop = null;
         this.mediaRecorder.onerror = null;
         this.mediaRecorder.ondataavailable = null;
+        this.mediaRecorder.onstart = null;
         this.mediaRecorder = null;
       }
       
@@ -285,6 +361,7 @@ export class RecordingService {
       console.log('Screen stream obtained:', {
         videoTracks: this.screenStream.getVideoTracks().length,
         audioTracks: this.screenStream.getAudioTracks().length,
+        resolution: `${this.screenStream.getVideoTracks()[0]?.getSettings().width}x${this.screenStream.getVideoTracks()[0]?.getSettings().height}`,
       });
 
       // Handle stream ending (user stops sharing)
@@ -298,6 +375,8 @@ export class RecordingService {
         throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Screen sharing permission was denied. Please allow screen sharing and try again.');
       } else if (error.name === 'NotSupportedError') {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'Screen sharing is not supported in this browser.');
+      } else if (error.name === 'AbortError') {
+        throw ErrorHandler.createError('USER_CANCELLED', 'Screen sharing was cancelled by the user.');
       }
       
       throw error;
@@ -313,6 +392,7 @@ export class RecordingService {
           width: { ideal: 640 },
           height: { ideal: 480 },
           frameRate: { ideal: options.frameRate },
+          facingMode: 'user',
         },
         audio: false, // Microphone is handled separately
       };
@@ -322,6 +402,7 @@ export class RecordingService {
       console.log('Camera stream obtained:', {
         videoTracks: this.cameraStream.getVideoTracks().length,
         audioTracks: this.cameraStream.getAudioTracks().length,
+        resolution: `${this.cameraStream.getVideoTracks()[0]?.getSettings().width}x${this.cameraStream.getVideoTracks()[0]?.getSettings().height}`,
       });
     } catch (error) {
       console.error('Failed to get camera stream:', error);
@@ -348,10 +429,15 @@ export class RecordingService {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
+          sampleRate: 44100,
+          sampleSize: 16,
         },
       });
       
-      console.log('Microphone stream obtained');
+      console.log('Microphone stream obtained:', {
+        audioTracks: this.microphoneStream.getAudioTracks().length,
+        settings: this.microphoneStream.getAudioTracks()[0]?.getSettings(),
+      });
     } catch (error) {
       console.error('Failed to get microphone stream:', error);
       
@@ -381,24 +467,11 @@ export class RecordingService {
     });
 
     // Choose the best available codec
-    const mimeTypes = [
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm;codecs=h264,opus',
-      'video/webm',
-    ];
+    const mimeType = this.getOptimalMimeType();
+    console.log('Selected MIME type:', mimeType);
 
-    let mimeType = '';
-    for (const type of mimeTypes) {
-      if (MediaRecorder.isTypeSupported(type)) {
-        mimeType = type;
-        console.log('Selected MIME type:', mimeType);
-        break;
-      }
-    }
-
-    if (!mimeType) {
-      throw new Error('No supported MediaRecorder mime type found');
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      throw new Error(`MIME type ${mimeType} is not supported`);
     }
 
     try {
@@ -408,27 +481,12 @@ export class RecordingService {
         audioBitsPerSecond: 128000, // 128 kbps for audio
       });
 
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          this.recordedChunks.push(event.data);
-          console.log('Received data chunk:', event.data.size, 'bytes, total chunks:', this.recordedChunks.length);
-        }
-      };
-
-      this.mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-        ErrorHandler.logError('mediarecorder-error', event);
-      };
-
-      this.mediaRecorder.onstart = () => {
-        console.log('MediaRecorder started');
-      };
-
-      this.mediaRecorder.onstop = () => {
-        console.log('MediaRecorder stopped');
-      };
-
-      console.log('MediaRecorder setup completed');
+      console.log('MediaRecorder created successfully:', {
+        mimeType: this.mediaRecorder.mimeType,
+        state: this.mediaRecorder.state,
+        videoBitsPerSecond: this.getVideoBitrate(options.resolution),
+        audioBitsPerSecond: 128000,
+      });
     } catch (error) {
       console.error('Failed to create MediaRecorder:', error);
       throw new Error(`Failed to create MediaRecorder: ${error.message}`);
@@ -490,13 +548,13 @@ export class RecordingService {
   private getVideoBitrate(resolution: string): number {
     switch (resolution) {
       case '480p':
-        return 1000000; // 1 Mbps
+        return 1500000; // 1.5 Mbps
       case '720p':
-        return 2500000; // 2.5 Mbps
+        return 3000000; // 3 Mbps
       case '1080p':
-        return 5000000; // 5 Mbps
+        return 6000000; // 6 Mbps
       default:
-        return 2500000; // Default to 720p bitrate
+        return 3000000; // Default to 720p bitrate
     }
   }
 

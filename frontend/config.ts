@@ -114,79 +114,10 @@ export const FEATURES = {
   drawing: true,
   clickHighlights: true,
   pip: true,
-  offlineMode: false,
+  offlineMode: true,
   analytics: true,
 };
 
 // Error Messages
 export const ERROR_MESSAGES = {
-  DRIVE_NOT_CONNECTED: 'Please connect your YouTube account before recording',
-  PERMISSIONS_DENIED: 'Recording permissions were denied. Please allow camera and screen access in your browser settings, then try again.',
-  UPLOAD_FAILED: 'Failed to upload recording to YouTube',
-  RECORDING_FAILED: 'Failed to start recording. Please check your browser permissions and try again.',
-  NETWORK_ERROR: 'Network connection error. Please check your internet.',
-  STORAGE_QUOTA_EXCEEDED: 'YouTube storage quota exceeded',
-  BROWSER_NOT_SUPPORTED: 'Your browser does not support screen recording. Please use Chrome, Edge, or Firefox.',
-  FILE_TOO_LARGE: 'Recording file is too large to upload',
-  AUTH_FAILED: 'YouTube authentication failed',
-  TOKEN_EXPIRED: 'Authentication session expired, please sign in again',
-  ACCESS_DENIED: 'Access to YouTube was denied',
-  POPUP_BLOCKED: 'Authentication popup was blocked. Please allow popups and try again.',
-  OAUTH_ERROR: 'Authentication failed. Please try again.',
-  CONNECTION_TIMEOUT: 'Connection timeout. Please check your internet connection.',
-  REDIRECT_URI_MISMATCH: 'OAuth configuration error. Please contact support.',
-  POPUP_TIMEOUT: 'Authentication window timed out. Please try again.',
-  POPUP_CLOSED: 'Authentication window was closed. Please try again.',
-  INVALID_STATE: 'Invalid authentication state. Please try again.',
-  CODE_EXCHANGE_FAILED: 'Failed to exchange authorization code. Please try again.',
-  TOKEN_REFRESH_FAILED: 'Failed to refresh authentication token. Please sign in again.',
-  AUTH_TOKEN_INVALID: 'Authentication token is invalid. Please sign in again.',
-  INVALID_GRANT: 'Invalid grant. Please re-authenticate.',
-  REFRESH_TOKEN_EXPIRED: 'Refresh token has expired. Please sign in again.',
-  DEVICE_NOT_FOUND: 'Recording device not found. Please check your camera and microphone connections.',
-  DEVICE_IN_USE: 'Recording device is currently in use by another application. Please close other apps and try again.',
-  SECURITY_ERROR: 'Recording blocked due to security restrictions. Please ensure you are using HTTPS.',
-  CONSTRAINTS_NOT_SATISFIED: 'Recording settings could not be applied. Please try with different settings.',
-};
-
-// Cache Configuration
-export const CACHE_CONFIG = {
-  storageKey: 'recordlane-cache',
-  version: '1.0',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  cleanupInterval: 60 * 60 * 1000,
-};
-
-// Development Configuration
-export const DEV_CONFIG = {
-  enableDebugLogs: process.env.NODE_ENV === 'development',
-  mockAPI: false,
-  skipOnboarding: false,
-  allowPopupFallback: true,
-  enableRedirectFallback: false, // Disabled for PKCE flow
-};
-
-// Analytics Configuration
-export const ANALYTICS_CONFIG = {
-  baseUrl: '/api',
-  trackingEnabled: FEATURES.analytics,
-  sessionTimeout: 30 * 60 * 1000,
-  batchSize: 10,
-  flushInterval: 5 * 60 * 1000,
-};
-
-// Token Refresh Configuration
-export const TOKEN_CONFIG = {
-  refreshThreshold: 5 * 60 * 1000, // 5 minutes before expiry
-  maxRefreshRetries: 3,
-  refreshRetryDelay: 1000,
-  autoRefreshEnabled: true,
-  proactiveRefreshThreshold: 15 * 60 * 1000, // 15 minutes before expiry
-};
-
-// PKCE Configuration
-export const PKCE_CONFIG = {
-  codeVerifierLength: 128,
-  codeChallengeMethod: 'S256',
-  stateLength: 32,
-};
+  DRIVE_NOT_CONNECTED: 'Please connect your

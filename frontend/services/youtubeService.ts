@@ -290,7 +290,6 @@ export class YouTubeService {
       const authUrl = this.buildAuthUrl(codeChallenge, state);
 
       let authCode: string;
-      let receivedState: string;
 
       console.log('Starting OAuth flow with PKCE...');
       authCode = await this.openOAuthPopup(authUrl, state);
