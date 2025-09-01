@@ -2,7 +2,7 @@
 
 // Google OAuth Configuration
 export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
-export const GOOGLE_CLIENT_SECRET = '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';
+// Note: Client secret should NEVER be in frontend code - removed for security
 
 // Google Drive API Configuration
 export const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
@@ -71,6 +71,9 @@ export const ERROR_MESSAGES = {
   STORAGE_QUOTA_EXCEEDED: 'Google Drive storage quota exceeded',
   BROWSER_NOT_SUPPORTED: 'Your browser does not support screen recording',
   FILE_TOO_LARGE: 'Recording file is too large to upload',
+  AUTH_FAILED: 'Google Drive authentication failed',
+  TOKEN_EXPIRED: 'Authentication session expired, please sign in again',
+  ACCESS_DENIED: 'Access to Google Drive was denied',
 };
 
 // Cache Configuration
@@ -86,4 +89,14 @@ export const DEV_CONFIG = {
   enableDebugLogs: process.env.NODE_ENV === 'development',
   mockAPI: false,
   skipOnboarding: false,
+};
+
+// OAuth Configuration
+export const OAUTH_CONFIG = {
+  redirectUri: typeof window !== 'undefined' ? window.location.origin : '',
+  responseType: 'token',
+  scope: GOOGLE_DRIVE_SCOPE,
+  includeGrantedScopes: true,
+  accessType: 'online', // For client-side only apps
+  prompt: 'consent', // Always show consent to ensure refresh token
 };

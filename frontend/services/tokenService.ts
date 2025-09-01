@@ -1,140 +1,20 @@
 import { ErrorHandler } from '../utils/errorHandler';
-import { CacheService } from '../utils/cacheService';
 import { GOOGLE_CLIENT_ID } from '../config';
 
-// Token management with client-side encryption for persistent auth
+// Simplified token management for client-side Google OAuth
 
 export class TokenService {
   private static readonly ACCESS_TOKEN_KEY = 'recordlane-access-token';
-  private static readonly REFRESH_TOKEN_KEY = 'recordlane-refresh-token';
   private static readonly TOKEN_EXPIRY_KEY = 'recordlane-token-expiry';
-  private static readonly ENCRYPTION_KEY_NAME = 'recordlane-encryption-key';
+  private static readonly USER_INFO_KEY = 'recordlane-user-info';
 
-  private static encryptionKey: CryptoKey | null = null;
-  private static cache = new CacheService('token-service');
-
-  // Initialize or retrieve encryption key
-  private static async getOrCreateEncryptionKey(): Promise<CryptoKey> {
-    if (this.encryptionKey) {
-      return this.encryptionKey;
-    }
-
+  // Store tokens securely (simplified for client-side)
+  static storeTokens(accessToken: string, expiresIn: number = 3600): void {
     try {
-      // Try to load existing key
-      const storedKey = localStorage.getItem(this.ENCRYPTION_KEY_NAME);
-      if (storedKey) {
-        try {
-          const keyData = JSON.parse(storedKey);
-          this.encryptionKey = await window.crypto.subtle.importKey(
-            'jwk',
-            keyData,
-            { name: 'AES-GCM' },
-            true,
-            ['encrypt', 'decrypt']
-          );
-          return this.encryptionKey;
-        } catch (error) {
-          console.warn('Failed to load existing encryption key, generating new one');
-          ErrorHandler.logError('encryption-key-load', error);
-        }
-      }
-
-      // Generate new key
-      this.encryptionKey = await window.crypto.subtle.generateKey(
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      );
-
-      // Store key
-      const exportedKey = await window.crypto.subtle.exportKey('jwk', this.encryptionKey);
-      localStorage.setItem(this.ENCRYPTION_KEY_NAME, JSON.stringify(exportedKey));
-
-      return this.encryptionKey;
-    } catch (error) {
-      console.error('Failed to create encryption key:', error);
-      ErrorHandler.logError('encryption-key-creation', error);
-      throw ErrorHandler.createError('ENCRYPTION_FAILED', 'Failed to create encryption key');
-    }
-  }
-
-  // Encrypt data using Web Crypto API
-  private static async encryptData(data: string): Promise<string> {
-    try {
-      const key = await this.getOrCreateEncryptionKey();
-      const iv = window.crypto.getRandomValues(new Uint8Array(12));
-      const encoder = new TextEncoder();
-      const dataBuffer = encoder.encode(data);
-
-      const encrypted = await window.crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
-        key,
-        dataBuffer
-      );
-
-      // Combine IV and encrypted data
-      const combined = new Uint8Array(iv.length + encrypted.byteLength);
-      combined.set(iv);
-      combined.set(new Uint8Array(encrypted), iv.length);
-
-      // Convert to base64
-      return btoa(String.fromCharCode(...combined));
-    } catch (error) {
-      console.error('Failed to encrypt data:', error);
-      ErrorHandler.logError('data-encryption', error);
-      throw ErrorHandler.createError('ENCRYPTION_FAILED', 'Failed to encrypt data');
-    }
-  }
-
-  // Decrypt data using Web Crypto API
-  private static async decryptData(encryptedData: string): Promise<string> {
-    try {
-      const key = await this.getOrCreateEncryptionKey();
-      const combined = new Uint8Array(
-        atob(encryptedData)
-          .split('')
-          .map(char => char.charCodeAt(0))
-      );
-
-      const iv = combined.slice(0, 12);
-      const encrypted = combined.slice(12);
-
-      const decrypted = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
-        key,
-        encrypted
-      );
-
-      const decoder = new TextDecoder();
-      return decoder.decode(decrypted);
-    } catch (error) {
-      console.error('Failed to decrypt data:', error);
-      ErrorHandler.logError('data-decryption', error);
-      throw ErrorHandler.createError('DECRYPTION_FAILED', 'Failed to decrypt stored data');
-    }
-  }
-
-  // Store tokens securely
-  static async storeTokens(accessToken: string, refreshToken?: string): Promise<void> {
-    try {
-      // Store access token with expiry (assume 1 hour)
-      const expiryTime = Date.now() + (60 * 60 * 1000); // 1 hour from now
+      const expiryTime = Date.now() + (expiresIn * 1000);
       
-      const encryptedAccessToken = await this.encryptData(accessToken);
-      localStorage.setItem(this.ACCESS_TOKEN_KEY, encryptedAccessToken);
+      localStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
       localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-
-      if (refreshToken) {
-        const encryptedRefreshToken = await this.encryptData(refreshToken);
-        localStorage.setItem(this.REFRESH_TOKEN_KEY, encryptedRefreshToken);
-      }
-
-      // Cache for quick access
-      await this.cache.set('tokens', {
-        accessToken,
-        expiryTime,
-        hasRefreshToken: !!refreshToken,
-      });
     } catch (error) {
       console.error('Failed to store tokens:', error);
       ErrorHandler.logError('token-storage', error);
@@ -142,97 +22,75 @@ export class TokenService {
     }
   }
 
-  // Get valid access token (refresh if needed)
-  static async getValidAccessToken(): Promise<string | null> {
+  // Store user info
+  static storeUserInfo(userInfo: any): void {
     try {
-      // Check cache first
-      const cached = await this.cache.get('tokens');
-      if (cached && cached.data.expiryTime > Date.now() + (5 * 60 * 1000)) { // 5 min buffer
-        return cached.data.accessToken;
-      }
-
-      const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
-      const now = Date.now();
-
-      // Check if we have a valid access token
-      if (expiryTime && parseInt(expiryTime) > now + (5 * 60 * 1000)) { // 5 min buffer
-        const encryptedToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
-        if (encryptedToken) {
-          const accessToken = await this.decryptData(encryptedToken);
-          
-          // Update cache
-          await this.cache.set('tokens', {
-            accessToken,
-            expiryTime: parseInt(expiryTime),
-            hasRefreshToken: !!localStorage.getItem(this.REFRESH_TOKEN_KEY),
-          });
-          
-          return accessToken;
-        }
-      }
-
-      // Try to refresh the token
-      return await this.refreshAccessToken();
+      localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(userInfo));
     } catch (error) {
-      console.error('Failed to get valid access token:', error);
+      console.error('Failed to store user info:', error);
+      ErrorHandler.logError('user-info-storage', error);
+    }
+  }
+
+  // Get stored user info
+  static getUserInfo(): any | null {
+    try {
+      const userInfo = localStorage.getItem(this.USER_INFO_KEY);
+      return userInfo ? JSON.parse(userInfo) : null;
+    } catch (error) {
+      console.error('Failed to get user info:', error);
+      return null;
+    }
+  }
+
+  // Get valid access token
+  static getValidAccessToken(): string | null {
+    try {
+      const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
+      const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+
+      if (!accessToken || !expiryTime) {
+        return null;
+      }
+
+      const now = Date.now();
+      const expiry = parseInt(expiryTime);
+
+      // Check if token is expired (with 5 minute buffer)
+      if (now >= expiry - (5 * 60 * 1000)) {
+        this.clearTokens();
+        return null;
+      }
+
+      return accessToken;
+    } catch (error) {
+      console.error('Failed to get access token:', error);
       ErrorHandler.logError('token-retrieval', error);
       return null;
     }
   }
 
-  // Refresh access token using refresh token
-  private static async refreshAccessToken(): Promise<string | null> {
+  // Check if token is close to expiring (within 10 minutes)
+  static isTokenNearExpiry(): boolean {
     try {
-      const encryptedRefreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-      if (!encryptedRefreshToken) {
-        return null;
-      }
+      const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+      if (!expiryTime) return true;
 
-      const refreshToken = await this.decryptData(encryptedRefreshToken);
+      const now = Date.now();
+      const expiry = parseInt(expiryTime);
       
-      const response = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-          client_id: GOOGLE_CLIENT_ID,
-        }),
-        signal: AbortSignal.timeout(10000), // 10 second timeout
-      });
-
-      if (!response.ok) {
-        // Refresh token is invalid, clear stored tokens
-        await this.clearTokens();
-        return null;
-      }
-
-      const data = await response.json();
-      
-      // Store new access token (and new refresh token if provided)
-      await this.storeTokens(data.access_token, data.refresh_token || refreshToken);
-      
-      return data.access_token;
+      return now >= expiry - (10 * 60 * 1000); // 10 minutes buffer
     } catch (error) {
-      console.error('Failed to refresh access token:', error);
-      ErrorHandler.logError('token-refresh', error);
-      await this.clearTokens();
-      return null;
+      return true;
     }
   }
 
-  // Clear all stored tokens
-  static async clearTokens(): Promise<void> {
+  // Clear all stored tokens and user info
+  static clearTokens(): void {
     try {
       localStorage.removeItem(this.ACCESS_TOKEN_KEY);
-      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-      localStorage.removeItem(this.ENCRYPTION_KEY_NAME);
-      this.encryptionKey = null;
-      
-      await this.cache.delete('tokens');
+      localStorage.removeItem(this.USER_INFO_KEY);
     } catch (error) {
       console.error('Failed to clear tokens:', error);
       ErrorHandler.logError('token-clear', error);
@@ -241,16 +99,45 @@ export class TokenService {
 
   // Check if we have stored tokens
   static hasStoredTokens(): boolean {
-    return !!(
-      localStorage.getItem(this.ACCESS_TOKEN_KEY) && 
-      localStorage.getItem(this.REFRESH_TOKEN_KEY)
-    );
+    const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
+    const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+    return !!(accessToken && expiryTime);
   }
 
-  // Validate token format
+  // Validate token format (basic validation)
   static isValidTokenFormat(token: string): boolean {
-    // Basic validation for Google OAuth tokens
-    return /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]*$/.test(token) || 
-           /^ya29\.[A-Za-z0-9\-_]+$/.test(token);
+    // Google OAuth2 access tokens are typically 39+ characters and alphanumeric with some special chars
+    return typeof token === 'string' && token.length >= 39 && /^[A-Za-z0-9\-_.~]+$/.test(token);
+  }
+
+  // Get token expiry info
+  static getTokenExpiry(): { expiresAt: number; expiresIn: number } | null {
+    try {
+      const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+      if (!expiryTime) return null;
+
+      const expiresAt = parseInt(expiryTime);
+      const expiresIn = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+
+      return { expiresAt, expiresIn };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Refresh token by re-authenticating (for client-side OAuth)
+  static async refreshToken(): Promise<string | null> {
+    try {
+      // For client-side OAuth, we need to re-authenticate
+      // This would typically trigger the OAuth flow again
+      console.log('Token refresh needed - re-authentication required');
+      this.clearTokens();
+      return null;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      ErrorHandler.logError('token-refresh', error);
+      this.clearTokens();
+      return null;
+    }
   }
 }

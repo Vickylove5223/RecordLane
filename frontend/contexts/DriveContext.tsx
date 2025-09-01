@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { DriveService, DriveFolder, UploadProgress } from '../services/driveService';
+import { TokenService } from '../services/tokenService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
@@ -61,14 +62,22 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       } else {
         setSelectedFolder(null);
       }
+      
+      // Clear any previous errors if check was successful
+      if (connection.isConnected) {
+        setConnectionError(null);
+      }
     } catch (error) {
       console.error('Failed to check Drive connection:', error);
       ErrorHandler.logError('drive-connection-check', error);
+      
       setIsConnected(false);
       setUserEmail(null);
       setSelectedFolder(null);
       setRequiresFolderSetup(false);
-      setConnectionError(ErrorHandler.formatErrorForUser(error));
+      
+      const errorMessage = ErrorHandler.formatErrorForUser(error);
+      setConnectionError(errorMessage);
     }
   }, [retryService]);
 
@@ -80,13 +89,14 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       const result = await retryService.execute(
         () => DriveService.connect(),
         {
-          maxRetries: 2,
+          maxRetries: 1, // Don't retry auth failures
           retryDelay: 2000,
           shouldRetry: (error) => {
-            // Retry on network errors but not on user cancellation
+            // Only retry on network errors, not auth errors
             return ErrorHandler.isRecoverableError(error) && 
                    !error.message?.includes('popup') &&
-                   !error.message?.includes('cancelled');
+                   !error.message?.includes('cancelled') &&
+                   !error.message?.includes('denied');
           },
           onRetry: (error, attempt) => {
             toast({
@@ -120,11 +130,14 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       const errorMessage = ErrorHandler.formatErrorForUser(error);
       setConnectionError(errorMessage);
       
-      toast({
-        title: "Connection Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      // Don't show toast for user cancellation
+      if (!error.message?.includes('cancelled') && !error.message?.includes('popup was closed')) {
+        toast({
+          title: "Connection Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsConnecting(false);
     }
@@ -171,25 +184,65 @@ export function DriveProvider({ children }: { children: ReactNode }) {
   }, [toast, retryService]);
 
   const listFolders = useCallback(async () => {
-    return await retryService.execute(
-      () => DriveService.listFolders(),
-      {
-        maxRetries: 2,
-        retryDelay: 1000,
-        shouldRetry: (error) => ErrorHandler.isRecoverableError(error),
+    try {
+      return await retryService.execute(
+        () => DriveService.listFolders(),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: (error) => {
+            // Don't retry auth errors, but do retry network errors
+            if (error.code === 'AUTH_EXPIRED' || error.message?.includes('Authentication expired')) {
+              // Auth expired, trigger reconnection
+              setIsConnected(false);
+              setUserEmail(null);
+              setSelectedFolder(null);
+              setConnectionError('Authentication expired, please reconnect');
+              return false;
+            }
+            return ErrorHandler.isRecoverableError(error);
+          },
+        }
+      );
+    } catch (error) {
+      if (error.code === 'AUTH_EXPIRED') {
+        setIsConnected(false);
+        setUserEmail(null);
+        setSelectedFolder(null);
+        setConnectionError('Authentication expired, please reconnect');
       }
-    );
+      throw error;
+    }
   }, [retryService]);
 
   const createFolder = useCallback(async (name: string) => {
-    return await retryService.execute(
-      () => DriveService.createFolder(name),
-      {
-        maxRetries: 2,
-        retryDelay: 1000,
-        shouldRetry: (error) => ErrorHandler.isRecoverableError(error),
+    try {
+      return await retryService.execute(
+        () => DriveService.createFolder(name),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: (error) => {
+            if (error.code === 'AUTH_EXPIRED') {
+              setIsConnected(false);
+              setUserEmail(null);
+              setSelectedFolder(null);
+              setConnectionError('Authentication expired, please reconnect');
+              return false;
+            }
+            return ErrorHandler.isRecoverableError(error);
+          },
+        }
+      );
+    } catch (error) {
+      if (error.code === 'AUTH_EXPIRED') {
+        setIsConnected(false);
+        setUserEmail(null);
+        setSelectedFolder(null);
+        setConnectionError('Authentication expired, please reconnect');
       }
-    );
+      throw error;
+    }
   }, [retryService]);
 
   const selectFolder = useCallback(async (folderId: string, folderName: string) => {
@@ -206,9 +259,16 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       console.error('Failed to select folder:', error);
       ErrorHandler.logError('folder-select', error);
       
+      if (error.code === 'AUTH_EXPIRED') {
+        setIsConnected(false);
+        setUserEmail(null);
+        setSelectedFolder(null);
+        setConnectionError('Authentication expired, please reconnect');
+      }
+      
       toast({
         title: "Selection Failed",
-        description: "Failed to select folder",
+        description: ErrorHandler.formatErrorForUser(error),
         variant: "destructive",
       });
       
@@ -230,25 +290,43 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       throw ErrorHandler.createError('NO_FOLDER_SELECTED', 'No folder selected for uploads');
     }
     
-    return await retryService.execute(
-      () => DriveService.uploadFile(file, title, privacy, onProgress),
-      {
-        maxRetries: 3,
-        retryDelay: 2000,
-        shouldRetry: (error) => {
-          // Retry on network errors and certain HTTP errors
-          return ErrorHandler.isRecoverableError(error) ||
-                 (error.status >= 500 && error.status < 600) ||
-                 error.status === 429; // Rate limit
-        },
-        onRetry: (error, attempt) => {
-          toast({
-            title: "Upload Retry",
-            description: `Retrying upload attempt ${attempt}...`,
-          });
+    try {
+      return await retryService.execute(
+        () => DriveService.uploadFile(file, title, privacy, onProgress),
+        {
+          maxRetries: 3,
+          retryDelay: 2000,
+          shouldRetry: (error) => {
+            // Don't retry auth errors
+            if (error.code === 'AUTH_EXPIRED') {
+              setIsConnected(false);
+              setUserEmail(null);
+              setSelectedFolder(null);
+              setConnectionError('Authentication expired, please reconnect');
+              return false;
+            }
+            // Retry on network errors and certain HTTP errors
+            return ErrorHandler.isRecoverableError(error) ||
+                   (error.status >= 500 && error.status < 600) ||
+                   error.status === 429; // Rate limit
+          },
+          onRetry: (error, attempt) => {
+            toast({
+              title: "Upload Retry",
+              description: `Retrying upload attempt ${attempt}...`,
+            });
+          }
         }
+      );
+    } catch (error) {
+      if (error.code === 'AUTH_EXPIRED') {
+        setIsConnected(false);
+        setUserEmail(null);
+        setSelectedFolder(null);
+        setConnectionError('Authentication expired, please reconnect');
       }
-    );
+      throw error;
+    }
   }, [isConnected, selectedFolder, retryService, toast]);
 
   const retryConnection = useCallback(async () => {
@@ -259,10 +337,43 @@ export function DriveProvider({ children }: { children: ReactNode }) {
     }
   }, [connectionError, connectDrive, checkConnection]);
 
-  // Check connection on mount
+  // Check connection on mount and periodically check token expiry
   React.useEffect(() => {
     checkConnection();
+    
+    // Set up periodic token expiry check
+    const interval = setInterval(() => {
+      if (isConnected && TokenService.isTokenNearExpiry()) {
+        console.log('Token is near expiry, clearing connection state');
+        setIsConnected(false);
+        setUserEmail(null);
+        setSelectedFolder(null);
+        setConnectionError('Authentication session expired, please reconnect');
+        TokenService.clearTokens();
+      }
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(interval);
   }, [checkConnection]);
+
+  // Check connection when coming back from background (tab visibility change)
+  React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isConnected) {
+        // Check if we still have a valid token when tab becomes visible
+        const token = TokenService.getValidAccessToken();
+        if (!token) {
+          setIsConnected(false);
+          setUserEmail(null);
+          setSelectedFolder(null);
+          setConnectionError('Authentication session expired, please reconnect');
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isConnected]);
 
   return (
     <DriveContext.Provider value={{
