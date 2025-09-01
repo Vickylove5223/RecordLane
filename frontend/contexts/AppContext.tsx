@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { ErrorHandler } from '../utils/errorHandler';
 
 export interface AppState {
   isOnboarded: boolean;
@@ -15,6 +16,8 @@ export interface AppState {
     defaultPrivacy: 'private' | 'anyone-viewer' | 'anyone-commenter';
   };
   recordings: Recording[];
+  isLoading: boolean;
+  error: string | null;
 }
 
 export interface Recording {
@@ -40,6 +43,8 @@ type AppAction =
   | { type: 'ADD_RECORDING'; payload: Recording }
   | { type: 'UPDATE_RECORDING'; payload: { id: string; updates: Partial<Recording> } }
   | { type: 'REMOVE_RECORDING'; payload: string }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'LOAD_STATE'; payload: Partial<AppState> };
 
 const initialState: AppState = {
@@ -53,44 +58,56 @@ const initialState: AppState = {
     defaultPrivacy: 'anyone-viewer',
   },
   recordings: [],
+  isLoading: false,
+  error: null,
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
-  switch (action.type) {
-    case 'SET_ONBOARDED':
-      return { ...state, isOnboarded: action.payload };
-    case 'SET_SETTINGS_OPEN':
-      return { ...state, settingsOpen: action.payload };
-    case 'SET_SHARE_MODAL_OPEN':
-      return { ...state, shareModalOpen: action.payload };
-    case 'SET_SHARE_MODAL_DATA':
-      return { 
-        ...state, 
-        shareModalOpen: true, 
-        shareModalData: action.payload 
-      };
-    case 'UPDATE_SETTINGS':
-      return { ...state, settings: { ...state.settings, ...action.payload } };
-    case 'ADD_RECORDING':
-      return { ...state, recordings: [action.payload, ...state.recordings] };
-    case 'UPDATE_RECORDING':
-      return {
-        ...state,
-        recordings: state.recordings.map(recording =>
-          recording.id === action.payload.id
-            ? { ...recording, ...action.payload.updates }
-            : recording
-        ),
-      };
-    case 'REMOVE_RECORDING':
-      return {
-        ...state,
-        recordings: state.recordings.filter(recording => recording.id !== action.payload),
-      };
-    case 'LOAD_STATE':
-      return { ...state, ...action.payload };
-    default:
-      return state;
+  try {
+    switch (action.type) {
+      case 'SET_ONBOARDED':
+        return { ...state, isOnboarded: action.payload };
+      case 'SET_SETTINGS_OPEN':
+        return { ...state, settingsOpen: action.payload };
+      case 'SET_SHARE_MODAL_OPEN':
+        return { ...state, shareModalOpen: action.payload };
+      case 'SET_SHARE_MODAL_DATA':
+        return { 
+          ...state, 
+          shareModalOpen: true, 
+          shareModalData: action.payload 
+        };
+      case 'UPDATE_SETTINGS':
+        return { ...state, settings: { ...state.settings, ...action.payload } };
+      case 'ADD_RECORDING':
+        return { ...state, recordings: [action.payload, ...state.recordings] };
+      case 'UPDATE_RECORDING':
+        return {
+          ...state,
+          recordings: state.recordings.map(recording =>
+            recording.id === action.payload.id
+              ? { ...recording, ...action.payload.updates }
+              : recording
+          ),
+        };
+      case 'REMOVE_RECORDING':
+        return {
+          ...state,
+          recordings: state.recordings.filter(recording => recording.id !== action.payload),
+        };
+      case 'SET_LOADING':
+        return { ...state, isLoading: action.payload };
+      case 'SET_ERROR':
+        return { ...state, error: action.payload };
+      case 'LOAD_STATE':
+        return { ...state, ...action.payload, error: null };
+      default:
+        return state;
+    }
+  } catch (error) {
+    console.error('Error in app reducer:', error);
+    ErrorHandler.logError('APP_REDUCER_ERROR', error, { action });
+    return { ...state, error: 'An error occurred while updating the application state' };
   }
 }
 
@@ -106,34 +123,94 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load state from localStorage on mount
   React.useEffect(() => {
-    const savedState = localStorage.getItem('loomclone-app-state');
-    if (savedState) {
+    const loadState = async () => {
       try {
-        const parsed = JSON.parse(savedState);
-        // Convert date strings back to Date objects
-        if (parsed.recordings) {
-          parsed.recordings = parsed.recordings.map((rec: any) => ({
-            ...rec,
-            createdAt: new Date(rec.createdAt),
-          }));
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
+        const savedState = localStorage.getItem('recordlane-app-state');
+        if (savedState) {
+          try {
+            const parsed = JSON.parse(savedState);
+            // Convert date strings back to Date objects
+            if (parsed.recordings) {
+              parsed.recordings = parsed.recordings.map((rec: any) => ({
+                ...rec,
+                createdAt: new Date(rec.createdAt),
+              }));
+            }
+            dispatch({ type: 'LOAD_STATE', payload: parsed });
+          } catch (error) {
+            console.error('Failed to parse saved state:', error);
+            ErrorHandler.logError('STATE_PARSE_ERROR', error);
+            // Clear corrupted state
+            localStorage.removeItem('recordlane-app-state');
+          }
         }
-        dispatch({ type: 'LOAD_STATE', payload: parsed });
       } catch (error) {
         console.error('Failed to load app state:', error);
+        ErrorHandler.logError('STATE_LOAD_ERROR', error);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load application state' });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
-    }
+    };
+
+    loadState();
   }, []);
 
-  // Save state to localStorage on changes
+  // Save state to localStorage on changes (debounced)
   React.useEffect(() => {
-    const stateToSave = {
-      ...state,
-      settingsOpen: false, // Don't persist modal states
-      shareModalOpen: false,
-      shareModalData: undefined,
+    const saveState = () => {
+      try {
+        const stateToSave = {
+          ...state,
+          settingsOpen: false, // Don't persist modal states
+          shareModalOpen: false,
+          shareModalData: undefined,
+          isLoading: false,
+          error: null,
+        };
+        
+        localStorage.setItem('recordlane-app-state', JSON.stringify(stateToSave));
+      } catch (error) {
+        console.error('Failed to save app state:', error);
+        ErrorHandler.logError('STATE_SAVE_ERROR', error);
+        
+        // Handle storage quota exceeded
+        if (error.name === 'QuotaExceededError') {
+          // Clear old recordings to free up space
+          const reducedState = {
+            ...stateToSave,
+            recordings: stateToSave.recordings.slice(0, 10), // Keep only 10 most recent
+          };
+          try {
+            localStorage.setItem('recordlane-app-state', JSON.stringify(reducedState));
+          } catch (e) {
+            // If still failing, clear everything
+            localStorage.removeItem('recordlane-app-state');
+          }
+        }
+      }
     };
-    localStorage.setItem('loomclone-app-state', JSON.stringify(stateToSave));
+
+    const timeoutId = setTimeout(saveState, 500); // Debounce saves
+
+    return () => clearTimeout(timeoutId);
   }, [state]);
+
+  // Handle state errors
+  React.useEffect(() => {
+    if (state.error) {
+      console.error('App state error:', state.error);
+      
+      // Auto-clear error after 10 seconds
+      const timeoutId = setTimeout(() => {
+        dispatch({ type: 'SET_ERROR', payload: null });
+      }, 10000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [state.error]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

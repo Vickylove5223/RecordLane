@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { DriveService } from '../services/driveService';
+import { DriveService, UploadProgress } from '../services/driveService';
+import { ErrorHandler } from '../utils/errorHandler';
+import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
 
 interface DriveContextType {
@@ -7,10 +9,17 @@ interface DriveContextType {
   userEmail: string | null;
   folderName: string;
   isConnecting: boolean;
+  connectionError: string | null;
   connectDrive: () => Promise<void>;
   disconnectDrive: () => Promise<void>;
-  uploadFile: (file: Blob, title: string, privacy: string) => Promise<{ fileId: string; shareLink: string }>;
+  uploadFile: (
+    file: Blob, 
+    title: string, 
+    privacy: string, 
+    onProgress?: (progress: UploadProgress) => void
+  ) => Promise<{ fileId: string; shareLink: string }>;
   checkConnection: () => Promise<void>;
+  retryConnection: () => Promise<void>;
 }
 
 const DriveContext = createContext<DriveContextType | undefined>(undefined);
@@ -18,13 +27,26 @@ const DriveContext = createContext<DriveContextType | undefined>(undefined);
 export function DriveProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [folderName, setFolderName] = useState('LoomClone Recordings');
+  const [folderName, setFolderName] = useState('RecordLane Recordings');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  const retryService = new RetryService();
 
   const checkConnection = useCallback(async () => {
     try {
-      const connection = await DriveService.checkConnection();
+      setConnectionError(null);
+      
+      const connection = await retryService.execute(
+        () => DriveService.checkConnection(),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: (error) => ErrorHandler.isRecoverableError(error),
+        }
+      );
+      
       setIsConnected(connection.isConnected);
       setUserEmail(connection.userEmail);
       if (connection.folderName) {
@@ -32,15 +54,38 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Failed to check Drive connection:', error);
+      ErrorHandler.logError('drive-connection-check', error);
       setIsConnected(false);
       setUserEmail(null);
+      setConnectionError(ErrorHandler.formatErrorForUser(error));
     }
-  }, []);
+  }, [retryService]);
 
   const connectDrive = useCallback(async () => {
     setIsConnecting(true);
+    setConnectionError(null);
+    
     try {
-      const result = await DriveService.connect();
+      const result = await retryService.execute(
+        () => DriveService.connect(),
+        {
+          maxRetries: 2,
+          retryDelay: 2000,
+          shouldRetry: (error) => {
+            // Retry on network errors but not on user cancellation
+            return ErrorHandler.isRecoverableError(error) && 
+                   !error.message?.includes('popup') &&
+                   !error.message?.includes('cancelled');
+          },
+          onRetry: (error, attempt) => {
+            toast({
+              title: "Connection Retry",
+              description: `Retrying connection attempt ${attempt}...`,
+            });
+          }
+        }
+      );
+      
       setIsConnected(true);
       setUserEmail(result.userEmail);
       setFolderName(result.folderName);
@@ -51,22 +96,36 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Failed to connect to Drive:', error);
+      ErrorHandler.logError('drive-connect', error);
+      
+      const errorMessage = ErrorHandler.formatErrorForUser(error);
+      setConnectionError(errorMessage);
+      
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to Google Drive. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsConnecting(false);
     }
-  }, [toast]);
+  }, [toast, retryService]);
 
   const disconnectDrive = useCallback(async () => {
     try {
-      await DriveService.disconnect();
+      await retryService.execute(
+        () => DriveService.disconnect(),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: () => true, // Always retry disconnect attempts
+        }
+      );
+      
       setIsConnected(false);
       setUserEmail(null);
-      setFolderName('LoomClone Recordings');
+      setFolderName('RecordLane Recordings');
+      setConnectionError(null);
       
       toast({
         title: "Drive Disconnected",
@@ -74,21 +133,59 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Failed to disconnect from Drive:', error);
+      ErrorHandler.logError('drive-disconnect', error);
+      
+      // Even if disconnect fails, clear local state
+      setIsConnected(false);
+      setUserEmail(null);
+      setConnectionError(null);
+      
       toast({
-        title: "Disconnect Failed",
-        description: "Failed to disconnect from Google Drive",
+        title: "Disconnect Warning",
+        description: "Local connection cleared, but Google may still show authorization",
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast, retryService]);
 
-  const uploadFile = useCallback(async (file: Blob, title: string, privacy: string) => {
+  const uploadFile = useCallback(async (
+    file: Blob, 
+    title: string, 
+    privacy: string,
+    onProgress?: (progress: UploadProgress) => void
+  ) => {
     if (!isConnected) {
-      throw new Error('Drive not connected');
+      throw ErrorHandler.createError('DRIVE_NOT_CONNECTED', 'Drive not connected');
     }
     
-    return await DriveService.uploadFile(file, title, privacy);
-  }, [isConnected]);
+    return await retryService.execute(
+      () => DriveService.uploadFile(file, title, privacy, onProgress),
+      {
+        maxRetries: 3,
+        retryDelay: 2000,
+        shouldRetry: (error) => {
+          // Retry on network errors and certain HTTP errors
+          return ErrorHandler.isRecoverableError(error) ||
+                 (error.status >= 500 && error.status < 600) ||
+                 error.status === 429; // Rate limit
+        },
+        onRetry: (error, attempt) => {
+          toast({
+            title: "Upload Retry",
+            description: `Retrying upload attempt ${attempt}...`,
+          });
+        }
+      }
+    );
+  }, [isConnected, retryService, toast]);
+
+  const retryConnection = useCallback(async () => {
+    if (connectionError) {
+      await connectDrive();
+    } else {
+      await checkConnection();
+    }
+  }, [connectionError, connectDrive, checkConnection]);
 
   // Check connection on mount
   React.useEffect(() => {
@@ -101,10 +198,12 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       userEmail,
       folderName,
       isConnecting,
+      connectionError,
       connectDrive,
       disconnectDrive,
       uploadFile,
       checkConnection,
+      retryConnection,
     }}>
       {children}
     </DriveContext.Provider>

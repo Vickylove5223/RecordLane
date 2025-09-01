@@ -63,7 +63,7 @@ export default function OnboardingModal() {
               <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                 <Video className="h-8 w-8 text-primary" />
               </div>
-              <DialogTitle className="text-2xl">Welcome to LoomClone</DialogTitle>
+              <DialogTitle className="text-2xl">Welcome to RecordLane</DialogTitle>
               <DialogDescription className="text-lg">
                 Record your screen and camera with instant Google Drive sync
               </DialogDescription>
@@ -108,7 +108,7 @@ export default function OnboardingModal() {
                 <div className="space-y-2">
                   <h3 className="font-semibold">Connect Google Drive to get started</h3>
                   <p className="text-sm text-muted-foreground">
-                    We'll create a "LoomClone Recordings" folder in your Drive to store your recordings.
+                    We'll create a "RecordLane Recordings" folder in your Drive to store your recordings.
                     You can change this folder anytime in settings.
                   </p>
                 </div>
@@ -135,7 +135,7 @@ export default function OnboardingModal() {
                 </Button>
 
                 <p className="text-xs text-muted-foreground">
-                  By connecting, you agree to let LoomClone access files it creates in your Google Drive.
+                  By connecting, you agree to let RecordLane access files it creates in your Google Drive.
                   You can disconnect anytime from settings.
                 </p>
               </div>

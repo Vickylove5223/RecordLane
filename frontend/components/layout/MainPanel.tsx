@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuickActionsSkeleton, RecordingSkeleton } from '@/components/ui/loading-skeleton';
@@ -6,6 +6,48 @@ import { ConnectionStatus } from '@/components/ui/connection-status';
 import { Video, Monitor, Camera, Zap, Shield, Download } from 'lucide-react';
 import { useDrive } from '../../contexts/DriveContext';
 import { useApp } from '../../contexts/AppContext';
+
+const QuickActionCard = memo(({ icon: Icon, title, description, color }: {
+  icon: React.ComponentType<any>;
+  title: string;
+  description: string;
+  color: string;
+}) => (
+  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+    <CardContent className="p-6 text-center">
+      <Icon className={`h-12 w-12 ${color} mx-auto mb-4`} />
+      <h3 className="font-semibold mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </CardContent>
+  </Card>
+));
+
+QuickActionCard.displayName = 'QuickActionCard';
+
+const RecordingCard = memo(({ recording }: { recording: any }) => (
+  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+    <CardContent className="p-4">
+      <div className="aspect-video bg-muted rounded mb-3 flex items-center justify-center">
+        {recording.thumbnail ? (
+          <img
+            src={recording.thumbnail}
+            alt={recording.title}
+            className="w-full h-full object-cover rounded"
+            loading="lazy"
+          />
+        ) : (
+          <Video className="h-8 w-8 text-muted-foreground" />
+        )}
+      </div>
+      <h3 className="font-medium truncate mb-1">{recording.title}</h3>
+      <p className="text-sm text-muted-foreground">
+        {new Date(recording.createdAt).toLocaleDateString()}
+      </p>
+    </CardContent>
+  </Card>
+));
+
+RecordingCard.displayName = 'RecordingCard';
 
 export default function MainPanel() {
   const { isConnected, isConnecting } = useDrive();
@@ -25,7 +67,7 @@ export default function MainPanel() {
             <Video className="h-16 w-16 text-primary" />
           </div>
           
-          <h1 className="text-4xl font-bold mb-4">Welcome to LoomClone</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to RecordLane</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Record your screen and camera with instant Google Drive sync
           </p>
@@ -73,38 +115,29 @@ export default function MainPanel() {
             <QuickActionsSkeleton />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <Monitor className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Screen Recording</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Capture your entire screen or specific windows
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <Camera className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Camera Recording</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Record with your webcam for personal messages
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <div className="relative mx-auto mb-4">
+              <QuickActionCard
+                icon={Monitor}
+                title="Screen Recording"
+                description="Capture your entire screen or specific windows"
+                color="text-blue-500"
+              />
+              <QuickActionCard
+                icon={Camera}
+                title="Camera Recording"
+                description="Record with your webcam for personal messages"
+                color="text-green-500"
+              />
+              <QuickActionCard
+                icon={() => (
+                  <div className="relative">
                     <Monitor className="h-12 w-12 text-purple-500" />
                     <Camera className="h-6 w-6 text-purple-500 absolute -bottom-1 -right-1 bg-background rounded" />
                   </div>
-                  <h3 className="font-semibold mb-2">Screen + Camera</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Combine screen capture with picture-in-picture camera
-                  </p>
-                </CardContent>
-              </Card>
+                )}
+                title="Screen + Camera"
+                description="Combine screen capture with picture-in-picture camera"
+                color=""
+              />
             </div>
           )}
         </div>
@@ -120,25 +153,7 @@ export default function MainPanel() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {state.recordings.slice(0, 6).map((recording) => (
-                  <Card key={recording.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="aspect-video bg-muted rounded mb-3 flex items-center justify-center">
-                        {recording.thumbnail ? (
-                          <img
-                            src={recording.thumbnail}
-                            alt={recording.title}
-                            className="w-full h-full object-cover rounded"
-                          />
-                        ) : (
-                          <Video className="h-8 w-8 text-muted-foreground" />
-                        )}
-                      </div>
-                      <h3 className="font-medium truncate mb-1">{recording.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(recording.createdAt).toLocaleDateString()}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <RecordingCard key={recording.id} recording={recording} />
                 ))}
               </div>
             )}

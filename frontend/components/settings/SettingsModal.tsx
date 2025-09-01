@@ -292,12 +292,12 @@ export default function SettingsModal() {
                 {/* About */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>About LoomClone</CardTitle>
+                    <CardTitle>About RecordLane</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-sm text-muted-foreground space-y-2">
                       <p>
-                        LoomClone is an open-source screen recording tool that stores all recordings
+                        RecordLane is an open-source screen recording tool that stores all recordings
                         directly in your Google Drive for maximum privacy and control.
                       </p>
                       <p>

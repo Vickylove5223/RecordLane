@@ -23,7 +23,7 @@ export default function TopNav() {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <div className="w-4 h-4 bg-primary-foreground rounded-full"></div>
           </div>
-          <span className="font-semibold text-lg">LoomClone</span>
+          <span className="font-semibold text-lg">RecordLane</span>
         </div>
       </div>
 
