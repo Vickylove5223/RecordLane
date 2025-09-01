@@ -39,6 +39,8 @@ export class DriveService {
   private static selectedFolderName: string | null = null;
   private static cache = new CacheService('drive-service');
   private static retryService = new RetryService();
+  private static isGapiLoaded = false;
+  private static gapiLoadPromise: Promise<void> | null = null;
 
   static async checkConnection(): Promise<DriveConnection> {
     try {
@@ -66,12 +68,14 @@ export class DriveService {
         {
           maxRetries: 2,
           retryDelay: 1000,
-          shouldRetry: (error) => error.name === 'TypeError' || error.name === 'TimeoutError'
+          shouldRetry: (error) => this.isRetryableError(error)
         }
       );
 
       if (!response.ok) {
-        await TokenService.clearTokens();
+        if (response.status === 401) {
+          await TokenService.clearTokens();
+        }
         const result = { isConnected: false, userEmail: null };
         await this.cache.set('connection-status', result);
         return result;
@@ -132,7 +136,7 @@ export class DriveService {
         {
           maxRetries: 2,
           retryDelay: 1000,
-          shouldRetry: (error) => error.message.includes('network') || error.message.includes('timeout')
+          shouldRetry: (error) => this.isRetryableError(error)
         }
       );
       
@@ -227,7 +231,7 @@ export class DriveService {
 
       const response = await this.retryService.execute(
         () => fetch(
-          `${DRIVE_API_BASE}/files?q=mimeType='application/vnd.google-apps.folder' and trashed=false&orderBy=name&fields=files(id,name,createdTime,webViewLink)`,
+          `${DRIVE_API_BASE}/files?q=mimeType='application/vnd.google-apps.folder' and trashed=false&orderBy=name&fields=files(id,name,createdTime,webViewLink)&pageSize=100`,
           {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
@@ -238,12 +242,16 @@ export class DriveService {
         {
           maxRetries: 2,
           retryDelay: 1000,
-          shouldRetry: (error) => error.name === 'TypeError' || error.status >= 500
+          shouldRetry: (error) => this.isRetryableError(error)
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to list folders: ${response.status}`);
+        if (response.status === 401) {
+          await TokenService.clearTokens();
+          throw ErrorHandler.createError('AUTH_EXPIRED', 'Authentication expired');
+        }
+        throw new Error(`Failed to list folders: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -278,12 +286,16 @@ export class DriveService {
         {
           maxRetries: 2,
           retryDelay: 1000,
-          shouldRetry: (error) => error.name === 'TypeError' || error.status >= 500
+          shouldRetry: (error) => this.isRetryableError(error)
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to create folder: ${response.status}`);
+        if (response.status === 401) {
+          await TokenService.clearTokens();
+          throw ErrorHandler.createError('AUTH_EXPIRED', 'Authentication expired');
+        }
+        throw new Error(`Failed to create folder: ${response.status} ${response.statusText}`);
       }
 
       const folder = await response.json();
@@ -375,7 +387,7 @@ export class DriveService {
         {
           maxRetries: UPLOAD_CONFIG.maxRetries,
           retryDelay: UPLOAD_CONFIG.retryDelayMs,
-          shouldRetry: (error) => error.message.includes('network') || error.status >= 500
+          shouldRetry: (error) => this.isRetryableError(error)
         }
       );
       
@@ -409,6 +421,17 @@ export class DriveService {
     }
   }
 
+  private static isRetryableError(error: any): boolean {
+    return (
+      error?.name === 'TypeError' || 
+      error?.name === 'TimeoutError' ||
+      (error?.status >= 500 && error?.status < 600) ||
+      error?.status === 429 || // Rate limit
+      error?.message?.includes('network') ||
+      error?.message?.includes('timeout')
+    );
+  }
+
   private static async verifyFolder(folderId: string, accessToken: string): Promise<void> {
     const response = await fetch(`${DRIVE_API_BASE}/files/${folderId}?fields=id,name,trashed`, {
       headers: {
@@ -418,6 +441,13 @@ export class DriveService {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Folder not found');
+      }
+      if (response.status === 401) {
+        await TokenService.clearTokens();
+        throw new Error('Authentication expired');
+      }
       throw new Error(`Folder verification failed: ${response.status}`);
     }
 
@@ -428,37 +458,103 @@ export class DriveService {
   }
 
   private static async loadGoogleAPI(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (window.gapi) {
+    if (this.isGapiLoaded) {
+      return;
+    }
+
+    if (this.gapiLoadPromise) {
+      return this.gapiLoadPromise;
+    }
+
+    this.gapiLoadPromise = new Promise((resolve, reject) => {
+      if (window.gapi && window.gapi.auth2) {
+        this.isGapiLoaded = true;
         resolve();
+        return;
+      }
+
+      // Check if script is already being loaded
+      const existingScript = document.querySelector('script[src*="apis.google.com"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => {
+          this.initializeGapi().then(resolve).catch(reject);
+        });
+        existingScript.addEventListener('error', reject);
         return;
       }
 
       const script = document.createElement('script');
       script.src = 'https://apis.google.com/js/api.js';
+      script.async = true;
+      script.defer = true;
+      
       script.onload = () => {
-        window.gapi.load('auth2', () => {
+        this.initializeGapi().then(resolve).catch(reject);
+      };
+      
+      script.onerror = () => {
+        reject(new Error('Failed to load Google API script'));
+      };
+      
+      document.head.appendChild(script);
+    });
+
+    return this.gapiLoadPromise;
+  }
+
+  private static async initializeGapi(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!window.gapi) {
+        reject(new Error('Google API not available'));
+        return;
+      }
+
+      window.gapi.load('auth2', {
+        callback: () => {
           window.gapi.auth2.init({
             client_id: GOOGLE_CLIENT_ID,
             scope: DRIVE_SCOPE,
-          }).then(resolve, reject);
-        });
-      };
-      script.onerror = () => reject(new Error('Failed to load Google API'));
-      document.head.appendChild(script);
+          }).then(() => {
+            this.isGapiLoaded = true;
+            resolve();
+          }).catch(reject);
+        },
+        onerror: () => {
+          reject(new Error('Failed to load Google Auth2'));
+        }
+      });
     });
   }
 
   private static async authorize(): Promise<any> {
+    if (!window.gapi || !window.gapi.auth2) {
+      throw new Error('Google API not initialized');
+    }
+
     const authInstance = window.gapi.auth2.getAuthInstance();
-    const authResult = await authInstance.signIn({
-      scope: DRIVE_SCOPE,
-      access_type: 'offline',
-      prompt: 'consent',
-    });
-    
-    const authResponse = authResult.getAuthResponse(true);
-    return authResponse;
+    if (!authInstance) {
+      throw new Error('Google Auth2 instance not available');
+    }
+
+    try {
+      const authResult = await authInstance.signIn({
+        scope: DRIVE_SCOPE,
+        access_type: 'offline',
+        prompt: 'consent',
+      });
+      
+      const authResponse = authResult.getAuthResponse(true);
+      if (!authResponse.access_token) {
+        throw new Error('No access token received');
+      }
+      
+      return authResponse;
+    } catch (error) {
+      if (error.error === 'popup_closed_by_user' || error.error === 'access_denied') {
+        throw ErrorHandler.createError('USER_CANCELLED', 'Authorization was cancelled by user');
+      }
+      throw error;
+    }
   }
 
   private static async getUserInfo(accessToken: string): Promise<any> {
@@ -470,6 +566,9 @@ export class DriveService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication expired');
+      }
       throw new Error(`Failed to get user info: ${response.status}`);
     }
 
@@ -494,6 +593,9 @@ export class DriveService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication expired');
+      }
       throw new Error(`Failed to initiate resumable upload: ${response.status}`);
     }
 
@@ -532,6 +634,8 @@ export class DriveService {
           } catch (error) {
             reject(new Error('Invalid response format'));
           }
+        } else if (xhr.status === 401) {
+          reject(new Error('Authentication expired'));
         } else {
           reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
         }
