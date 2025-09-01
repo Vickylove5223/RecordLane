@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { LoadingSpinner } from '@/components/ui/spinner';
+import { ProgressIndicator, CircularProgress } from '@/components/ui/progress-indicator';
 import { 
   Dialog, 
   DialogContent, 
@@ -23,7 +25,8 @@ import {
   Trash2, 
   Cloud, 
   Scissors,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
 import { useDrive } from '../../contexts/DriveContext';
@@ -46,6 +49,7 @@ export default function ReviewPanel() {
   const [showTrimming, setShowTrimming] = useState(false);
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(0);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewUrl = getPreviewUrl();
@@ -96,6 +100,7 @@ export default function ReviewPanel() {
 
     setIsUploading(true);
     setUploadProgress(0);
+    setUploadSuccess(false);
 
     try {
       // Simulate upload progress
@@ -113,6 +118,7 @@ export default function ReviewPanel() {
       
       clearInterval(progressInterval);
       setUploadProgress(100);
+      setUploadSuccess(true);
 
       // Add to recordings list
       const recording = {
@@ -133,19 +139,22 @@ export default function ReviewPanel() {
         description: "Your recording has been saved to Google Drive",
       });
 
-      // Show share modal logic would go here
-      deleteRecording(); // Clean up local recording
+      // Show success for a moment, then clean up
+      setTimeout(() => {
+        deleteRecording();
+      }, 2000);
       
     } catch (error) {
       console.error('Upload failed:', error);
       setUploadProgress(0);
+      setUploadSuccess(false);
       toast({
         title: "Upload Failed",
         description: "Failed to upload recording to Google Drive",
         variant: "destructive",
       });
     } finally {
-      setIsUploading(false);
+      setTimeout(() => setIsUploading(false), 2000);
     }
   };
 
@@ -160,12 +169,18 @@ export default function ReviewPanel() {
   }
 
   return (
-    <Dialog open={true} onOpenChange={() => deleteRecording()}>
+    <Dialog open={true} onOpenChange={() => !isUploading && deleteRecording()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Review Recording</DialogTitle>
+          <DialogTitle className="flex items-center space-x-2">
+            <span>Review Recording</span>
+            {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
+          </DialogTitle>
           <DialogDescription>
-            Review your recording and upload to Google Drive
+            {uploadSuccess 
+              ? "Your recording has been successfully uploaded to Google Drive"
+              : "Review your recording and upload to Google Drive"
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -180,122 +195,165 @@ export default function ReviewPanel() {
             />
             
             {/* Play/Pause Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
-              <Button
-                size="lg"
-                variant="secondary"
-                onClick={togglePlayPause}
-                className="rounded-full h-16 w-16"
-              >
-                {isPlaying ? (
-                  <Pause className="h-6 w-6" />
-                ) : (
-                  <Play className="h-6 w-6 ml-1" />
-                )}
-              </Button>
-            </div>
+            {!uploadSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  onClick={togglePlayPause}
+                  disabled={isUploading}
+                  className="rounded-full h-16 w-16"
+                >
+                  {isPlaying ? (
+                    <Pause className="h-6 w-6" />
+                  ) : (
+                    <Play className="h-6 w-6 ml-1" />
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Upload Progress Overlay */}
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="text-center">
+                  <CircularProgress 
+                    progress={uploadProgress} 
+                    size={80} 
+                    className="text-white mb-4"
+                  />
+                  <p className="text-white text-sm">
+                    {uploadSuccess ? 'Upload Complete!' : 'Uploading to Drive...'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Timeline */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-            <div
-              className="h-2 bg-muted rounded-full cursor-pointer trim-timeline"
-              style={{ '--progress': `${(currentTime / duration) * 100}%` } as any}
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                handleSeek(percent * duration);
-              }}
-            >
+          {!uploadSuccess && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
               <div
-                className="h-full bg-primary rounded-full relative"
-                style={{ width: `${(currentTime / duration) * 100}%` }}
+                className="h-2 bg-muted rounded-full cursor-pointer trim-timeline"
+                style={{ '--progress': `${(currentTime / duration) * 100}%` } as any}
+                onClick={(e) => {
+                  if (!isUploading) {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    handleSeek(percent * duration);
+                  }
+                }}
               >
-                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background" />
+                <div
+                  className="h-full bg-primary rounded-full relative"
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                >
+                  <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background" />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Recording Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Title</label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter recording title"
-              />
+          {!uploadSuccess && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Title</label>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter recording title"
+                  disabled={isUploading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Privacy</label>
+                <Select value={privacy} onValueChange={setPrivacy} disabled={isUploading}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private (Only you)</SelectItem>
+                    <SelectItem value="anyone-viewer">Anyone with link (Viewer)</SelectItem>
+                    <SelectItem value="anyone-commenter">Anyone with link (Commenter)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Privacy</label>
-              <Select value={privacy} onValueChange={setPrivacy}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">Private (Only you)</SelectItem>
-                  <SelectItem value="anyone-viewer">Anyone with link (Viewer)</SelectItem>
-                  <SelectItem value="anyone-commenter">Anyone with link (Commenter)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
 
           {/* Upload Progress */}
           {isUploading && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Uploading to Google Drive...</span>
-                <span>{Math.round(uploadProgress)}%</span>
-              </div>
-              <Progress value={uploadProgress} />
-            </div>
+            <ProgressIndicator
+              progress={uploadProgress}
+              status={uploadSuccess ? 'completed' : 'uploading'}
+              text={uploadSuccess ? 'Upload completed successfully!' : undefined}
+            />
           )}
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowTrimming(true)}
-                disabled={isUploading}
-              >
-                <Scissors className="h-4 w-4 mr-2" />
-                Trim
-              </Button>
+              {!uploadSuccess && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowTrimming(true)}
+                  disabled={isUploading}
+                >
+                  <Scissors className="h-4 w-4 mr-2" />
+                  Trim
+                </Button>
+              )}
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                onClick={deleteRecording}
-                disabled={isUploading}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={restartRecording}
-                disabled={isUploading}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Restart
-              </Button>
+              {!uploadSuccess && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={deleteRecording}
+                    disabled={isUploading}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={restartRecording}
+                    disabled={isUploading}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Restart
+                  </Button>
 
-              <Button
-                onClick={handleUpload}
-                disabled={isUploading || !title.trim()}
-              >
-                <Cloud className="h-4 w-4 mr-2" />
-                {isUploading ? 'Uploading...' : 'Sync to Drive'}
-              </Button>
+                  <Button
+                    onClick={handleUpload}
+                    disabled={isUploading || !title.trim()}
+                  >
+                    {isUploading ? (
+                      <LoadingSpinner text="Uploading..." size="sm" />
+                    ) : (
+                      <>
+                        <Cloud className="h-4 w-4 mr-2" />
+                        Sync to Drive
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+              
+              {uploadSuccess && (
+                <Button onClick={deleteRecording}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Done
+                </Button>
+              )}
             </div>
           </div>
         </div>

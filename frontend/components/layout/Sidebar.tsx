@@ -2,6 +2,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
+import { ProgressIndicator } from '@/components/ui/progress-indicator';
+import { ConnectionStatus } from '@/components/ui/connection-status';
 import { Folder, Video, Clock, ExternalLink } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { useDrive } from '../../contexts/DriveContext';
@@ -9,7 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 export default function Sidebar() {
   const { state } = useApp();
-  const { folderName, isConnected } = useDrive();
+  const { folderName, isConnected, isConnecting } = useDrive();
 
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -18,25 +21,33 @@ export default function Sidebar() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const getConnectionStatus = () => {
+    if (isConnecting) return 'connecting';
+    if (isConnected) return 'connected';
+    return 'disconnected';
+  };
+
   return (
     <aside className="w-80 bg-card border-r border-border flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Recordings</h2>
-          {isConnected && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Folder className="h-4 w-4" />
-              <span className="truncate max-w-32">{folderName}</span>
-            </div>
-          )}
         </div>
+        
+        {/* Connection Status */}
+        <ConnectionStatus 
+          status={getConnectionStatus()}
+          text={isConnected ? folderName : undefined}
+        />
       </div>
 
       {/* Recordings List */}
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
-          {state.recordings.length === 0 ? (
+          {isConnecting ? (
+            <RecordingSkeleton count={3} />
+          ) : state.recordings.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-sm">No recordings yet</p>
@@ -74,6 +85,15 @@ export default function Sidebar() {
                     </div>
                     <span>{formatDistanceToNow(recording.createdAt, { addSuffix: true })}</span>
                   </div>
+
+                  {/* Upload Progress */}
+                  {recording.uploadStatus === 'uploading' && (
+                    <ProgressIndicator
+                      progress={recording.uploadProgress || 0}
+                      status={recording.uploadStatus}
+                      className="mt-2"
+                    />
+                  )}
 
                   {/* Status & Actions */}
                   <div className="flex items-center justify-between">

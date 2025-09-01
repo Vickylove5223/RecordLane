@@ -22,24 +22,22 @@ import {
   MessageSquare,
   Check
 } from 'lucide-react';
+import { useApp } from '../../contexts/AppContext';
 import { useToast } from '@/components/ui/use-toast';
 
-interface ShareModalProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  shareLink?: string;
-  title?: string;
-}
-
-export default function ShareModal({ 
-  isOpen = false, 
-  onClose = () => {}, 
-  shareLink = '',
-  title = ''
-}: ShareModalProps) {
+export default function ShareModal() {
+  const { state, dispatch } = useApp();
   const [privacy, setPrivacy] = useState('anyone-viewer');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const isOpen = state.shareModalOpen;
+  const shareLink = state.shareModalData?.shareLink || '';
+  const title = state.shareModalData?.title || '';
+
+  const handleClose = () => {
+    dispatch({ type: 'SET_SHARE_MODAL_OPEN', payload: false });
+  };
 
   const handleCopy = async () => {
     try {
@@ -80,7 +78,7 @@ export default function ShareModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Share Recording</DialogTitle>
@@ -166,7 +164,7 @@ export default function ShareModal({
 
           {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4 border-t border-border">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={handleClose}>
               Close
             </Button>
             <Button onClick={() => window.open(shareLink, '_blank')}>

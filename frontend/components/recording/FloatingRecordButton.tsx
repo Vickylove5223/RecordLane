@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { LoadingSpinner } from '@/components/ui/spinner';
 import { 
   Circle, 
   ChevronUp, 
@@ -15,7 +17,11 @@ import {
   Camera, 
   MonitorSpeaker,
   MousePointer,
-  Pen
+  Pen,
+  Volume2,
+  Mic,
+  VolumeX,
+  MicOff
 } from 'lucide-react';
 import { useRecording, RecordingMode, RecordingOptions } from '../../contexts/RecordingContext';
 import { useApp } from '../../contexts/AppContext';
@@ -23,11 +29,12 @@ import { useDrive } from '../../contexts/DriveContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function FloatingRecordButton() {
-  const { startRecording, options, updateOptions } = useRecording();
+  const { startRecording, options, updateOptions, state: recordingState } = useRecording();
   const { state } = useApp();
   const { isConnected } = useDrive();
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleModeSelect = async (mode: RecordingMode) => {
     if (!isConnected) {
@@ -49,13 +56,47 @@ export default function FloatingRecordButton() {
     setIsMenuOpen(false);
   };
 
-  const toggleClickHighlight = () => {
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const toggleClickHighlight = (e: React.MouseEvent) => {
+    handleToggleClick(e);
     updateOptions({ highlightClicks: !options.highlightClicks });
   };
 
-  const toggleDrawing = () => {
+  const toggleDrawing = (e: React.MouseEvent) => {
+    handleToggleClick(e);
     updateOptions({ enableDrawing: !options.enableDrawing });
   };
+
+  const toggleSystemAudio = (e: React.MouseEvent) => {
+    handleToggleClick(e);
+    updateOptions({ systemAudio: !options.systemAudio });
+  };
+
+  const toggleMicrophone = (e: React.MouseEvent) => {
+    handleToggleClick(e);
+    updateOptions({ microphone: !options.microphone });
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const getModeIcon = (mode: RecordingMode) => {
     switch (mode) {
@@ -83,20 +124,27 @@ export default function FloatingRecordButton() {
     }
   };
 
+  const isStarting = recordingState === 'starting';
+
   return (
     <div className="fixed bottom-8 left-8 z-50">
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             size="lg"
+            disabled={isStarting}
             className="floating-record-button h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transition-all group relative"
           >
-            <Circle className="h-6 w-6 fill-current" />
+            {isStarting ? (
+              <LoadingSpinner size="sm" className="text-white" />
+            ) : (
+              <Circle className="h-6 w-6 fill-current" />
+            )}
             
             {/* Hover Tooltip */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap">
-                Record
+                {isStarting ? 'Starting...' : 'Record'}
                 <ChevronUp className="absolute top-full left-1/2 transform -translate-x-1/2 h-2 w-2 text-popover fill-current" />
               </div>
             </div>
@@ -104,13 +152,22 @@ export default function FloatingRecordButton() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent 
+          ref={menuRef}
           side="top" 
           align="start" 
-          className="w-64 mb-4"
+          className="w-72 mb-4"
           sideOffset={8}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
           {/* Recording Modes */}
-          <DropdownMenuItem onClick={() => handleModeSelect('screen')}>
+          <div className="px-2 py-1">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Recording Mode</p>
+          </div>
+          
+          <DropdownMenuItem 
+            onClick={() => handleModeSelect('screen')}
+            className="cursor-pointer"
+          >
             <Monitor className="h-4 w-4 mr-3" />
             <div className="flex-1">
               <div className="font-medium">Screen Only</div>
@@ -118,7 +175,10 @@ export default function FloatingRecordButton() {
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => handleModeSelect('camera')}>
+          <DropdownMenuItem 
+            onClick={() => handleModeSelect('camera')}
+            className="cursor-pointer"
+          >
             <Camera className="h-4 w-4 mr-3" />
             <div className="flex-1">
               <div className="font-medium">Camera Only</div>
@@ -126,7 +186,10 @@ export default function FloatingRecordButton() {
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => handleModeSelect('screen-camera')}>
+          <DropdownMenuItem 
+            onClick={() => handleModeSelect('screen-camera')}
+            className="cursor-pointer"
+          >
             <MonitorSpeaker className="h-4 w-4 mr-3" />
             <div className="flex-1">
               <div className="font-medium">Screen + Camera</div>
@@ -136,24 +199,91 @@ export default function FloatingRecordButton() {
 
           <DropdownMenuSeparator />
 
-          {/* Options */}
-          <DropdownMenuItem onClick={toggleClickHighlight}>
-            <MousePointer className="h-4 w-4 mr-3" />
-            <div className="flex-1 flex items-center justify-between">
-              <span>Highlight Clicks</span>
-              {options.highlightClicks && (
-                <Badge variant="secondary" className="text-xs">On</Badge>
+          {/* Audio Options */}
+          <div className="px-2 py-1">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Audio</p>
+          </div>
+
+          <DropdownMenuItem 
+            onClick={toggleSystemAudio}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center w-full">
+              {options.systemAudio ? (
+                <Volume2 className="h-4 w-4 mr-3" />
+              ) : (
+                <VolumeX className="h-4 w-4 mr-3" />
               )}
+              <div className="flex-1 flex items-center justify-between">
+                <span>System Audio</span>
+                <Switch
+                  checked={options.systemAudio}
+                  onCheckedChange={toggleSystemAudio}
+                  onClick={handleToggleClick}
+                />
+              </div>
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={toggleDrawing}>
-            <Pen className="h-4 w-4 mr-3" />
-            <div className="flex-1 flex items-center justify-between">
-              <span>Drawing Tools</span>
-              {options.enableDrawing && (
-                <Badge variant="secondary" className="text-xs">On</Badge>
+          <DropdownMenuItem 
+            onClick={toggleMicrophone}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center w-full">
+              {options.microphone ? (
+                <Mic className="h-4 w-4 mr-3" />
+              ) : (
+                <MicOff className="h-4 w-4 mr-3" />
               )}
+              <div className="flex-1 flex items-center justify-between">
+                <span>Microphone</span>
+                <Switch
+                  checked={options.microphone}
+                  onCheckedChange={toggleMicrophone}
+                  onClick={handleToggleClick}
+                />
+              </div>
+            </div>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          {/* Visual Options */}
+          <div className="px-2 py-1">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Visual Effects</p>
+          </div>
+
+          <DropdownMenuItem 
+            onClick={toggleClickHighlight}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center w-full">
+              <MousePointer className="h-4 w-4 mr-3" />
+              <div className="flex-1 flex items-center justify-between">
+                <span>Highlight Clicks</span>
+                <Switch
+                  checked={options.highlightClicks}
+                  onCheckedChange={toggleClickHighlight}
+                  onClick={handleToggleClick}
+                />
+              </div>
+            </div>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem 
+            onClick={toggleDrawing}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center w-full">
+              <Pen className="h-4 w-4 mr-3" />
+              <div className="flex-1 flex items-center justify-between">
+                <span>Drawing Tools</span>
+                <Switch
+                  checked={options.enableDrawing}
+                  onCheckedChange={toggleDrawing}
+                  onClick={handleToggleClick}
+                />
+              </div>
             </div>
           </DropdownMenuItem>
 

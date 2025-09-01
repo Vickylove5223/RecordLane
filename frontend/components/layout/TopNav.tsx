@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LoadingSpinner } from '@/components/ui/spinner';
 import { Settings, Search } from 'lucide-react';
 import { useDrive } from '../../contexts/DriveContext';
+import { useApp } from '../../contexts/AppContext';
 
 export default function TopNav() {
-  const { userEmail } = useDrive();
+  const { userEmail, isConnecting } = useDrive();
+  const { dispatch } = useApp();
   const [showSettings, setShowSettings] = useState(false);
+
+  const handleSettingsClick = () => {
+    dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-6">
@@ -28,6 +35,7 @@ export default function TopNav() {
             type="text"
             placeholder="Search recordings..."
             className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+            disabled={isConnecting}
           />
         </div>
       </div>
@@ -37,18 +45,23 @@ export default function TopNav() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setShowSettings(true)}
+          onClick={handleSettingsClick}
+          disabled={isConnecting}
         >
           <Settings className="h-4 w-4" />
         </Button>
         
-        {userEmail && (
+        {isConnecting ? (
+          <LoadingSpinner size="sm" />
+        ) : userEmail ? (
           <Avatar className="h-8 w-8">
             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${userEmail}`} />
             <AvatarFallback>
               {userEmail.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
+        ) : (
+          <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
         )}
       </div>
     </header>

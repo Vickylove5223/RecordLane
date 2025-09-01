@@ -35,7 +35,7 @@ export default function AppShell() {
       </div>
 
       {/* Floating Record Button */}
-      {recordingState !== 'recording' && recordingState !== 'paused' && (
+      {recordingState !== 'recording' && recordingState !== 'paused' && recordingState !== 'starting' && (
         <FloatingRecordButton />
       )}
 

@@ -9,6 +9,8 @@ interface RecordingOptions {
   mode: RecordingMode;
   highlightClicks: boolean;
   enableDrawing: boolean;
+  systemAudio: boolean;
+  microphone: boolean;
   resolution: '480p' | '720p' | '1080p';
   frameRate: 30 | 60;
 }
@@ -40,6 +42,8 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     mode: 'screen',
     highlightClicks: true,
     enableDrawing: false,
+    systemAudio: true,
+    microphone: false,
     resolution: '720p',
     frameRate: 30,
   });
