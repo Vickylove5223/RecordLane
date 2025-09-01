@@ -54,12 +54,12 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       
       setIsConnected(connection.isConnected);
       setUserEmail(connection.userEmail);
+      setRequiresFolderSetup(connection.requiresFolderSetup || false);
       
       if (connection.folderId && connection.folderName) {
         setSelectedFolder({ id: connection.folderId, name: connection.folderName });
-        setRequiresFolderSetup(false);
-      } else if (connection.isConnected) {
-        setRequiresFolderSetup(true);
+      } else {
+        setSelectedFolder(null);
       }
     } catch (error) {
       console.error('Failed to check Drive connection:', error);
@@ -67,6 +67,7 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       setIsConnected(false);
       setUserEmail(null);
       setSelectedFolder(null);
+      setRequiresFolderSetup(false);
       setConnectionError(ErrorHandler.formatErrorForUser(error));
     }
   }, [retryService]);

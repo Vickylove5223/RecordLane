@@ -29,7 +29,12 @@ export default function OnboardingModal() {
   const [showFolderSetup, setShowFolderSetup] = useState(false);
 
   const handleConnect = async () => {
-    await connectDrive();
+    try {
+      await connectDrive();
+    } catch (error) {
+      console.error('Connection failed:', error);
+      // Error is handled in DriveContext
+    }
   };
 
   const handleComplete = () => {

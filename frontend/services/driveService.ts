@@ -13,6 +13,7 @@ export interface DriveConnection {
   userEmail: string | null;
   folderName?: string;
   folderId?: string;
+  requiresFolderSetup?: boolean;
 }
 
 export interface DriveFolder {
@@ -52,7 +53,7 @@ export class DriveService {
 
       const accessToken = await TokenService.getValidAccessToken();
       if (!accessToken) {
-        const result = { isConnected: false, userEmail: null };
+        const result = { isConnected: false, userEmail: null, requiresFolderSetup: false };
         await this.cache.set('connection-status', result);
         return result;
       }
@@ -76,7 +77,7 @@ export class DriveService {
         if (response.status === 401) {
           await TokenService.clearTokens();
         }
-        const result = { isConnected: false, userEmail: null };
+        const result = { isConnected: false, userEmail: null, requiresFolderSetup: false };
         await this.cache.set('connection-status', result);
         return result;
       }
@@ -85,9 +86,22 @@ export class DriveService {
       const storedFolderId = localStorage.getItem('recordlane-selected-folder-id');
       const storedFolderName = localStorage.getItem('recordlane-selected-folder-name');
 
+      let requiresFolderSetup = true;
+
       if (storedFolderId && storedFolderName) {
-        this.selectedFolderId = storedFolderId;
-        this.selectedFolderName = storedFolderName;
+        try {
+          // Verify the folder still exists
+          await this.verifyFolder(storedFolderId, accessToken);
+          this.selectedFolderId = storedFolderId;
+          this.selectedFolderName = storedFolderName;
+          requiresFolderSetup = false;
+        } catch (error) {
+          // Folder doesn't exist anymore, need to setup again
+          localStorage.removeItem('recordlane-selected-folder-id');
+          localStorage.removeItem('recordlane-selected-folder-name');
+          this.selectedFolderId = null;
+          this.selectedFolderName = null;
+        }
       }
 
       const result = {
@@ -95,6 +109,7 @@ export class DriveService {
         userEmail: userInfo.email,
         folderName: this.selectedFolderName || undefined,
         folderId: this.selectedFolderId || undefined,
+        requiresFolderSetup,
       };
 
       await this.cache.set('connection-status', result);
@@ -103,7 +118,7 @@ export class DriveService {
       console.error('Failed to check Drive connection:', error);
       ErrorHandler.logError('drive-connection-check', error);
       
-      const result = { isConnected: false, userEmail: null };
+      const result = { isConnected: false, userEmail: null, requiresFolderSetup: false };
       await this.cache.set('connection-status', result);
       return result;
     }
@@ -166,6 +181,7 @@ export class DriveService {
         userEmail: userInfo.email,
         folderName: this.selectedFolderName,
         folderId: this.selectedFolderId,
+        requiresFolderSetup,
       });
       
       return {
@@ -334,6 +350,7 @@ export class DriveService {
       if (cached) {
         cached.data.folderId = folderId;
         cached.data.folderName = folderName;
+        cached.data.requiresFolderSetup = false;
         await this.cache.set('connection-status', cached.data);
       }
     } catch (error) {
@@ -350,6 +367,20 @@ export class DriveService {
         name: this.selectedFolderName,
       };
     }
+
+    // Try to load from localStorage if not in memory
+    const storedFolderId = localStorage.getItem('recordlane-selected-folder-id');
+    const storedFolderName = localStorage.getItem('recordlane-selected-folder-name');
+    
+    if (storedFolderId && storedFolderName) {
+      this.selectedFolderId = storedFolderId;
+      this.selectedFolderName = storedFolderName;
+      return {
+        id: storedFolderId,
+        name: storedFolderName,
+      };
+    }
+
     return null;
   }
 
@@ -467,7 +498,7 @@ export class DriveService {
     }
 
     this.gapiLoadPromise = new Promise((resolve, reject) => {
-      if (window.gapi && window.gapi.auth2) {
+      if (typeof window !== 'undefined' && window.gapi && window.gapi.auth2) {
         this.isGapiLoaded = true;
         resolve();
         return;
