@@ -31,6 +31,7 @@ function AppLoadingFallback() {
 function AppInner() {
   const { metrics, markStart, markEnd, getOptimizationSuggestions } = usePerformanceMonitor();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [lastSuggestionLog, setLastSuggestionLog] = useState(0);
 
   useEffect(() => {
     // Mark app initialization start
@@ -64,13 +65,19 @@ function AppInner() {
 
     initializeApp();
 
-    // Set up performance monitoring
+    // Set up performance monitoring with reduced frequency
     const unsubscribe = performanceMonitor.addObserver((newMetrics) => {
       const suggestions = getOptimizationSuggestions();
-      if (suggestions.length > 0) {
-        console.group('🔧 Performance Suggestions');
-        suggestions.forEach(suggestion => console.warn(suggestion));
-        console.groupEnd();
+      const now = Date.now();
+      
+      // Only log suggestions once per minute to avoid spam
+      if (suggestions.length > 0 && now - lastSuggestionLog > 60000) {
+        if (process.env.NODE_ENV === 'development') {
+          console.group('🔧 Performance Suggestions');
+          suggestions.forEach(suggestion => console.warn(suggestion));
+          console.groupEnd();
+        }
+        setLastSuggestionLog(now);
       }
     });
 
@@ -79,19 +86,24 @@ function AppInner() {
       unsubscribe();
       GlobalCacheManager.disposeAll();
     };
-  }, [markStart, markEnd, getOptimizationSuggestions]);
+  }, [markStart, markEnd, getOptimizationSuggestions, lastSuggestionLog]);
 
-  // Display performance metrics in development
+  // Display performance metrics in development (reduced frequency)
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && metrics) {
-      console.group('📊 Performance Metrics');
-      console.log('FPS:', metrics.fps?.toFixed(1));
-      console.log('Render Time:', metrics.renderTime?.toFixed(2), 'ms');
-      console.log('Cache Hit Rate:', metrics.cacheHitRate?.toFixed(1), '%');
-      if (metrics.memoryUsage) {
-        console.log('Memory Usage:', (metrics.memoryUsage.usedJSHeapSize / 1024 / 1024).toFixed(1), 'MB');
-      }
-      console.groupEnd();
+      // Only log metrics every 30 seconds in development
+      const interval = setInterval(() => {
+        console.group('📊 Performance Metrics');
+        console.log('FPS:', metrics.fps?.toFixed(1));
+        console.log('Render Time:', metrics.renderTime?.toFixed(2), 'ms');
+        console.log('Cache Hit Rate:', metrics.cacheHitRate?.toFixed(1), '%');
+        if (metrics.memoryUsage) {
+          console.log('Memory Usage:', (metrics.memoryUsage.usedJSHeapSize / 1024 / 1024).toFixed(1), 'MB');
+        }
+        console.groupEnd();
+      }, 30000); // Every 30 seconds
+
+      return () => clearInterval(interval);
     }
   }, [metrics]);
 

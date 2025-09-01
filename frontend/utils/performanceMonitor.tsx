@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface PerformanceMetrics {
   memoryUsage?: {
     usedJSHeapSize: number;
@@ -30,6 +32,9 @@ export class PerformanceMonitor {
   private errorCount = 0;
   private cacheRequests = 0;
   private cacheHits = 0;
+  private metricsCollectionInterval?: NodeJS.Timeout;
+  private lastSuggestionTime = 0;
+  private suggestionCooldown = 60000; // 1 minute cooldown for suggestions
 
   static getInstance(): PerformanceMonitor {
     if (!this.instance) {
@@ -61,10 +66,10 @@ export class PerformanceMonitor {
     // Monitor resource timing
     this.setupResourceTimingMonitoring();
 
-    // Start periodic metrics collection
-    setInterval(() => {
+    // Start periodic metrics collection (reduced frequency)
+    this.metricsCollectionInterval = setInterval(() => {
       this.collectMetrics();
-    }, 10000); // Every 10 seconds
+    }, 30000); // Every 30 seconds instead of 10
   }
 
   private startFPSMonitoring(): void {
@@ -278,41 +283,48 @@ export class PerformanceMonitor {
     this.frameCount = 0;
   }
 
-  // Performance optimization suggestions
+  // Performance optimization suggestions with cooldown
   getOptimizationSuggestions(): string[] {
+    const now = Date.now();
+    
+    // Only generate suggestions if enough time has passed since last suggestion
+    if (now - this.lastSuggestionTime < this.suggestionCooldown) {
+      return [];
+    }
+
     const metrics = this.getMetrics();
     const suggestions: string[] = [];
 
+    // Only include critical suggestions to reduce noise
     if (metrics.memoryUsage) {
       const memoryUsagePercent = (metrics.memoryUsage.usedJSHeapSize / metrics.memoryUsage.jsHeapSizeLimit) * 100;
       
-      if (memoryUsagePercent > 80) {
-        suggestions.push('High memory usage detected. Consider clearing unused data or reducing cache size.');
-      }
-      
       if (memoryUsagePercent > 90) {
         suggestions.push('Critical memory usage. Application may become unresponsive.');
+      } else if (memoryUsagePercent > 85) {
+        suggestions.push('High memory usage detected. Consider clearing unused data or reducing cache size.');
       }
     }
 
-    if (metrics.fps && metrics.fps < 30) {
-      suggestions.push('Low frame rate detected. Consider reducing visual effects or animation complexity.');
+    if (metrics.fps && metrics.fps < 20) {
+      suggestions.push('Very low frame rate detected. Consider reducing visual effects or animation complexity.');
     }
 
-    if (metrics.renderTime > 100) {
-      suggestions.push('Slow render times detected. Consider optimizing component rendering or using React.memo.');
+    if (metrics.renderTime > 200) {
+      suggestions.push('Very slow render times detected. Consider optimizing component rendering.');
     }
 
-    if (metrics.networkLatency && metrics.networkLatency > 2000) {
-      suggestions.push('High network latency detected. Consider implementing offline capabilities or request optimization.');
+    if (metrics.networkLatency && metrics.networkLatency > 5000) {
+      suggestions.push('Very high network latency detected. Consider implementing offline capabilities.');
     }
 
-    if (metrics.cacheHitRate < 50) {
-      suggestions.push('Low cache hit rate. Consider improving caching strategy or cache key optimization.');
-    }
-
-    if (metrics.errorCount > 10) {
+    if (metrics.errorCount > 20) {
       suggestions.push('High error count detected. Check error logs and improve error handling.');
+    }
+
+    // Update last suggestion time only if we have suggestions
+    if (suggestions.length > 0) {
+      this.lastSuggestionTime = now;
     }
 
     return suggestions;
@@ -322,6 +334,11 @@ export class PerformanceMonitor {
   cleanup(): void {
     this.clear();
     this.observers = [];
+    
+    if (this.metricsCollectionInterval) {
+      clearInterval(this.metricsCollectionInterval);
+      this.metricsCollectionInterval = undefined;
+    }
     
     if (typeof window !== 'undefined' && window.performance) {
       try {
@@ -387,12 +404,4 @@ export function withPerformanceMonitoring<P extends object>(
 
   WrappedComponent.displayName = `withPerformanceMonitoring(${Component.displayName || Component.name})`;
   return WrappedComponent;
-}
-
-declare global {
-  namespace React {
-    function useState<T>(initialState: T | (() => T)): [T, React.Dispatch<React.SetStateAction<T>>];
-    function useEffect(effect: React.EffectCallback, deps?: React.DependencyList): void;
-    function useLayoutEffect(effect: React.EffectCallback, deps?: React.DependencyList): void;
-  }
 }
