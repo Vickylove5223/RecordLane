@@ -2,7 +2,7 @@ import { TokenService } from './tokenService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { CacheService } from '../utils/cacheService';
 import { RetryService } from '../utils/retryService';
-import { GOOGLE_CLIENT_ID, UPLOAD_CONFIG, ERROR_MESSAGES, DEFAULT_RECORDING_SETTINGS } from '../config';
+import { GOOGLE_CLIENT_ID, UPLOAD_CONFIG, ERROR_MESSAGES } from '../config';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -12,11 +12,20 @@ export interface DriveConnection {
   isConnected: boolean;
   userEmail: string | null;
   folderName?: string;
+  folderId?: string;
+}
+
+export interface DriveFolder {
+  id: string;
+  name: string;
+  createdTime: string;
+  webViewLink: string;
 }
 
 export interface UploadResult {
   fileId: string;
   shareLink: string;
+  webViewLink: string;
 }
 
 export interface UploadProgress {
@@ -26,7 +35,8 @@ export interface UploadProgress {
 }
 
 export class DriveService {
-  private static folderId: string | null = null;
+  private static selectedFolderId: string | null = null;
+  private static selectedFolderName: string | null = null;
   private static cache = new CacheService('drive-service');
   private static retryService = new RetryService();
 
@@ -68,12 +78,19 @@ export class DriveService {
       }
 
       const userInfo = await response.json();
-      const folderName = localStorage.getItem('recordlane-folder-name') || DEFAULT_RECORDING_SETTINGS.folderName;
+      const storedFolderId = localStorage.getItem('recordlane-selected-folder-id');
+      const storedFolderName = localStorage.getItem('recordlane-selected-folder-name');
+
+      if (storedFolderId && storedFolderName) {
+        this.selectedFolderId = storedFolderId;
+        this.selectedFolderName = storedFolderName;
+      }
 
       const result = {
         isConnected: true,
         userEmail: userInfo.email,
-        folderName,
+        folderName: this.selectedFolderName || undefined,
+        folderId: this.selectedFolderId || undefined,
       };
 
       await this.cache.set('connection-status', result);
@@ -88,7 +105,7 @@ export class DriveService {
     }
   }
 
-  static async connect(): Promise<{ userEmail: string; folderName: string }> {
+  static async connect(): Promise<{ userEmail: string; requiresFolderSetup: boolean }> {
     try {
       // Clear any cached connection status
       await this.cache.delete('connection-status');
@@ -119,21 +136,37 @@ export class DriveService {
         }
       );
       
-      // Create or find the recordings folder
-      const folderName = await this.setupRecordingsFolder(authResult.access_token);
+      // Check if user already has a selected folder
+      const storedFolderId = localStorage.getItem('recordlane-selected-folder-id');
+      const storedFolderName = localStorage.getItem('recordlane-selected-folder-name');
       
-      localStorage.setItem('recordlane-folder-name', folderName);
+      let requiresFolderSetup = true;
+      
+      if (storedFolderId && storedFolderName) {
+        // Verify the folder still exists
+        try {
+          await this.verifyFolder(storedFolderId, authResult.access_token);
+          this.selectedFolderId = storedFolderId;
+          this.selectedFolderName = storedFolderName;
+          requiresFolderSetup = false;
+        } catch (error) {
+          // Folder doesn't exist anymore, need to setup again
+          localStorage.removeItem('recordlane-selected-folder-id');
+          localStorage.removeItem('recordlane-selected-folder-name');
+        }
+      }
       
       // Cache the successful connection
       await this.cache.set('connection-status', {
         isConnected: true,
         userEmail: userInfo.email,
-        folderName,
+        folderName: this.selectedFolderName,
+        folderId: this.selectedFolderId,
       });
       
       return {
         userEmail: userInfo.email,
-        folderName,
+        requiresFolderSetup,
       };
     } catch (error) {
       console.error('Failed to connect to Drive:', error);
@@ -169,9 +202,10 @@ export class DriveService {
       await TokenService.clearTokens();
       await this.cache.clear();
       
-      localStorage.removeItem('recordlane-folder-name');
-      localStorage.removeItem('recordlane-folder-id');
-      this.folderId = null;
+      localStorage.removeItem('recordlane-selected-folder-id');
+      localStorage.removeItem('recordlane-selected-folder-name');
+      this.selectedFolderId = null;
+      this.selectedFolderName = null;
     } catch (error) {
       console.error('Failed to disconnect from Drive:', error);
       ErrorHandler.logError('drive-disconnect', error);
@@ -182,6 +216,129 @@ export class DriveService {
       
       throw error;
     }
+  }
+
+  static async listFolders(): Promise<DriveFolder[]> {
+    try {
+      const accessToken = await TokenService.getValidAccessToken();
+      if (!accessToken) {
+        throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
+      }
+
+      const response = await this.retryService.execute(
+        () => fetch(
+          `${DRIVE_API_BASE}/files?q=mimeType='application/vnd.google-apps.folder' and trashed=false&orderBy=name&fields=files(id,name,createdTime,webViewLink)`,
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            signal: AbortSignal.timeout(15000),
+          }
+        ),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: (error) => error.name === 'TypeError' || error.status >= 500
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to list folders: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result.files || [];
+    } catch (error) {
+      console.error('Failed to list folders:', error);
+      ErrorHandler.logError('drive-list-folders', error);
+      throw ErrorHandler.createError('FOLDER_LIST_FAILED', 'Failed to list Google Drive folders', error);
+    }
+  }
+
+  static async createFolder(name: string): Promise<DriveFolder> {
+    try {
+      const accessToken = await TokenService.getValidAccessToken();
+      if (!accessToken) {
+        throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
+      }
+
+      const response = await this.retryService.execute(
+        () => fetch(`${DRIVE_API_BASE}/files`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name,
+            mimeType: 'application/vnd.google-apps.folder',
+          }),
+          signal: AbortSignal.timeout(15000),
+        }),
+        {
+          maxRetries: 2,
+          retryDelay: 1000,
+          shouldRetry: (error) => error.name === 'TypeError' || error.status >= 500
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to create folder: ${response.status}`);
+      }
+
+      const folder = await response.json();
+      return {
+        id: folder.id,
+        name: folder.name,
+        createdTime: folder.createdTime || new Date().toISOString(),
+        webViewLink: folder.webViewLink || `https://drive.google.com/drive/folders/${folder.id}`,
+      };
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+      ErrorHandler.logError('drive-create-folder', error, { name });
+      throw ErrorHandler.createError('FOLDER_CREATE_FAILED', 'Failed to create folder in Google Drive', error);
+    }
+  }
+
+  static async selectFolder(folderId: string, folderName: string): Promise<void> {
+    try {
+      const accessToken = await TokenService.getValidAccessToken();
+      if (!accessToken) {
+        throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
+      }
+
+      // Verify the folder exists and is accessible
+      await this.verifyFolder(folderId, accessToken);
+
+      // Store the selection
+      this.selectedFolderId = folderId;
+      this.selectedFolderName = folderName;
+      
+      localStorage.setItem('recordlane-selected-folder-id', folderId);
+      localStorage.setItem('recordlane-selected-folder-name', folderName);
+
+      // Update cache
+      const cached = await this.cache.get('connection-status');
+      if (cached) {
+        cached.data.folderId = folderId;
+        cached.data.folderName = folderName;
+        await this.cache.set('connection-status', cached.data);
+      }
+    } catch (error) {
+      console.error('Failed to select folder:', error);
+      ErrorHandler.logError('drive-select-folder', error, { folderId, folderName });
+      throw ErrorHandler.createError('FOLDER_SELECT_FAILED', 'Failed to select folder', error);
+    }
+  }
+
+  static getSelectedFolder(): { id: string; name: string } | null {
+    if (this.selectedFolderId && this.selectedFolderName) {
+      return {
+        id: this.selectedFolderId,
+        name: this.selectedFolderName,
+      };
+    }
+    return null;
   }
 
   static async uploadFile(
@@ -196,18 +353,19 @@ export class DriveService {
         throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
       }
 
+      if (!this.selectedFolderId) {
+        throw ErrorHandler.createError('NO_FOLDER_SELECTED', 'No folder selected for uploads');
+      }
+
       // Validate file size (100MB limit)
       if (blob.size > 100 * 1024 * 1024) {
         throw ErrorHandler.createError('FILE_TOO_LARGE', ERROR_MESSAGES.FILE_TOO_LARGE);
       }
 
-      // Ensure we have a folder
-      await this.ensureFolder(accessToken);
-
       // Create file metadata
       const metadata = {
         name: `${title}.webm`,
-        parents: this.folderId ? [this.folderId] : undefined,
+        parents: [this.selectedFolderId],
         mimeType: 'video/webm',
       };
 
@@ -234,10 +392,11 @@ export class DriveService {
         }
       );
       
-      // Generate share link
+      // Generate share links
       const shareLink = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+      const webViewLink = `https://drive.google.com/file/d/${fileId}/preview`;
       
-      return { fileId, shareLink };
+      return { fileId, shareLink, webViewLink };
     } catch (error) {
       console.error('Failed to upload file:', error);
       ErrorHandler.logError('drive-upload', error, { title, privacy, fileSize: blob.size });
@@ -247,6 +406,24 @@ export class DriveService {
       }
       
       throw ErrorHandler.createError('UPLOAD_FAILED', ERROR_MESSAGES.UPLOAD_FAILED, error);
+    }
+  }
+
+  private static async verifyFolder(folderId: string, accessToken: string): Promise<void> {
+    const response = await fetch(`${DRIVE_API_BASE}/files/${folderId}?fields=id,name,trashed`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Folder verification failed: ${response.status}`);
+    }
+
+    const folder = await response.json();
+    if (folder.trashed) {
+      throw new Error('Folder is in trash');
     }
   }
 
@@ -297,89 +474,6 @@ export class DriveService {
     }
 
     return response.json();
-  }
-
-  private static async setupRecordingsFolder(accessToken: string): Promise<string> {
-    const folderName = DEFAULT_RECORDING_SETTINGS.folderName;
-    
-    try {
-      // Check cache first
-      const cachedFolder = await this.cache.get(`folder-${folderName}`);
-      if (cachedFolder && cachedFolder.data.id) {
-        this.folderId = cachedFolder.data.id;
-        localStorage.setItem('recordlane-folder-id', this.folderId);
-        return folderName;
-      }
-
-      // Check if folder already exists
-      const searchResponse = await fetch(
-        `${DRIVE_API_BASE}/files?q=name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          signal: AbortSignal.timeout(15000),
-        }
-      );
-
-      if (!searchResponse.ok) {
-        throw new Error(`Failed to search for existing folder: ${searchResponse.status}`);
-      }
-
-      const searchResult = await searchResponse.json();
-      
-      if (searchResult.files && searchResult.files.length > 0) {
-        // Folder exists
-        this.folderId = searchResult.files[0].id;
-        localStorage.setItem('recordlane-folder-id', this.folderId);
-        
-        // Cache the folder info
-        await this.cache.set(`folder-${folderName}`, { id: this.folderId, name: folderName });
-        
-        return folderName;
-      }
-
-      // Create new folder
-      const createResponse = await fetch(`${DRIVE_API_BASE}/files`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: folderName,
-          mimeType: 'application/vnd.google-apps.folder',
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (!createResponse.ok) {
-        throw new Error(`Failed to create recordings folder: ${createResponse.status}`);
-      }
-
-      const folder = await createResponse.json();
-      this.folderId = folder.id;
-      localStorage.setItem('recordlane-folder-id', this.folderId);
-      
-      // Cache the new folder
-      await this.cache.set(`folder-${folderName}`, { id: this.folderId, name: folderName });
-      
-      return folderName;
-    } catch (error) {
-      console.error('Failed to setup recordings folder:', error);
-      throw error;
-    }
-  }
-
-  private static async ensureFolder(accessToken: string): Promise<void> {
-    if (!this.folderId) {
-      const storedFolderId = localStorage.getItem('recordlane-folder-id');
-      if (storedFolderId) {
-        this.folderId = storedFolderId;
-      } else {
-        await this.setupRecordingsFolder(accessToken);
-      }
-    }
   }
 
   private static async initiateResumableUpload(

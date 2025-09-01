@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuickActionsSkeleton, RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Video, Monitor, Camera, Zap, Shield, Download } from 'lucide-react';
+import { Video, Monitor, Camera, Zap, Shield, Download, Folder } from 'lucide-react';
 import { useDrive } from '../../contexts/DriveContext';
 import { useApp } from '../../contexts/AppContext';
 
@@ -50,7 +50,7 @@ const RecordingCard = memo(({ recording }: { recording: any }) => (
 RecordingCard.displayName = 'RecordingCard';
 
 export default function MainPanel() {
-  const { isConnected, isConnecting } = useDrive();
+  const { isConnected, isConnecting, selectedFolder, requiresFolderSetup } = useDrive();
   const { state } = useApp();
 
   const getConnectionStatus = () => {
@@ -59,7 +59,15 @@ export default function MainPanel() {
     return 'disconnected';
   };
 
-  if (!isConnected || !state.isOnboarded) {
+  const getConnectionText = () => {
+    if (isConnecting) return 'Connecting to Google Drive...';
+    if (isConnected && selectedFolder) return `Using folder: ${selectedFolder.name}`;
+    if (isConnected && requiresFolderSetup) return 'Folder setup required';
+    if (isConnected) return 'Connected to Google Drive';
+    return 'Not connected';
+  };
+
+  if (!isConnected || !state.isOnboarded || requiresFolderSetup) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-2xl">
@@ -75,9 +83,30 @@ export default function MainPanel() {
           <div className="mb-6">
             <ConnectionStatus 
               status={getConnectionStatus()}
+              text={getConnectionText()}
               className="mx-auto"
             />
           </div>
+
+          {requiresFolderSetup && (
+            <Card className="text-left mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Folder className="h-6 w-6 text-blue-500 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Folder Setup Required</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Choose or create a folder in your Google Drive to store your recordings.
+                    </p>
+                    <Button size="sm">
+                      <Folder className="h-4 w-4 mr-2" />
+                      Setup Folder
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {!isConnected && (
             <Card className="text-left">

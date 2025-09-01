@@ -12,7 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 export default function Sidebar() {
   const { state } = useApp();
-  const { folderName, isConnected, isConnecting } = useDrive();
+  const { selectedFolder, isConnected, isConnecting, requiresFolderSetup } = useDrive();
 
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -27,6 +27,14 @@ export default function Sidebar() {
     return 'disconnected';
   };
 
+  const getConnectionText = () => {
+    if (isConnecting) return 'Connecting...';
+    if (isConnected && selectedFolder) return selectedFolder.name;
+    if (isConnected && requiresFolderSetup) return 'Setup required';
+    if (isConnected) return 'Connected';
+    return 'Not connected';
+  };
+
   return (
     <aside className="w-80 bg-card border-r border-border flex flex-col">
       {/* Header */}
@@ -38,8 +46,21 @@ export default function Sidebar() {
         {/* Connection Status */}
         <ConnectionStatus 
           status={getConnectionStatus()}
-          text={isConnected ? folderName : undefined}
+          text={getConnectionText()}
         />
+
+        {/* Folder Info */}
+        {selectedFolder && (
+          <div className="mt-3 p-2 bg-muted/50 rounded-lg">
+            <div className="flex items-center space-x-2 text-sm">
+              <Folder className="h-4 w-4 text-blue-500" />
+              <span className="font-medium">Saving to:</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 truncate">
+              {selectedFolder.name}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Recordings List */}

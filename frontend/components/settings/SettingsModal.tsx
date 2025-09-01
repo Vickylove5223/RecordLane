@@ -22,6 +22,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { SettingsPageSkeleton } from '@/components/ui/loading-skeleton';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ConnectionStatus } from '@/components/ui/connection-status';
+import { FolderSetupModal } from '../onboarding/FolderSetupModal';
 import { 
   User, 
   Folder, 
@@ -29,15 +30,24 @@ import {
   Unlink,
   Shield,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  FolderOpen
 } from 'lucide-react';
 import { useDrive } from '../../contexts/DriveContext';
 import { useApp } from '../../contexts/AppContext';
 
 export default function SettingsModal() {
-  const { isConnected, userEmail, folderName, disconnectDrive, isConnecting } = useDrive();
+  const { 
+    isConnected, 
+    userEmail, 
+    selectedFolder, 
+    requiresFolderSetup,
+    disconnectDrive, 
+    isConnecting 
+  } = useDrive();
   const { state, dispatch } = useApp();
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+  const [showFolderSetup, setShowFolderSetup] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,11 +79,23 @@ export default function SettingsModal() {
     }
   };
 
+  const handleFolderSetup = () => {
+    setShowFolderSetup(true);
+  };
+
+  const handleFolderSetupComplete = () => {
+    setShowFolderSetup(false);
+  };
+
   const getConnectionStatus = () => {
     if (isConnecting || isDisconnecting) return 'connecting';
     if (isConnected) return 'connected';
     return 'disconnected';
   };
+
+  if (showFolderSetup) {
+    return <FolderSetupModal onComplete={handleFolderSetupComplete} />;
+  }
 
   if (!isOpen) {
     return null;
@@ -135,12 +157,50 @@ export default function SettingsModal() {
                                 <span>Connected</span>
                               </Badge>
                             </div>
-                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                              <Folder className="h-4 w-4" />
-                              <span>{folderName}</span>
-                            </div>
+                            {selectedFolder && (
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
+                                <Folder className="h-4 w-4" />
+                                <span>{selectedFolder.name}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
+
+                        {/* Folder Management */}
+                        <Card className="bg-muted/30">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-start space-x-3">
+                                <FolderOpen className="h-5 w-5 text-blue-500 mt-0.5" />
+                                <div>
+                                  <h4 className="font-medium">Recording Folder</h4>
+                                  {selectedFolder ? (
+                                    <p className="text-sm text-muted-foreground">
+                                      Recordings are saved to: {selectedFolder.name}
+                                    </p>
+                                  ) : requiresFolderSetup ? (
+                                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                                      No folder selected - setup required
+                                    </p>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                      No folder configured
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleFolderSetup}
+                                disabled={isDisconnecting}
+                              >
+                                <Folder className="h-4 w-4 mr-2" />
+                                {selectedFolder ? 'Change Folder' : 'Setup Folder'}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
 
                         {showDisconnectConfirm ? (
                           <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">

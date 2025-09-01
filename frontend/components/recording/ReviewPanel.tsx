@@ -26,7 +26,8 @@ import {
   Cloud, 
   Scissors,
   X,
-  CheckCircle
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
 import { useDrive } from '../../contexts/DriveContext';
@@ -50,6 +51,7 @@ export default function ReviewPanel() {
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{ shareLink: string; webViewLink: string } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewUrl = getPreviewUrl();
@@ -103,22 +105,13 @@ export default function ReviewPanel() {
     setUploadSuccess(false);
 
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return prev;
-          }
-          return prev + Math.random() * 10;
-        });
-      }, 200);
-
-      const result = await uploadFile(recordedBlob, title, privacy);
+      const result = await uploadFile(recordedBlob, title, privacy, (progress) => {
+        setUploadProgress(progress.percentage);
+      });
       
-      clearInterval(progressInterval);
       setUploadProgress(100);
       setUploadSuccess(true);
+      setUploadResult(result);
 
       // Add to recordings list
       const recording = {
@@ -139,10 +132,14 @@ export default function ReviewPanel() {
         description: "Your recording has been saved to Google Drive",
       });
 
-      // Show success for a moment, then clean up
-      setTimeout(() => {
-        deleteRecording();
-      }, 2000);
+      // Show share modal with the result
+      dispatch({ 
+        type: 'SET_SHARE_MODAL_DATA', 
+        payload: { 
+          shareLink: result.shareLink, 
+          title 
+        } 
+      });
       
     } catch (error) {
       console.error('Upload failed:', error);
@@ -154,7 +151,7 @@ export default function ReviewPanel() {
         variant: "destructive",
       });
     } finally {
-      setTimeout(() => setIsUploading(false), 2000);
+      setTimeout(() => setIsUploading(false), 1000);
     }
   };
 
@@ -164,12 +161,23 @@ export default function ReviewPanel() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleClose = () => {
+    if (uploadSuccess) {
+      deleteRecording();
+    } else {
+      // Show confirmation if upload not completed
+      if (window.confirm('Are you sure you want to close without uploading?')) {
+        deleteRecording();
+      }
+    }
+  };
+
   if (!recordedBlob || !previewUrl) {
     return null;
   }
 
   return (
-    <Dialog open={true} onOpenChange={() => !isUploading && deleteRecording()}>
+    <Dialog open={true} onOpenChange={() => !isUploading && handleClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
@@ -296,6 +304,41 @@ export default function ReviewPanel() {
             />
           )}
 
+          {/* Success Message with Links */}
+          {uploadSuccess && uploadResult && (
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-green-800 dark:text-green-200">
+                    Recording uploaded successfully!
+                  </h3>
+                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    Your recording is now available in Google Drive
+                  </p>
+                  <div className="flex space-x-2 mt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(uploadResult.shareLink, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View in Drive
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(uploadResult.webViewLink, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="flex items-center space-x-2">
@@ -341,7 +384,7 @@ export default function ReviewPanel() {
                     ) : (
                       <>
                         <Cloud className="h-4 w-4 mr-2" />
-                        Sync to Drive
+                        Upload to Drive
                       </>
                     )}
                   </Button>

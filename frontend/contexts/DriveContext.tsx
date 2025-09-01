@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { DriveService, UploadProgress } from '../services/driveService';
+import { DriveService, DriveFolder, UploadProgress } from '../services/driveService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,17 +7,21 @@ import { useToast } from '@/components/ui/use-toast';
 interface DriveContextType {
   isConnected: boolean;
   userEmail: string | null;
-  folderName: string;
+  selectedFolder: { id: string; name: string } | null;
+  requiresFolderSetup: boolean;
   isConnecting: boolean;
   connectionError: string | null;
   connectDrive: () => Promise<void>;
   disconnectDrive: () => Promise<void>;
+  listFolders: () => Promise<DriveFolder[]>;
+  createFolder: (name: string) => Promise<DriveFolder>;
+  selectFolder: (folderId: string, folderName: string) => Promise<void>;
   uploadFile: (
     file: Blob, 
     title: string, 
     privacy: string, 
     onProgress?: (progress: UploadProgress) => void
-  ) => Promise<{ fileId: string; shareLink: string }>;
+  ) => Promise<{ fileId: string; shareLink: string; webViewLink: string }>;
   checkConnection: () => Promise<void>;
   retryConnection: () => Promise<void>;
 }
@@ -27,7 +31,8 @@ const DriveContext = createContext<DriveContextType | undefined>(undefined);
 export function DriveProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [folderName, setFolderName] = useState('RecordLane Recordings');
+  const [selectedFolder, setSelectedFolder] = useState<{ id: string; name: string } | null>(null);
+  const [requiresFolderSetup, setRequiresFolderSetup] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -49,14 +54,19 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       
       setIsConnected(connection.isConnected);
       setUserEmail(connection.userEmail);
-      if (connection.folderName) {
-        setFolderName(connection.folderName);
+      
+      if (connection.folderId && connection.folderName) {
+        setSelectedFolder({ id: connection.folderId, name: connection.folderName });
+        setRequiresFolderSetup(false);
+      } else if (connection.isConnected) {
+        setRequiresFolderSetup(true);
       }
     } catch (error) {
       console.error('Failed to check Drive connection:', error);
       ErrorHandler.logError('drive-connection-check', error);
       setIsConnected(false);
       setUserEmail(null);
+      setSelectedFolder(null);
       setConnectionError(ErrorHandler.formatErrorForUser(error));
     }
   }, [retryService]);
@@ -88,7 +98,15 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       
       setIsConnected(true);
       setUserEmail(result.userEmail);
-      setFolderName(result.folderName);
+      setRequiresFolderSetup(result.requiresFolderSetup);
+      
+      // If folder setup is not required, get the selected folder
+      if (!result.requiresFolderSetup) {
+        const folder = DriveService.getSelectedFolder();
+        if (folder) {
+          setSelectedFolder(folder);
+        }
+      }
       
       toast({
         title: "Drive Connected",
@@ -124,7 +142,8 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       
       setIsConnected(false);
       setUserEmail(null);
-      setFolderName('RecordLane Recordings');
+      setSelectedFolder(null);
+      setRequiresFolderSetup(false);
       setConnectionError(null);
       
       toast({
@@ -138,6 +157,8 @@ export function DriveProvider({ children }: { children: ReactNode }) {
       // Even if disconnect fails, clear local state
       setIsConnected(false);
       setUserEmail(null);
+      setSelectedFolder(null);
+      setRequiresFolderSetup(false);
       setConnectionError(null);
       
       toast({
@@ -148,6 +169,52 @@ export function DriveProvider({ children }: { children: ReactNode }) {
     }
   }, [toast, retryService]);
 
+  const listFolders = useCallback(async () => {
+    return await retryService.execute(
+      () => DriveService.listFolders(),
+      {
+        maxRetries: 2,
+        retryDelay: 1000,
+        shouldRetry: (error) => ErrorHandler.isRecoverableError(error),
+      }
+    );
+  }, [retryService]);
+
+  const createFolder = useCallback(async (name: string) => {
+    return await retryService.execute(
+      () => DriveService.createFolder(name),
+      {
+        maxRetries: 2,
+        retryDelay: 1000,
+        shouldRetry: (error) => ErrorHandler.isRecoverableError(error),
+      }
+    );
+  }, [retryService]);
+
+  const selectFolder = useCallback(async (folderId: string, folderName: string) => {
+    try {
+      await DriveService.selectFolder(folderId, folderName);
+      setSelectedFolder({ id: folderId, name: folderName });
+      setRequiresFolderSetup(false);
+      
+      toast({
+        title: "Folder Selected",
+        description: `Using "${folderName}" for recordings`,
+      });
+    } catch (error) {
+      console.error('Failed to select folder:', error);
+      ErrorHandler.logError('folder-select', error);
+      
+      toast({
+        title: "Selection Failed",
+        description: "Failed to select folder",
+        variant: "destructive",
+      });
+      
+      throw error;
+    }
+  }, [toast]);
+
   const uploadFile = useCallback(async (
     file: Blob, 
     title: string, 
@@ -156,6 +223,10 @@ export function DriveProvider({ children }: { children: ReactNode }) {
   ) => {
     if (!isConnected) {
       throw ErrorHandler.createError('DRIVE_NOT_CONNECTED', 'Drive not connected');
+    }
+    
+    if (!selectedFolder) {
+      throw ErrorHandler.createError('NO_FOLDER_SELECTED', 'No folder selected for uploads');
     }
     
     return await retryService.execute(
@@ -177,7 +248,7 @@ export function DriveProvider({ children }: { children: ReactNode }) {
         }
       }
     );
-  }, [isConnected, retryService, toast]);
+  }, [isConnected, selectedFolder, retryService, toast]);
 
   const retryConnection = useCallback(async () => {
     if (connectionError) {
@@ -196,11 +267,15 @@ export function DriveProvider({ children }: { children: ReactNode }) {
     <DriveContext.Provider value={{
       isConnected,
       userEmail,
-      folderName,
+      selectedFolder,
+      requiresFolderSetup,
       isConnecting,
       connectionError,
       connectDrive,
       disconnectDrive,
+      listFolders,
+      createFolder,
+      selectFolder,
       uploadFile,
       checkConnection,
       retryConnection,

@@ -1,8 +1,8 @@
 // Configuration for the RecordLane application
 
 // Google OAuth Configuration
-// TODO: Replace with your Google OAuth client ID from Google Cloud Console
-export const GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_SECRET = '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';
 
 // Google Drive API Configuration
 export const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';

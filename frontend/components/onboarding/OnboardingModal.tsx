@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog, 
@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ConnectionStatus } from '@/components/ui/connection-status';
+import { FolderSetupModal } from './FolderSetupModal';
 import { 
   Shield, 
   Zap, 
@@ -23,14 +24,28 @@ import { useDrive } from '../../contexts/DriveContext';
 import { useApp } from '../../contexts/AppContext';
 
 export default function OnboardingModal() {
-  const { connectDrive, isConnecting, isConnected } = useDrive();
+  const { connectDrive, isConnecting, isConnected, requiresFolderSetup } = useDrive();
   const { dispatch } = useApp();
+  const [showFolderSetup, setShowFolderSetup] = useState(false);
 
   const handleConnect = async () => {
     await connectDrive();
-    if (isConnected) {
-      dispatch({ type: 'SET_ONBOARDED', payload: true });
+  };
+
+  const handleComplete = () => {
+    dispatch({ type: 'SET_ONBOARDED', payload: true });
+  };
+
+  // Show folder setup if connected but needs folder setup
+  useEffect(() => {
+    if (isConnected && requiresFolderSetup) {
+      setShowFolderSetup(true);
     }
+  }, [isConnected, requiresFolderSetup]);
+
+  const handleFolderSetupComplete = () => {
+    setShowFolderSetup(false);
+    handleComplete();
   };
 
   const features = [
@@ -53,6 +68,11 @@ export default function OnboardingModal() {
       color: 'text-purple-500',
     },
   ];
+
+  // If folder setup is needed, show that modal
+  if (showFolderSetup) {
+    return <FolderSetupModal onComplete={handleFolderSetupComplete} />;
+  }
 
   return (
     <Dialog open={true}>
@@ -83,7 +103,7 @@ export default function OnboardingModal() {
                           <h3 className="font-semibold mb-1">{feature.title}</h3>
                           <p className="text-sm text-muted-foreground">{feature.description}</p>
                         </div>
-                        {!isConnecting && isConnected && (
+                        {!isConnecting && isConnected && !requiresFolderSetup && (
                           <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                         )}
                       </div>
@@ -108,20 +128,20 @@ export default function OnboardingModal() {
                 <div className="space-y-2">
                   <h3 className="font-semibold">Connect Google Drive to get started</h3>
                   <p className="text-sm text-muted-foreground">
-                    We'll create a "RecordLane Recordings" folder in your Drive to store your recordings.
-                    You can change this folder anytime in settings.
+                    We'll help you choose or create a folder in your Drive to store your recordings.
+                    You can change this anytime in settings.
                   </p>
                 </div>
 
                 <Button
                   size="lg"
                   onClick={handleConnect}
-                  disabled={isConnecting || isConnected}
+                  disabled={isConnecting || (isConnected && !requiresFolderSetup)}
                   className="w-full max-w-xs"
                 >
                   {isConnecting ? (
                     <LoadingSpinner text="Connecting..." size="sm" />
-                  ) : isConnected ? (
+                  ) : isConnected && !requiresFolderSetup ? (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Connected
@@ -133,6 +153,13 @@ export default function OnboardingModal() {
                     </>
                   )}
                 </Button>
+
+                {isConnected && !requiresFolderSetup && (
+                  <Button onClick={handleComplete} className="w-full max-w-xs">
+                    Continue to RecordLane
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
 
                 <p className="text-xs text-muted-foreground">
                   By connecting, you agree to let RecordLane access files it creates in your Google Drive.
