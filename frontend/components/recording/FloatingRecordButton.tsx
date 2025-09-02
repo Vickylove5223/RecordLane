@@ -25,27 +25,16 @@ import {
 } from 'lucide-react';
 import { useRecording, RecordingMode, RecordingOptions } from '../../contexts/RecordingContext';
 import { useApp } from '../../contexts/AppContext';
-import { useYouTube } from '../../contexts/YouTubeContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function FloatingRecordButton() {
   const { startRecording, options, updateOptions, state: recordingState } = useRecording();
   const { state } = useApp();
-  const { isConnected } = useYouTube();
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleModeSelect = async (mode: RecordingMode) => {
-    if (!isConnected) {
-      toast({
-        title: "YouTube Not Connected",
-        description: "Please connect your YouTube account before recording",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const recordingOptions: RecordingOptions = {
       ...options,
       mode,
@@ -287,14 +276,11 @@ export default function FloatingRecordButton() {
             </div>
           </DropdownMenuItem>
 
-          {!isConnected && (
-            <>
-              <DropdownMenuSeparator />
-              <div className="px-2 py-2 text-xs text-muted-foreground">
-                Connect YouTube to start recording
-              </div>
-            </>
-          )}
+          <DropdownMenuSeparator />
+          
+          <div className="px-2 py-2 text-xs text-muted-foreground">
+            Recording works offline. Connect YouTube to sync.
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

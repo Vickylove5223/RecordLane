@@ -27,7 +27,11 @@ import {
   Scissors,
   X,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  Save,
+  Upload,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
 import { useYouTube } from '../../contexts/YouTubeContext';
@@ -36,7 +40,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 export default function ReviewPanel() {
   const { recordedBlob, deleteRecording, restartRecording, getPreviewUrl } = useRecording();
-  const { uploadVideo } = useYouTube();
+  const { uploadVideo, isConnected, connectYouTube } = useYouTube();
   const { dispatch } = useApp();
   const { toast } = useToast();
 
@@ -52,6 +56,8 @@ export default function ReviewPanel() {
   const [trimEnd, setTrimEnd] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ videoId: string; videoUrl: string } | null>(null);
+  const [savedLocally, setSavedLocally] = useState(false);
+  const [showConnectPrompt, setShowConnectPrompt] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewUrl = getPreviewUrl();
@@ -97,7 +103,54 @@ export default function ReviewPanel() {
     }
   };
 
-  const handleUpload = async () => {
+  const handleSaveLocally = async () => {
+    if (!recordedBlob) return;
+
+    try {
+      // Create a download link
+      const url = URL.createObjectURL(recordedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Add to recordings list as local recording
+      const recording = {
+        id: Date.now().toString(),
+        title,
+        duration: duration * 1000,
+        createdAt: new Date(),
+        privacy: privacy,
+        uploadStatus: 'local' as const,
+        localBlob: recordedBlob,
+      };
+
+      dispatch({ type: 'ADD_RECORDING', payload: recording });
+      setSavedLocally(true);
+
+      toast({
+        title: "Recording Saved",
+        description: "Your recording has been saved locally",
+      });
+    } catch (error) {
+      console.error('Save failed:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save recording locally",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUploadToYouTube = async () => {
+    if (!isConnected) {
+      setShowConnectPrompt(true);
+      return;
+    }
+
     if (!recordedBlob) return;
 
     setIsUploading(true);
@@ -129,7 +182,7 @@ export default function ReviewPanel() {
 
       toast({
         title: "Upload Complete",
-        description: "Your recording has been saved to YouTube",
+        description: "Your recording has been uploaded to YouTube",
       });
 
       // Show share modal with the result
@@ -155,6 +208,18 @@ export default function ReviewPanel() {
     }
   };
 
+  const handleConnectAndUpload = async () => {
+    try {
+      await connectYouTube();
+      setShowConnectPrompt(false);
+      // After successful connection, proceed with upload
+      await handleUploadToYouTube();
+    } catch (error) {
+      console.error('Connection failed:', error);
+      // Connection error is handled in YouTubeContext
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -162,11 +227,11 @@ export default function ReviewPanel() {
   };
 
   const handleClose = () => {
-    if (uploadSuccess) {
+    if (uploadSuccess || savedLocally) {
       deleteRecording();
     } else {
-      // Show confirmation if upload not completed
-      if (window.confirm('Are you sure you want to close without uploading?')) {
+      // Show confirmation if recording not saved
+      if (window.confirm('Are you sure you want to close without saving your recording?')) {
         deleteRecording();
       }
     }
@@ -183,11 +248,14 @@ export default function ReviewPanel() {
           <DialogTitle className="flex items-center space-x-2">
             <span>Review Recording</span>
             {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
+            {savedLocally && !uploadSuccess && <Save className="h-5 w-5 text-blue-500" />}
           </DialogTitle>
           <DialogDescription>
             {uploadSuccess 
               ? "Your recording has been successfully uploaded to YouTube"
-              : "Review your recording and upload to YouTube"
+              : savedLocally
+              ? "Your recording has been saved locally"
+              : "Review your recording and save locally or upload to YouTube"
             }
           </DialogDescription>
         </DialogHeader>
@@ -203,7 +271,7 @@ export default function ReviewPanel() {
             />
             
             {/* Play/Pause Overlay */}
-            {!uploadSuccess && (
+            {!uploadSuccess && !savedLocally && (
               <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
                 <Button
                   size="lg"
@@ -239,7 +307,7 @@ export default function ReviewPanel() {
           </div>
 
           {/* Timeline */}
-          {!uploadSuccess && (
+          {!uploadSuccess && !savedLocally && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
@@ -267,7 +335,7 @@ export default function ReviewPanel() {
           )}
 
           {/* Recording Details */}
-          {!uploadSuccess && (
+          {!uploadSuccess && !savedLocally && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title</label>
@@ -331,10 +399,66 @@ export default function ReviewPanel() {
             </div>
           )}
 
+          {/* Local Save Success */}
+          {savedLocally && !uploadSuccess && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Save className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-blue-800 dark:text-blue-200">
+                    Recording saved locally!
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                    Your recording has been downloaded to your device
+                  </p>
+                  {!isConnected && (
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                      Connect YouTube to also sync your recordings online
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Connect YouTube Prompt */}
+          {showConnectPrompt && (
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <WifiOff className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                    Connect YouTube to Upload
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+                    Connect your YouTube account to upload and sync your recordings online.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={handleConnectAndUpload}
+                      disabled={isUploading}
+                    >
+                      <Wifi className="h-4 w-4 mr-2" />
+                      Connect & Upload
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowConnectPrompt(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="flex items-center space-x-2">
-              {!uploadSuccess && (
+              {!uploadSuccess && !savedLocally && (
                 <Button
                   variant="outline"
                   onClick={() => setShowTrimming(true)}
@@ -347,7 +471,7 @@ export default function ReviewPanel() {
             </div>
 
             <div className="flex items-center space-x-2">
-              {!uploadSuccess && (
+              {!uploadSuccess && !savedLocally && (
                 <>
                   <Button
                     variant="outline"
@@ -368,7 +492,16 @@ export default function ReviewPanel() {
                   </Button>
 
                   <Button
-                    onClick={handleUpload}
+                    variant="outline"
+                    onClick={handleSaveLocally}
+                    disabled={isUploading || !title.trim()}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Locally
+                  </Button>
+
+                  <Button
+                    onClick={handleUploadToYouTube}
                     disabled={isUploading || !title.trim()}
                   >
                     {isUploading ? (
@@ -383,7 +516,7 @@ export default function ReviewPanel() {
                 </>
               )}
               
-              {uploadSuccess && (
+              {(uploadSuccess || savedLocally) && (
                 <Button onClick={deleteRecording}>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Done

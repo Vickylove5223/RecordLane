@@ -158,7 +158,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     onProgress?: (progress: UploadProgress) => void
   ) => {
     if (!isConnected) {
-      throw ErrorHandler.createError('DRIVE_NOT_CONNECTED', 'YouTube not connected');
+      throw ErrorHandler.createError('YOUTUBE_NOT_CONNECTED', 'YouTube not connected');
     }
     
     try {

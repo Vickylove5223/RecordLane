@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ProgressIndicator } from '@/components/ui/progress-indicator';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Video, Clock, ExternalLink } from 'lucide-react';
+import { Video, Clock, ExternalLink, Download, Wifi, Cloud } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function Sidebar() {
   const { state } = useApp();
-  const { isConnected, isConnecting } = useYouTube();
+  const { isConnected, isConnecting, connectYouTube } = useYouTube();
 
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -33,12 +33,27 @@ export default function Sidebar() {
     return 'Not connected';
   };
 
+  const localRecordings = state.recordings.filter(r => r.uploadStatus === 'local');
+  const syncedRecordings = state.recordings.filter(r => r.uploadStatus === 'completed');
+
   return (
     <aside className="w-80 bg-card border-r border-border flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Recordings</h2>
+          <div className="flex items-center space-x-1">
+            {localRecordings.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {localRecordings.length} local
+              </Badge>
+            )}
+            {syncedRecordings.length > 0 && (
+              <Badge variant="default" className="text-xs">
+                {syncedRecordings.length} synced
+              </Badge>
+            )}
+          </div>
         </div>
         
         {/* Connection Status */}
@@ -46,6 +61,20 @@ export default function Sidebar() {
           status={getConnectionStatus()}
           text={getConnectionText()}
         />
+
+        {/* Quick Connect */}
+        {!isConnected && localRecordings.length > 0 && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={connectYouTube}
+            disabled={isConnecting}
+            className="w-full mt-3 text-xs"
+          >
+            <Wifi className="h-3 w-3 mr-1" />
+            Connect to sync {localRecordings.length} recording{localRecordings.length !== 1 ? 's' : ''}
+          </Button>
+        )}
       </div>
 
       {/* Recordings List */}
@@ -109,14 +138,21 @@ export default function Sidebar() {
                           ? 'default'
                           : recording.uploadStatus === 'failed'
                           ? 'destructive'
+                          : recording.uploadStatus === 'local'
+                          ? 'secondary'
                           : 'secondary'
                       }
                       className="text-xs"
                     >
-                      {recording.uploadStatus === 'completed' && 'Synced'}
+                      {recording.uploadStatus === 'completed' && (
+                        <><Cloud className="h-3 w-3 mr-1" />Synced</>
+                      )}
                       {recording.uploadStatus === 'uploading' && `${recording.uploadProgress || 0}%`}
                       {recording.uploadStatus === 'pending' && 'Pending'}
                       {recording.uploadStatus === 'failed' && 'Failed'}
+                      {recording.uploadStatus === 'local' && (
+                        <><Download className="h-3 w-3 mr-1" />Local</>
+                      )}
                     </Badge>
 
                     {recording.youtubeLink && (

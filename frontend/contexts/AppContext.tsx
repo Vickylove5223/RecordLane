@@ -30,8 +30,9 @@ export interface Recording {
   createdAt: Date;
   privacy: 'private' | 'unlisted' | 'public';
   localBlob?: Blob;
-  uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed';
+  uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed' | 'local';
   uploadProgress?: number;
+  localPath?: string;
 }
 
 type AppAction =
@@ -49,7 +50,7 @@ type AppAction =
   | { type: 'RESET_SETTINGS' };
 
 const initialState: AppState = {
-  isOnboarded: false,
+  isOnboarded: true, // Set to true to skip onboarding
   settingsOpen: false,
   shareModalOpen: false,
   settings: {
@@ -159,6 +160,11 @@ function saveStateToStorage(state: AppState): void {
       shareModalData: undefined,
       isLoading: false,
       error: null,
+      // Don't save blob data to localStorage
+      recordings: state.recordings.map(recording => ({
+        ...recording,
+        localBlob: undefined, // Remove blob data for storage
+      })),
     };
     
     localStorage.setItem('recordlane-app-state', JSON.stringify(stateToSave));
@@ -169,7 +175,10 @@ function saveStateToStorage(state: AppState): void {
     if (error.name === 'QuotaExceededError') {
       const reducedState = {
         ...state,
-        recordings: state.recordings.slice(0, 10),
+        recordings: state.recordings.slice(0, 10).map(recording => ({
+          ...recording,
+          localBlob: undefined,
+        })),
         settingsOpen: false,
         shareModalOpen: false,
         shareModalData: undefined,

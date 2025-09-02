@@ -19,7 +19,9 @@ import {
   ArrowRight,
   CheckCircle,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Play,
+  Download
 } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
@@ -56,27 +58,35 @@ export default function OnboardingModal() {
     }
   };
 
+  const handleSkip = () => {
+    dispatch({ type: 'SET_ONBOARDED', payload: true });
+    toast({
+      title: "Welcome to RecordLane",
+      description: "You can connect YouTube anytime from settings to sync your recordings.",
+    });
+  };
+
   const handleComplete = () => {
     dispatch({ type: 'SET_ONBOARDED', payload: true });
   };
 
   const features = [
     {
-      icon: Shield,
-      title: 'Privacy First',
-      description: 'Your recordings are uploaded to your YouTube channel as unlisted videos.',
+      icon: Play,
+      title: 'Instant Recording',
+      description: 'Start recording immediately without any setup. Works offline.',
       color: 'text-green-500',
     },
     {
-      icon: Zap,
-      title: 'One-Click Recording',
-      description: 'Start recording instantly with screen, camera, or both in picture-in-picture mode.',
+      icon: Download,
+      title: 'Local Storage',
+      description: 'Recordings are saved to your device first for instant access.',
       color: 'text-blue-500',
     },
     {
       icon: Cloud,
-      title: 'Automatic Sync',
-      description: 'Recordings are automatically uploaded to your YouTube channel with reliable retry logic.',
+      title: 'Optional Cloud Sync',
+      description: 'Connect YouTube to automatically sync and share recordings online.',
       color: 'text-purple-500',
     },
   ];
@@ -106,7 +116,7 @@ export default function OnboardingModal() {
               </div>
               <DialogTitle className="text-2xl">Welcome to RecordLane</DialogTitle>
               <DialogDescription className="text-lg">
-                Record your screen and camera with instant YouTube sync
+                Record your screen and camera instantly, with optional YouTube sync
               </DialogDescription>
             </DialogHeader>
 
@@ -124,23 +134,46 @@ export default function OnboardingModal() {
                           <h3 className="font-semibold mb-1">{feature.title}</h3>
                           <p className="text-sm text-muted-foreground">{feature.description}</p>
                         </div>
-                        {!isConnecting && isConnected && (
-                          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
+              {/* YouTube Benefits */}
+              <Card className="border-dashed">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-3 flex items-center">
+                    <Cloud className="h-5 w-5 mr-2 text-blue-500" />
+                    YouTube Sync Benefits (Optional)
+                  </h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-4 w-4 text-green-500" />
+                      <span>Automatic cloud backup to your YouTube channel</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Zap className="h-4 w-4 text-blue-500" />
+                      <span>Instant shareable links for collaboration</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <span>Access recordings from any device</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Connection Status */}
-              <div className="text-center py-4">
-                <ConnectionStatus 
-                  status={getConnectionStatus()}
-                  text={getConnectionText()}
-                  className="mx-auto"
-                />
-              </div>
+              {isConnecting || connectionError ? (
+                <div className="text-center py-4">
+                  <ConnectionStatus 
+                    status={getConnectionStatus()}
+                    text={getConnectionText()}
+                    className="mx-auto"
+                  />
+                </div>
+              ) : null}
 
               {/* Error Display */}
               {connectionError && (
@@ -155,22 +188,32 @@ export default function OnboardingModal() {
                         <p className="text-sm text-red-700 dark:text-red-300 mb-3">
                           {connectionError}
                         </p>
-                        <Button
-                          size="sm"
-                          onClick={handleRetry}
-                          disabled={isConnecting}
-                          variant="outline"
-                          className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300"
-                        >
-                          {isConnecting ? (
-                            <LoadingSpinner text="Retrying..." size="sm" />
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Try Again
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            onClick={handleRetry}
+                            disabled={isConnecting}
+                            variant="outline"
+                            className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300"
+                          >
+                            {isConnecting ? (
+                              <LoadingSpinner text="Retrying..." size="sm" />
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Try Again
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleSkip}
+                            className="text-red-700 hover:bg-red-100 dark:text-red-300"
+                          >
+                            Skip for now
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -179,37 +222,51 @@ export default function OnboardingModal() {
 
               {/* Call to Action */}
               <div className="text-center space-y-4 pt-4">
-                <div className="space-y-2">
-                  <h3 className="font-semibold">Connect YouTube to get started</h3>
-                  <p className="text-sm text-muted-foreground">
-                    We'll upload your recordings to your YouTube channel with enhanced token management
-                    and automatic retry capabilities. You can change this anytime in settings.
-                  </p>
-                </div>
-
                 {!isConnected ? (
-                  <Button
-                    size="lg"
-                    onClick={handleConnect}
-                    disabled={isConnecting}
-                    className="w-full max-w-xs"
-                  >
-                    {isConnecting ? (
-                      <LoadingSpinner text="Connecting..." size="sm" />
-                    ) : (
-                      <>
-                        Connect YouTube
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </>
-                    )}
-                  </Button>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold">Get Started</h3>
+                      <p className="text-sm text-muted-foreground">
+                        You can start recording immediately! Connect YouTube for cloud sync, or skip to record locally.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button
+                        size="lg"
+                        onClick={handleConnect}
+                        disabled={isConnecting}
+                        className="flex-1 sm:flex-none"
+                      >
+                        {isConnecting ? (
+                          <LoadingSpinner text="Connecting..." size="sm" />
+                        ) : (
+                          <>
+                            <Cloud className="h-4 w-4 mr-2" />
+                            Connect YouTube
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={handleSkip}
+                        disabled={isConnecting}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Start Recording
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex items-center justify-center space-x-2 text-green-600">
                       <CheckCircle className="h-5 w-5" />
                       <span className="font-medium">Connected Successfully!</span>
                     </div>
-                    <Button onClick={handleComplete} className="w-full max-w-xs">
+                    <Button onClick={handleComplete} size="lg" className="w-full max-w-xs">
                       Continue to RecordLane
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
@@ -217,9 +274,10 @@ export default function OnboardingModal() {
                 )}
 
                 <p className="text-xs text-muted-foreground">
-                  By connecting, you agree to let RecordLane upload videos to your YouTube account.
-                  You can disconnect anytime from settings. Your authentication tokens are managed
-                  securely with automatic refresh capabilities.
+                  {!isConnected 
+                    ? "YouTube connection is optional. You can record locally and connect later from settings."
+                    : "You can disconnect or reconnect anytime from settings."
+                  }
                 </p>
               </div>
             </div>
