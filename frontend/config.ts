@@ -7,6 +7,32 @@ export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.a
 // Google Drive API Configuration
 export const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
+// OAuth Configuration with proper parameters
+export const OAUTH_CONFIG = {
+  clientId: GOOGLE_CLIENT_ID,
+  scope: GOOGLE_DRIVE_SCOPE,
+  responseType: 'code', // Use authorization code flow instead of implicit
+  accessType: 'online', // For client-side only apps
+  prompt: 'consent', // Always show consent to ensure proper permissions
+  includeGrantedScopes: true,
+  state: '', // Will be generated dynamically
+  codeChallenge: '', // Will be generated for PKCE
+  codeChallengeMethod: 'S256',
+};
+
+// Environment-specific configuration
+export const getRedirectUri = (): string => {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  
+  // Development URLs
+  if (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('.lp.dev')) {
+    return origin;
+  }
+  
+  // Production URL - replace with your actual production domain
+  return 'https://recordlane.com';
+};
+
 // Application Configuration
 export const APP_CONFIG = {
   name: 'RecordLane',
@@ -74,6 +100,9 @@ export const ERROR_MESSAGES = {
   AUTH_FAILED: 'Google Drive authentication failed',
   TOKEN_EXPIRED: 'Authentication session expired, please sign in again',
   ACCESS_DENIED: 'Access to Google Drive was denied',
+  POPUP_BLOCKED: 'Authentication popup was blocked. Please allow popups and try again.',
+  OAUTH_ERROR: 'Authentication failed. Please try again.',
+  CONNECTION_TIMEOUT: 'Connection timeout. Please check your internet connection.',
 };
 
 // Cache Configuration
@@ -89,14 +118,5 @@ export const DEV_CONFIG = {
   enableDebugLogs: process.env.NODE_ENV === 'development',
   mockAPI: false,
   skipOnboarding: false,
-};
-
-// OAuth Configuration
-export const OAUTH_CONFIG = {
-  redirectUri: typeof window !== 'undefined' ? window.location.origin : '',
-  responseType: 'token',
-  scope: GOOGLE_DRIVE_SCOPE,
-  includeGrantedScopes: true,
-  accessType: 'online', // For client-side only apps
-  prompt: 'consent', // Always show consent to ensure refresh token
+  allowPopupFallback: true,
 };

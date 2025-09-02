@@ -2,11 +2,12 @@ import { TokenService } from './tokenService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { CacheService } from '../utils/cacheService';
 import { RetryService } from '../utils/retryService';
-import { GOOGLE_CLIENT_ID, UPLOAD_CONFIG, ERROR_MESSAGES, OAUTH_CONFIG } from '../config';
+import { GOOGLE_CLIENT_ID, UPLOAD_CONFIG, ERROR_MESSAGES, getRedirectUri, OAUTH_CONFIG } from '../config';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const UPLOAD_API_BASE = 'https://www.googleapis.com/upload/drive/v3';
+const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 
 export interface DriveConnection {
   isConnected: boolean;
@@ -40,8 +41,6 @@ export class DriveService {
   private static selectedFolderName: string | null = null;
   private static cache = new CacheService('drive-service');
   private static retryService = new RetryService();
-  private static isGapiLoaded = false;
-  private static gapiLoadPromise: Promise<void> | null = null;
 
   static async checkConnection(): Promise<DriveConnection> {
     try {
@@ -113,22 +112,11 @@ export class DriveService {
       // Clear any cached connection status
       await this.cache.delete('connection-status');
       
-      // Start OAuth flow
+      // Start OAuth flow with proper error handling
       const authResult = await this.startOAuthFlow();
       
-      // Parse the token from the result
-      const accessToken = authResult.access_token;
-      const expiresIn = parseInt(authResult.expires_in) || 3600;
-      
-      if (!accessToken) {
-        throw new Error('No access token received from OAuth');
-      }
-
-      // Store tokens
-      TokenService.storeTokens(accessToken, expiresIn);
-      
       // Get user info
-      const userInfo = await this.getUserInfo(accessToken);
+      const userInfo = await this.getUserInfo(authResult.access_token);
       TokenService.storeUserInfo(userInfo);
       
       // Check if user already has a selected folder
@@ -139,7 +127,7 @@ export class DriveService {
       
       if (storedFolderId && storedFolderName) {
         try {
-          await this.verifyFolder(storedFolderId, accessToken);
+          await this.verifyFolder(storedFolderId, authResult.access_token);
           this.selectedFolderId = storedFolderId;
           this.selectedFolderName = storedFolderName;
           requiresFolderSetup = false;
@@ -175,6 +163,8 @@ export class DriveService {
         throw ErrorHandler.createError('USER_CANCELLED', 'Authentication was cancelled');
       } else if (this.isAuthError(error)) {
         throw ErrorHandler.createError('AUTH_FAILED', ERROR_MESSAGES.AUTH_FAILED, error);
+      } else if (this.isPopupBlockedError(error)) {
+        throw ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED, error);
       }
       
       throw ErrorHandler.createError('CONNECTION_FAILED', 'Failed to connect to Google Drive', error);
@@ -458,25 +448,85 @@ export class DriveService {
 
   // Private helper methods
 
-  private static async startOAuthFlow(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      // Create OAuth URL
-      const params = new URLSearchParams({
-        client_id: GOOGLE_CLIENT_ID,
-        redirect_uri: window.location.origin,
-        response_type: 'token',
-        scope: DRIVE_SCOPE,
-        include_granted_scopes: 'true',
-        state: Math.random().toString(36).substring(2, 15),
-      });
+  private static async startOAuthFlow(): Promise<{ access_token: string; expires_in: number }> {
+    try {
+      // Generate PKCE challenge
+      const codeVerifier = this.generateCodeVerifier();
+      const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+      const state = this.generateState();
 
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+      // Store PKCE verifier and state
+      sessionStorage.setItem('oauth_code_verifier', codeVerifier);
+      sessionStorage.setItem('oauth_state', state);
+
+      // Build authorization URL
+      const authUrl = this.buildAuthUrl(codeChallenge, state);
+
+      // Try popup first, with fallback to redirect
+      let authCode: string;
       
-      // Open popup window
+      try {
+        authCode = await this.openOAuthPopup(authUrl, state);
+      } catch (popupError) {
+        // If popup fails, try redirect as fallback
+        if (this.isPopupBlockedError(popupError)) {
+          console.warn('Popup blocked, trying redirect fallback');
+          authCode = await this.redirectOAuthFlow(authUrl);
+        } else {
+          throw popupError;
+        }
+      }
+
+      // Exchange authorization code for access token
+      const tokenResponse = await this.exchangeCodeForToken(authCode, codeVerifier);
+      
+      // Store tokens
+      TokenService.storeTokens(tokenResponse.access_token, tokenResponse.expires_in);
+      
+      return tokenResponse;
+    } catch (error) {
+      // Clean up stored PKCE data on error
+      sessionStorage.removeItem('oauth_code_verifier');
+      sessionStorage.removeItem('oauth_state');
+      
+      console.error('OAuth flow failed:', error);
+      throw error;
+    }
+  }
+
+  private static buildAuthUrl(codeChallenge: string, state: string): string {
+    const params = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: getRedirectUri(),
+      response_type: 'code',
+      scope: DRIVE_SCOPE,
+      state: state,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
+      access_type: 'online',
+      prompt: 'consent',
+      include_granted_scopes: 'true',
+    });
+
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  }
+
+  private static async openOAuthPopup(authUrl: string, expectedState: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Check if popups are likely to be blocked
+      const testPopup = window.open('', '_blank', 'width=1,height=1');
+      if (!testPopup || testPopup.closed || typeof testPopup.closed === 'undefined') {
+        testPopup?.close();
+        reject(new Error('Popup blocked by browser'));
+        return;
+      }
+      testPopup.close();
+
+      // Open the actual OAuth popup
       const popup = window.open(
         authUrl,
         'google_oauth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
+        'width=500,height=600,scrollbars=yes,resizable=yes,centerscreen=yes'
       );
 
       if (!popup) {
@@ -484,17 +534,16 @@ export class DriveService {
         return;
       }
 
-      // Poll for completion
+      // Polling for completion with improved error handling
       const pollTimer = setInterval(() => {
         try {
           if (popup.closed) {
             clearInterval(pollTimer);
-            reject(new Error('OAuth popup was closed'));
+            reject(new Error('OAuth popup was closed by user'));
             return;
           }
 
-          // Check if we can access the popup URL (same origin)
-          let popupUrl;
+          let popupUrl: string;
           try {
             popupUrl = popup.location.href;
           } catch (e) {
@@ -502,32 +551,30 @@ export class DriveService {
             return;
           }
 
-          // Check if we're back to our origin with a fragment
-          if (popupUrl.includes(window.location.origin) && popupUrl.includes('#')) {
+          // Check if we're back to our origin with authorization code
+          const url = new URL(popupUrl);
+          if (url.origin === window.location.origin) {
             clearInterval(pollTimer);
             popup.close();
 
-            // Parse the fragment
-            const fragment = popupUrl.split('#')[1];
-            const params = new URLSearchParams(fragment);
-            
-            const accessToken = params.get('access_token');
-            const error = params.get('error');
+            const urlParams = new URLSearchParams(url.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
             
             if (error) {
-              reject(new Error(`OAuth error: ${error}`));
-            } else if (accessToken) {
-              resolve({
-                access_token: accessToken,
-                expires_in: params.get('expires_in') || '3600',
-                token_type: params.get('token_type') || 'Bearer',
-              });
+              const errorDescription = urlParams.get('error_description') || error;
+              reject(new Error(`OAuth error: ${errorDescription}`));
+            } else if (!code) {
+              reject(new Error('No authorization code received'));
+            } else if (state !== expectedState) {
+              reject(new Error('OAuth state mismatch - possible security issue'));
             } else {
-              reject(new Error('No access token received'));
+              resolve(code);
             }
           }
         } catch (error) {
-          // Continue polling
+          // Continue polling on errors
         }
       }, 1000);
 
@@ -537,9 +584,127 @@ export class DriveService {
         if (!popup.closed) {
           popup.close();
         }
-        reject(new Error('OAuth timeout'));
+        reject(new Error('OAuth timeout - please try again'));
       }, 5 * 60 * 1000);
     });
+  }
+
+  private static async redirectOAuthFlow(authUrl: string): Promise<string> {
+    // Store current URL for return
+    sessionStorage.setItem('oauth_return_url', window.location.href);
+    
+    // Redirect to OAuth
+    window.location.href = authUrl;
+    
+    // This will never resolve as we're redirecting
+    return new Promise(() => {});
+  }
+
+  private static async exchangeCodeForToken(
+    code: string, 
+    codeVerifier: string
+  ): Promise<{ access_token: string; expires_in: number }> {
+    const tokenData = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      code: code,
+      code_verifier: codeVerifier,
+      grant_type: 'authorization_code',
+      redirect_uri: getRedirectUri(),
+    });
+
+    const response = await fetch(TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: tokenData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Token exchange failed: ${errorData.error_description || response.statusText}`);
+    }
+
+    const result = await response.json();
+    return {
+      access_token: result.access_token,
+      expires_in: parseInt(result.expires_in) || 3600,
+    };
+  }
+
+  // PKCE helper methods
+  private static generateCodeVerifier(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return this.base64URLEncode(array);
+  }
+
+  private static async generateCodeChallenge(verifier: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return this.base64URLEncode(new Uint8Array(digest));
+  }
+
+  private static base64URLEncode(array: Uint8Array): string {
+    const base64 = btoa(String.fromCharCode(...array));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  private static generateState(): string {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    return this.base64URLEncode(array);
+  }
+
+  // Check for OAuth callback on page load
+  static handleOAuthCallback(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    if (code || error) {
+      // This is an OAuth callback
+      const storedState = sessionStorage.getItem('oauth_state');
+      const codeVerifier = sessionStorage.getItem('oauth_code_verifier');
+      const returnUrl = sessionStorage.getItem('oauth_return_url');
+
+      // Clean up
+      sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_code_verifier');
+      sessionStorage.removeItem('oauth_return_url');
+
+      if (error) {
+        console.error('OAuth error:', error);
+        const errorDescription = urlParams.get('error_description') || error;
+        ErrorHandler.logError('oauth-callback-error', new Error(errorDescription));
+      } else if (state !== storedState) {
+        console.error('OAuth state mismatch');
+        ErrorHandler.logError('oauth-state-mismatch', new Error('State parameter mismatch'));
+      } else if (code && codeVerifier) {
+        // Handle successful callback
+        this.exchangeCodeForToken(code, codeVerifier)
+          .then(async (tokenResponse) => {
+            TokenService.storeTokens(tokenResponse.access_token, tokenResponse.expires_in);
+            
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
+            
+            // Reload to trigger connection check
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error('Token exchange failed:', error);
+            ErrorHandler.logError('token-exchange-error', error);
+          });
+      }
+
+      // Clear URL parameters if we haven't already
+      if (window.location.search.includes('code=') || window.location.search.includes('error=')) {
+        window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
+      }
+    }
   }
 
   private static async getUserInfo(accessToken: string): Promise<any> {
@@ -722,7 +887,21 @@ export class DriveService {
     return (
       error?.message?.includes('popup was closed') ||
       error?.message?.includes('access_denied') ||
-      error?.message?.includes('cancelled')
+      error?.message?.includes('cancelled') ||
+      error?.message?.includes('closed by user')
     );
   }
+
+  private static isPopupBlockedError(error: any): boolean {
+    return (
+      error?.message?.includes('popup') && 
+      (error?.message?.includes('blocked') || error?.message?.includes('Failed to open'))
+    );
+  }
+}
+
+// Initialize OAuth callback handling
+if (typeof window !== 'undefined') {
+  // Handle OAuth callback on page load
+  DriveService.handleOAuthCallback();
 }
