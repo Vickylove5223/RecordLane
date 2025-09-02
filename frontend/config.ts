@@ -7,33 +7,50 @@ export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.a
 // Google Drive API Configuration
 export const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
-// OAuth Configuration with proper parameters
+// OAuth Configuration with PKCE
 export const OAUTH_CONFIG = {
   clientId: GOOGLE_CLIENT_ID,
   scope: GOOGLE_DRIVE_SCOPE,
-  responseType: 'code', // Use authorization code flow instead of implicit
+  responseType: 'code', // Use authorization code flow
   accessType: 'online', // For client-side only apps
   prompt: 'consent', // Always show consent to ensure proper permissions
   includeGrantedScopes: true,
-  state: '', // Will be generated dynamically
-  codeChallenge: '', // Will be generated for PKCE
+  codeChallenge: '', // Will be generated dynamically
   codeChallengeMethod: 'S256',
+  state: '', // Will be generated dynamically for security
 };
 
 // Environment-specific configuration
 export const getRedirectUri = (): string => {
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  if (typeof window === 'undefined') {
+    return 'http://localhost:3000';
+  }
   
-  // Development URLs - handle .lp.dev domains specifically
+  const origin = window.location.origin;
+  
+  // Development URLs - handle various development environments
   if (origin.includes('localhost') || 
       origin.includes('127.0.0.1') || 
-      origin.includes('.lp.dev') || 
-      origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
+      origin.includes('.lp.dev') ||
+      origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev') ||
+      process.env.NODE_ENV === 'development') {
     return origin;
   }
   
   // Production URL - replace with your actual production domain
   return 'https://recordlane.com';
+};
+
+// Popup configuration for OAuth
+export const POPUP_CONFIG = {
+  width: 500,
+  height: 600,
+  scrollbars: 'yes',
+  resizable: 'yes',
+  centerscreen: 'yes',
+  windowName: 'google_oauth',
+  pollInterval: 1000,
+  timeout: 5 * 60 * 1000, // 5 minutes
 };
 
 // Application Configuration
@@ -107,6 +124,10 @@ export const ERROR_MESSAGES = {
   OAUTH_ERROR: 'Authentication failed. Please try again.',
   CONNECTION_TIMEOUT: 'Connection timeout. Please check your internet connection.',
   REDIRECT_URI_MISMATCH: 'OAuth configuration error. Please contact support.',
+  POPUP_TIMEOUT: 'Authentication window timed out. Please try again.',
+  POPUP_CLOSED: 'Authentication window was closed. Please try again.',
+  INVALID_STATE: 'Invalid authentication state. Please try again.',
+  CODE_EXCHANGE_FAILED: 'Failed to exchange authorization code. Please try again.',
 };
 
 // Cache Configuration
@@ -123,4 +144,5 @@ export const DEV_CONFIG = {
   mockAPI: false,
   skipOnboarding: false,
   allowPopupFallback: true,
+  enableRedirectFallback: true,
 };

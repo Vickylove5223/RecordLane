@@ -2,12 +2,21 @@ import { TokenService } from './tokenService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { CacheService } from '../utils/cacheService';
 import { RetryService } from '../utils/retryService';
-import { GOOGLE_CLIENT_ID, UPLOAD_CONFIG, ERROR_MESSAGES, getRedirectUri, OAUTH_CONFIG } from '../config';
+import { 
+  GOOGLE_CLIENT_ID, 
+  UPLOAD_CONFIG, 
+  ERROR_MESSAGES, 
+  getRedirectUri, 
+  OAUTH_CONFIG, 
+  POPUP_CONFIG,
+  DEV_CONFIG 
+} from '../config';
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const UPLOAD_API_BASE = 'https://www.googleapis.com/upload/drive/v3';
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
+const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 
 export interface DriveConnection {
   isConnected: boolean;
@@ -464,16 +473,22 @@ export class DriveService {
       // Build authorization URL with correct redirect URI
       const authUrl = this.buildAuthUrl(codeChallenge, state);
 
-      // Try popup first, with fallback to redirect
+      // Try popup first, with fallback options
       let authCode: string;
       
       try {
         authCode = await this.openOAuthPopup(authUrl, state);
       } catch (popupError) {
-        // If popup fails, try redirect as fallback
+        // Handle popup specific errors
         if (this.isPopupBlockedError(popupError)) {
           console.warn('Popup blocked, trying redirect fallback');
-          authCode = await this.redirectOAuthFlow(authUrl);
+          
+          // Only try redirect in development or if explicitly enabled
+          if (DEV_CONFIG.enableRedirectFallback) {
+            authCode = await this.redirectOAuthFlow(authUrl);
+          } else {
+            throw ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED, popupError);
+          }
         } else {
           throw popupError;
         }
@@ -514,38 +529,81 @@ export class DriveService {
       include_granted_scopes: 'true',
     });
 
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    return `${AUTH_ENDPOINT}?${params.toString()}`;
   }
 
   private static async openOAuthPopup(authUrl: string, expectedState: string): Promise<string> {
     return new Promise((resolve, reject) => {
       // Check if popups are likely to be blocked
-      const testPopup = window.open('', '_blank', 'width=1,height=1');
-      if (!testPopup || testPopup.closed || typeof testPopup.closed === 'undefined') {
-        testPopup?.close();
-        reject(new Error('Popup blocked by browser'));
+      let testPopup: Window | null = null;
+      try {
+        testPopup = window.open('', '_blank', 'width=1,height=1');
+        if (!testPopup || testPopup.closed || typeof testPopup.closed === 'undefined') {
+          if (testPopup) testPopup.close();
+          reject(ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED));
+          return;
+        }
+        testPopup.close();
+      } catch (error) {
+        reject(ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED, error));
         return;
       }
-      testPopup.close();
+
+      // Calculate popup position for centering
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const popupWidth = POPUP_CONFIG.width;
+      const popupHeight = POPUP_CONFIG.height;
+      const left = (screenWidth - popupWidth) / 2;
+      const top = (screenHeight - popupHeight) / 2;
+
+      const popupFeatures = [
+        `width=${popupWidth}`,
+        `height=${popupHeight}`,
+        `left=${left}`,
+        `top=${top}`,
+        'scrollbars=yes',
+        'resizable=yes',
+        'status=no',
+        'toolbar=no',
+        'menubar=no',
+        'location=no'
+      ].join(',');
 
       // Open the actual OAuth popup
-      const popup = window.open(
-        authUrl,
-        'google_oauth',
-        'width=500,height=600,scrollbars=yes,resizable=yes,centerscreen=yes'
-      );
+      const popup = window.open(authUrl, POPUP_CONFIG.windowName, popupFeatures);
 
       if (!popup) {
-        reject(new Error('Failed to open OAuth popup. Please allow popups for this site.'));
+        reject(ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED));
         return;
       }
+
+      // Focus the popup
+      try {
+        popup.focus();
+      } catch (error) {
+        console.warn('Could not focus popup:', error);
+      }
+
+      let pollCount = 0;
+      const maxPolls = POPUP_CONFIG.timeout / POPUP_CONFIG.pollInterval;
 
       // Polling for completion with improved error handling
       const pollTimer = setInterval(() => {
+        pollCount++;
+
         try {
           if (popup.closed) {
             clearInterval(pollTimer);
-            reject(new Error('OAuth popup was closed by user'));
+            reject(ErrorHandler.createError('POPUP_CLOSED', ERROR_MESSAGES.POPUP_CLOSED));
+            return;
+          }
+
+          // Check for timeout
+          if (pollCount >= maxPolls) {
+            clearInterval(pollTimer);
+            popup.close();
+            reject(ErrorHandler.createError('POPUP_TIMEOUT', ERROR_MESSAGES.POPUP_TIMEOUT));
             return;
           }
 
@@ -572,28 +630,33 @@ export class DriveService {
             
             if (error) {
               const errorDescription = urlParams.get('error_description') || error;
-              reject(new Error(`OAuth error: ${errorDescription}`));
+              reject(ErrorHandler.createError('OAUTH_ERROR', `OAuth error: ${errorDescription}`));
             } else if (!code) {
-              reject(new Error('No authorization code received'));
+              reject(ErrorHandler.createError('OAUTH_ERROR', 'No authorization code received'));
             } else if (state !== expectedState) {
-              reject(new Error('OAuth state mismatch - possible security issue'));
+              reject(ErrorHandler.createError('INVALID_STATE', ERROR_MESSAGES.INVALID_STATE));
             } else {
               resolve(code);
             }
           }
         } catch (error) {
-          // Continue polling on errors
+          // Continue polling on errors, but log them
+          if (DEV_CONFIG.enableDebugLogs) {
+            console.debug('Popup polling error:', error);
+          }
         }
-      }, 1000);
+      }, POPUP_CONFIG.pollInterval);
 
-      // Timeout after 5 minutes
-      setTimeout(() => {
-        clearInterval(pollTimer);
-        if (!popup.closed) {
-          popup.close();
+      // Cleanup on popup close
+      const checkClosed = () => {
+        if (popup.closed) {
+          clearInterval(pollTimer);
+          reject(ErrorHandler.createError('POPUP_CLOSED', ERROR_MESSAGES.POPUP_CLOSED));
+        } else {
+          setTimeout(checkClosed, 1000);
         }
-        reject(new Error('OAuth timeout - please try again'));
-      }, 5 * 60 * 1000);
+      };
+      checkClosed();
     });
   }
 
@@ -622,24 +685,42 @@ export class DriveService {
       redirect_uri: redirectUri,
     });
 
-    const response = await fetch(TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: tokenData,
-    });
+    try {
+      const response = await fetch(TOKEN_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: tokenData,
+        signal: AbortSignal.timeout(10000),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Token exchange failed: ${errorData.error_description || response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error_description || `HTTP ${response.status}: ${response.statusText}`;
+        throw ErrorHandler.createError('CODE_EXCHANGE_FAILED', ERROR_MESSAGES.CODE_EXCHANGE_FAILED, {
+          status: response.status,
+          error: errorData.error,
+          description: errorData.error_description,
+        });
+      }
+
+      const result = await response.json();
+      
+      if (!result.access_token) {
+        throw ErrorHandler.createError('CODE_EXCHANGE_FAILED', 'No access token in response');
+      }
+
+      return {
+        access_token: result.access_token,
+        expires_in: parseInt(result.expires_in) || 3600,
+      };
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
+        throw error;
+      }
+      throw ErrorHandler.createError('CODE_EXCHANGE_FAILED', ERROR_MESSAGES.CODE_EXCHANGE_FAILED, error);
     }
-
-    const result = await response.json();
-    return {
-      access_token: result.access_token,
-      expires_in: parseInt(result.expires_in) || 3600,
-    };
   }
 
   // PKCE helper methods
@@ -680,7 +761,7 @@ export class DriveService {
       const codeVerifier = sessionStorage.getItem('oauth_code_verifier');
       const returnUrl = sessionStorage.getItem('oauth_return_url');
 
-      // Clean up
+      // Clean up immediately
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_code_verifier');
       sessionStorage.removeItem('oauth_return_url');
@@ -689,9 +770,26 @@ export class DriveService {
         console.error('OAuth error:', error);
         const errorDescription = urlParams.get('error_description') || error;
         ErrorHandler.logError('oauth-callback-error', new Error(errorDescription));
+        
+        // Clear URL parameters and show error
+        window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
+        
+        // Could dispatch an error event here for the UI to handle
+        window.dispatchEvent(new CustomEvent('oauth-error', { 
+          detail: { error, description: errorDescription } 
+        }));
+        
       } else if (state !== storedState) {
         console.error('OAuth state mismatch');
         ErrorHandler.logError('oauth-state-mismatch', new Error('State parameter mismatch'));
+        
+        // Clear URL parameters and show error
+        window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
+        
+        window.dispatchEvent(new CustomEvent('oauth-error', { 
+          detail: { error: 'state_mismatch', description: 'Security validation failed' } 
+        }));
+        
       } else if (code && codeVerifier) {
         // Handle successful callback
         this.exchangeCodeForToken(code, codeVerifier)
@@ -701,12 +799,24 @@ export class DriveService {
             // Clear URL parameters
             window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
             
+            // Dispatch success event
+            window.dispatchEvent(new CustomEvent('oauth-success', { 
+              detail: { accessToken: tokenResponse.access_token } 
+            }));
+            
             // Reload to trigger connection check
             window.location.reload();
           })
           .catch((error) => {
             console.error('Token exchange failed:', error);
             ErrorHandler.logError('token-exchange-error', error);
+            
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, returnUrl || window.location.pathname);
+            
+            window.dispatchEvent(new CustomEvent('oauth-error', { 
+              detail: { error: 'token_exchange_failed', description: 'Failed to complete authentication' } 
+            }));
           });
       }
 
@@ -895,6 +1005,8 @@ export class DriveService {
 
   private static isUserCancelledError(error: any): boolean {
     return (
+      error?.code === 'POPUP_CLOSED' ||
+      error?.code === 'USER_CANCELLED' ||
       error?.message?.includes('popup was closed') ||
       error?.message?.includes('access_denied') ||
       error?.message?.includes('cancelled') ||
@@ -904,8 +1016,9 @@ export class DriveService {
 
   private static isPopupBlockedError(error: any): boolean {
     return (
-      error?.message?.includes('popup') && 
-      (error?.message?.includes('blocked') || error?.message?.includes('Failed to open'))
+      error?.code === 'POPUP_BLOCKED' ||
+      (error?.message?.includes('popup') && 
+       (error?.message?.includes('blocked') || error?.message?.includes('Failed to open')))
     );
   }
 
