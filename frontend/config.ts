@@ -26,14 +26,14 @@ export const OAUTH_CONFIG = {
 // Environment-specific configuration
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
+    return 'https://recordlane-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
   const origin = window.location.origin;
   
   // Development URLs - handle Leap development environment
   if (origin.includes('.lp.dev') || 
-      origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev') ||
+      origin.includes('recordlane-d2qv2u482vjq7vcc59sg.lp.dev') ||
       process.env.NODE_ENV === 'development') {
     return origin;
   }
