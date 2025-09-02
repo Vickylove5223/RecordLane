@@ -1,6 +1,10 @@
 import { api } from "encore.dev/api";
 import { SQLDatabase } from "encore.dev/storage/sqldb";
 
+// Reference databases at the top level
+const metadataDb = SQLDatabase.named("metadata");
+const analyticsDb = SQLDatabase.named("analytics");
+
 export interface HealthResponse {
   status: "healthy" | "degraded" | "unhealthy";
   timestamp: Date;
@@ -25,9 +29,9 @@ export const check = api<void, HealthResponse>(
     // Check database connectivity
     let databaseStatus: "healthy" | "unhealthy" = "healthy";
     try {
-      // Try to connect to metadata database
-      const metadataDb = SQLDatabase.named("metadata");
+      // Try to connect to both databases
       await metadataDb.queryRow`SELECT 1 as test`;
+      await analyticsDb.queryRow`SELECT 1 as test`;
     } catch (error) {
       console.error("Database health check failed:", error);
       databaseStatus = "unhealthy";
