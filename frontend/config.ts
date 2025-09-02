@@ -1,7 +1,7 @@
 // Configuration for the RecordLane application
 
 // Google OAuth Configuration
-export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_ID = '946418844667-r1bc8nqhf0q39g1ks76v77ldmjn3f8sg.apps.googleusercontent.com';
 // Note: Client secret should NEVER be in frontend code - removed for security
 
 // Google Drive API Configuration
@@ -104,7 +104,7 @@ export const FEATURES = {
   clickHighlights: true, // Enable click highlighting
   pip: true, // Enable picture-in-picture camera
   offlineMode: false, // Offline recording (future feature)
-  analytics: false, // Usage analytics (privacy-respecting)
+  analytics: true, // Usage analytics (privacy-respecting)
 };
 
 // Error Messages
@@ -145,4 +145,13 @@ export const DEV_CONFIG = {
   skipOnboarding: false,
   allowPopupFallback: true,
   enableRedirectFallback: true,
+};
+
+// Analytics Configuration
+export const ANALYTICS_CONFIG = {
+  baseUrl: '/api',
+  trackingEnabled: FEATURES.analytics,
+  sessionTimeout: 30 * 60 * 1000, // 30 minutes
+  batchSize: 10,
+  flushInterval: 5 * 60 * 1000, // 5 minutes
 };

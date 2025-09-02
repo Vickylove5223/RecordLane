@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/ui/spinner';
 import { performanceMonitor, usePerformanceMonitor } from './utils/performanceMonitor';
 import { GlobalCacheManager } from './utils/cacheService';
 import { ErrorHandler } from './utils/errorHandler';
+import { analytics } from './utils/analyticsService';
 import './App.css';
 
 // Lazy load main components for better performance
@@ -48,6 +49,9 @@ function AppInner() {
           // Pre-warm cache system
           GlobalCacheManager.getInstance('app-cache'),
           
+          // Initialize analytics
+          analytics.initialize(),
+          
           // Check browser compatibility
           checkBrowserCompatibility(),
         ]);
@@ -58,6 +62,7 @@ function AppInner() {
       } catch (error) {
         console.error('App initialization failed:', error);
         ErrorHandler.logError('app-init-error', error);
+        analytics.trackError('app_init_failed', error.message);
         setIsInitialized(true); // Continue anyway
         markEnd('app-init');
       }
@@ -79,12 +84,21 @@ function AppInner() {
         }
         setLastSuggestionLog(now);
       }
+
+      // Track performance metrics
+      analytics.trackPerformance({
+        fps: newMetrics.fps || 0,
+        renderTime: newMetrics.renderTime || 0,
+        memoryUsage: newMetrics.memoryUsage?.usedJSHeapSize || 0,
+        cacheHitRate: newMetrics.cacheHitRate || 0,
+      });
     });
 
     // Cleanup function
     return () => {
       unsubscribe();
       GlobalCacheManager.disposeAll();
+      analytics.cleanup();
     };
   }, [markStart, markEnd, getOptimizationSuggestions, lastSuggestionLog]);
 
@@ -156,6 +170,7 @@ function checkBrowserCompatibility(): Promise<void> {
     if (missingAPIs.length > 0) {
       const error = new Error(`Browser missing required APIs: ${missingAPIs.join(', ')}`);
       ErrorHandler.logError('browser-compatibility-error', error, { missingAPIs });
+      analytics.trackError('browser_compatibility_error', error.message, { missingAPIs });
       
       // Don't reject - we'll handle this gracefully in the UI
       console.warn('Browser compatibility issues detected:', missingAPIs);

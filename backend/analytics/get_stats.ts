@@ -26,59 +26,109 @@ export const getStats = api<GetStatsRequest, UsageStats>(
 
     // Get total recordings from metadata service
     const { metadata } = await import("~encore/clients");
-    const recordingsResult = await metadata.list({ limit: 1 });
-    const totalRecordings = recordingsResult.total;
+    try {
+      const recordingsResult = await metadata.list({ limit: 1 });
+      const totalRecordings = recordingsResult.total;
 
-    // Calculate total duration from all recordings
-    const allRecordings = await metadata.list({ limit: 1000 }); // Get more for duration calc
-    const totalDuration = allRecordings.recordings.reduce((sum, r) => sum + r.duration, 0);
+      // Calculate total duration from all recordings
+      const allRecordings = await metadata.list({ limit: 1000 }); // Get more for duration calc
+      const totalDuration = allRecordings.recordings.reduce((sum, r) => sum + r.duration, 0);
 
-    // Get events count for last N days
-    const eventsCount = await db.queryRow<{ count: string }>`
-      SELECT COUNT(*) as count 
-      FROM events 
-      WHERE created_at >= ${cutoffDate}
-    `;
-    const eventsLastNDays = parseInt(eventsCount?.count || "0");
+      // Get events count for last N days
+      const eventsCount = await db.queryRow<{ count: string }>`
+        SELECT COUNT(*) as count 
+        FROM events 
+        WHERE created_at >= ${cutoffDate}
+      `;
+      const eventsLastNDays = parseInt(eventsCount?.count || "0");
 
-    // Get popular event types
-    const popularEvents: Array<{ eventType: string; count: number }> = [];
-    for await (const row of db.query<{ event_type: string; count: string }>`
-      SELECT event_type, COUNT(*) as count
-      FROM events
-      WHERE created_at >= ${cutoffDate}
-      GROUP BY event_type
-      ORDER BY count DESC
-      LIMIT 10
-    `) {
-      popularEvents.push({
-        eventType: row.event_type,
-        count: parseInt(row.count),
-      });
+      // Get popular event types
+      const popularEvents: Array<{ eventType: string; count: number }> = [];
+      for await (const row of db.query<{ event_type: string; count: string }>`
+        SELECT event_type, COUNT(*) as count
+        FROM events
+        WHERE created_at >= ${cutoffDate}
+        GROUP BY event_type
+        ORDER BY count DESC
+        LIMIT 10
+      `) {
+        popularEvents.push({
+          eventType: row.event_type,
+          count: parseInt(row.count),
+        });
+      }
+
+      // Get daily stats
+      const dailyStats: Array<{ date: string; recordings: number; events: number }> = [];
+      for await (const row of db.query<{ date: string; events: string }>`
+        SELECT DATE(created_at) as date, COUNT(*) as events
+        FROM events
+        WHERE created_at >= ${cutoffDate}
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+      `) {
+        dailyStats.push({
+          date: row.date,
+          recordings: 0, // Would need to join with recordings if we tracked creation events
+          events: parseInt(row.events),
+        });
+      }
+
+      return {
+        totalRecordings,
+        totalDuration,
+        eventsLastNDays,
+        popularEventTypes: popularEvents,
+        dailyStats,
+      };
+    } catch (metadataError) {
+      console.error('Failed to fetch metadata:', metadataError);
+      
+      // Return analytics-only stats if metadata service is unavailable
+      const eventsCount = await db.queryRow<{ count: string }>`
+        SELECT COUNT(*) as count 
+        FROM events 
+        WHERE created_at >= ${cutoffDate}
+      `;
+      const eventsLastNDays = parseInt(eventsCount?.count || "0");
+
+      const popularEvents: Array<{ eventType: string; count: number }> = [];
+      for await (const row of db.query<{ event_type: string; count: string }>`
+        SELECT event_type, COUNT(*) as count
+        FROM events
+        WHERE created_at >= ${cutoffDate}
+        GROUP BY event_type
+        ORDER BY count DESC
+        LIMIT 10
+      `) {
+        popularEvents.push({
+          eventType: row.event_type,
+          count: parseInt(row.count),
+        });
+      }
+
+      const dailyStats: Array<{ date: string; recordings: number; events: number }> = [];
+      for await (const row of db.query<{ date: string; events: string }>`
+        SELECT DATE(created_at) as date, COUNT(*) as events
+        FROM events
+        WHERE created_at >= ${cutoffDate}
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+      `) {
+        dailyStats.push({
+          date: row.date,
+          recordings: 0,
+          events: parseInt(row.events),
+        });
+      }
+
+      return {
+        totalRecordings: 0,
+        totalDuration: 0,
+        eventsLastNDays,
+        popularEventTypes: popularEvents,
+        dailyStats,
+      };
     }
-
-    // Get daily stats
-    const dailyStats: Array<{ date: string; recordings: number; events: number }> = [];
-    for await (const row of db.query<{ date: string; events: string }>`
-      SELECT DATE(created_at) as date, COUNT(*) as events
-      FROM events
-      WHERE created_at >= ${cutoffDate}
-      GROUP BY DATE(created_at)
-      ORDER BY date DESC
-    `) {
-      dailyStats.push({
-        date: row.date,
-        recordings: 0, // Would need to join with recordings if we tracked creation events
-        events: parseInt(row.events),
-      });
-    }
-
-    return {
-      totalRecordings,
-      totalDuration,
-      eventsLastNDays,
-      popularEventTypes: popularEvents,
-      dailyStats,
-    };
   }
 );
