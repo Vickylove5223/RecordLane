@@ -45,7 +45,8 @@ type AppAction =
   | { type: 'REMOVE_RECORDING'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'LOAD_STATE'; payload: Partial<AppState> };
+  | { type: 'LOAD_STATE'; payload: Partial<AppState> }
+  | { type: 'RESET_SETTINGS' };
 
 const initialState: AppState = {
   isOnboarded: false,
@@ -66,23 +67,51 @@ function appReducer(state: AppState, action: AppAction): AppState {
   try {
     switch (action.type) {
       case 'SET_ONBOARDED':
-        return { ...state, isOnboarded: action.payload };
+        const newOnboardedState = { ...state, isOnboarded: action.payload };
+        // Save to localStorage immediately
+        saveStateToStorage(newOnboardedState);
+        return newOnboardedState;
+        
       case 'SET_SETTINGS_OPEN':
         return { ...state, settingsOpen: action.payload };
+        
       case 'SET_SHARE_MODAL_OPEN':
         return { ...state, shareModalOpen: action.payload };
+        
       case 'SET_SHARE_MODAL_DATA':
         return { 
           ...state, 
           shareModalOpen: true, 
           shareModalData: action.payload 
         };
+        
       case 'UPDATE_SETTINGS':
-        return { ...state, settings: { ...state.settings, ...action.payload } };
+        const newSettingsState = { 
+          ...state, 
+          settings: { ...state.settings, ...action.payload } 
+        };
+        // Save to localStorage immediately
+        saveStateToStorage(newSettingsState);
+        return newSettingsState;
+        
+      case 'RESET_SETTINGS':
+        const resetSettingsState = {
+          ...state,
+          settings: { ...initialState.settings }
+        };
+        saveStateToStorage(resetSettingsState);
+        return resetSettingsState;
+        
       case 'ADD_RECORDING':
-        return { ...state, recordings: [action.payload, ...state.recordings] };
+        const newRecordingState = { 
+          ...state, 
+          recordings: [action.payload, ...state.recordings] 
+        };
+        saveStateToStorage(newRecordingState);
+        return newRecordingState;
+        
       case 'UPDATE_RECORDING':
-        return {
+        const updatedRecordingState = {
           ...state,
           recordings: state.recordings.map(recording =>
             recording.id === action.payload.id
@@ -90,17 +119,26 @@ function appReducer(state: AppState, action: AppAction): AppState {
               : recording
           ),
         };
+        saveStateToStorage(updatedRecordingState);
+        return updatedRecordingState;
+        
       case 'REMOVE_RECORDING':
-        return {
+        const removedRecordingState = {
           ...state,
           recordings: state.recordings.filter(recording => recording.id !== action.payload),
         };
+        saveStateToStorage(removedRecordingState);
+        return removedRecordingState;
+        
       case 'SET_LOADING':
         return { ...state, isLoading: action.payload };
+        
       case 'SET_ERROR':
         return { ...state, error: action.payload };
+        
       case 'LOAD_STATE':
         return { ...state, ...action.payload, error: null };
+        
       default:
         return state;
     }
@@ -108,6 +146,42 @@ function appReducer(state: AppState, action: AppAction): AppState {
     console.error('Error in app reducer:', error);
     ErrorHandler.logError('APP_REDUCER_ERROR', error, { action });
     return { ...state, error: 'An error occurred while updating the application state' };
+  }
+}
+
+// Helper function to save state to localStorage
+function saveStateToStorage(state: AppState): void {
+  try {
+    const stateToSave = {
+      ...state,
+      settingsOpen: false,
+      shareModalOpen: false,
+      shareModalData: undefined,
+      isLoading: false,
+      error: null,
+    };
+    
+    localStorage.setItem('recordlane-app-state', JSON.stringify(stateToSave));
+  } catch (error) {
+    console.error('Failed to save app state:', error);
+    ErrorHandler.logError('STATE_SAVE_ERROR', error);
+    
+    if (error.name === 'QuotaExceededError') {
+      const reducedState = {
+        ...state,
+        recordings: state.recordings.slice(0, 10),
+        settingsOpen: false,
+        shareModalOpen: false,
+        shareModalData: undefined,
+        isLoading: false,
+        error: null,
+      };
+      try {
+        localStorage.setItem('recordlane-app-state', JSON.stringify(reducedState));
+      } catch (e) {
+        localStorage.removeItem('recordlane-app-state');
+      }
+    }
   }
 }
 
@@ -131,7 +205,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (savedState) {
           try {
             const parsed = JSON.parse(savedState);
-            // Convert date strings back to Date objects
             if (parsed.recordings) {
               parsed.recordings = parsed.recordings.map((rec: any) => ({
                 ...rec,
@@ -142,7 +215,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           } catch (error) {
             console.error('Failed to parse saved state:', error);
             ErrorHandler.logError('STATE_PARSE_ERROR', error);
-            // Clear corrupted state
             localStorage.removeItem('recordlane-app-state');
           }
         }
@@ -158,52 +230,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadState();
   }, []);
 
-  // Save state to localStorage on changes (debounced)
-  React.useEffect(() => {
-    const saveState = () => {
-      try {
-        const stateToSave = {
-          ...state,
-          settingsOpen: false, // Don't persist modal states
-          shareModalOpen: false,
-          shareModalData: undefined,
-          isLoading: false,
-          error: null,
-        };
-        
-        localStorage.setItem('recordlane-app-state', JSON.stringify(stateToSave));
-      } catch (error) {
-        console.error('Failed to save app state:', error);
-        ErrorHandler.logError('STATE_SAVE_ERROR', error);
-        
-        // Handle storage quota exceeded
-        if (error.name === 'QuotaExceededError') {
-          // Clear old recordings to free up space
-          const reducedState = {
-            ...stateToSave,
-            recordings: stateToSave.recordings.slice(0, 10), // Keep only 10 most recent
-          };
-          try {
-            localStorage.setItem('recordlane-app-state', JSON.stringify(reducedState));
-          } catch (e) {
-            // If still failing, clear everything
-            localStorage.removeItem('recordlane-app-state');
-          }
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(saveState, 500); // Debounce saves
-
-    return () => clearTimeout(timeoutId);
-  }, [state]);
-
   // Handle state errors
   React.useEffect(() => {
     if (state.error) {
       console.error('App state error:', state.error);
       
-      // Auto-clear error after 10 seconds
       const timeoutId = setTimeout(() => {
         dispatch({ type: 'SET_ERROR', payload: null });
       }, 10000);

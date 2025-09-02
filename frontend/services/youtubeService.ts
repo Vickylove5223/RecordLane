@@ -226,6 +226,8 @@ export class YouTubeService {
 
   private static buildAuthUrl(codeChallenge: string, state: string): string {
     const redirectUri = getRedirectUri();
+    console.log('Building auth URL with redirect URI:', redirectUri);
+    
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: redirectUri,
@@ -234,37 +236,81 @@ export class YouTubeService {
       state: state,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
-      access_type: 'offline', // To get a refresh token
+      access_type: 'offline',
       prompt: 'consent',
       include_granted_scopes: 'true',
     });
-    return `${AUTH_ENDPOINT}?${params.toString()}`;
+    
+    const url = `${AUTH_ENDPOINT}?${params.toString()}`;
+    console.log('Generated auth URL:', url);
+    return url;
   }
 
   private static async openOAuthPopup(authUrl: string, expectedState: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const popup = window.open(authUrl, POPUP_CONFIG.windowName, `width=${POPUP_CONFIG.width},height=${POPUP_CONFIG.height}`);
+      const popup = window.open(
+        authUrl, 
+        POPUP_CONFIG.windowName, 
+        `width=${POPUP_CONFIG.width},height=${POPUP_CONFIG.height},scrollbars=${POPUP_CONFIG.scrollbars},resizable=${POPUP_CONFIG.resizable}`
+      );
+      
       if (!popup) {
         return reject(ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED));
       }
+
+      const timeout = setTimeout(() => {
+        popup.close();
+        reject(ErrorHandler.createError('POPUP_TIMEOUT', ERROR_MESSAGES.POPUP_TIMEOUT));
+      }, POPUP_CONFIG.timeout);
 
       const pollTimer = setInterval(() => {
         try {
           if (popup.closed) {
             clearInterval(pollTimer);
+            clearTimeout(timeout);
             return reject(ErrorHandler.createError('POPUP_CLOSED', ERROR_MESSAGES.POPUP_CLOSED));
           }
-          const url = new URL(popup.location.href);
-          if (url.origin === window.location.origin) {
+
+          let currentUrl;
+          try {
+            currentUrl = popup.location.href;
+          } catch (e) {
+            // Cross-origin error, popup still on Google's domain
+            return;
+          }
+
+          const url = new URL(currentUrl);
+          const redirectUri = getRedirectUri();
+          
+          if (url.origin === new URL(redirectUri).origin) {
             clearInterval(pollTimer);
+            clearTimeout(timeout);
             popup.close();
+            
             const code = url.searchParams.get('code');
             const state = url.searchParams.get('state');
-            if (state !== expectedState) reject(ErrorHandler.createError('INVALID_STATE', ERROR_MESSAGES.INVALID_STATE));
-            else if (code) resolve(code);
-            else reject(ErrorHandler.createError('OAUTH_ERROR', 'No authorization code received'));
+            const error = url.searchParams.get('error');
+            
+            if (error) {
+              if (error === 'access_denied') {
+                return reject(ErrorHandler.createError('USER_CANCELLED', 'User denied access'));
+              }
+              return reject(ErrorHandler.createError('OAUTH_ERROR', `OAuth error: ${error}`));
+            }
+            
+            if (state !== expectedState) {
+              return reject(ErrorHandler.createError('INVALID_STATE', ERROR_MESSAGES.INVALID_STATE));
+            }
+            
+            if (code) {
+              resolve(code);
+            } else {
+              reject(ErrorHandler.createError('OAUTH_ERROR', 'No authorization code received'));
+            }
           }
-        } catch (error) { /* ignore cross-origin errors */ }
+        } catch (error) {
+          // Ignore cross-origin errors during polling
+        }
       }, POPUP_CONFIG.pollInterval);
     });
   }
@@ -283,12 +329,19 @@ export class YouTubeService {
       grant_type: 'authorization_code',
       redirect_uri: getRedirectUri(),
     });
+    
     const response = await fetch(TOKEN_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: tokenData,
     });
-    if (!response.ok) throw new Error('Failed to exchange code for token');
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Token exchange failed:', errorText);
+      throw new Error(`Failed to exchange code for token: ${response.status} ${errorText}`);
+    }
+    
     return response.json();
   }
 
@@ -297,13 +350,30 @@ export class YouTubeService {
   private static base64URLEncode = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   private static generateState = () => this.base64URLEncode(crypto.getRandomValues(new Uint8Array(16)));
 
-  static handleOAuthCallback() { /* Logic moved to connect() for simplicity in this flow */ }
+  static handleOAuthCallback() {
+    // Check if we're handling an OAuth callback
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+      const error = urlParams.get('error');
+      
+      if (code || error) {
+        console.log('OAuth callback detected:', { code: !!code, error, state });
+        // The popup handling will take care of this
+      }
+    }
+  }
 
   private static async getUserInfo(accessToken: string): Promise<any> {
     const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { 'Authorization': `Bearer ${accessToken}` },
     });
-    if (!response.ok) throw new Error('Failed to get user info');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to get user info: ${response.status}`);
+    }
+    
     return response.json();
   }
 
@@ -318,28 +388,63 @@ export class YouTubeService {
       },
       body: JSON.stringify(metadata),
     });
-    if (!response.ok) throw new Error('Failed to initiate resumable upload');
-    return response.headers.get('Location')!;
+    
+    if (!response.ok) {
+      throw new Error(`Failed to initiate resumable upload: ${response.status}`);
+    }
+    
+    const location = response.headers.get('Location');
+    if (!location) {
+      throw new Error('No upload URL received from YouTube API');
+    }
+    
+    return location;
   }
 
   private static async uploadFileContent(uploadUrl: string, blob: Blob, onProgress?: (p: UploadProgress) => void): Promise<string> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.upload.onprogress = (e) => onProgress?.({ loaded: e.loaded, total: e.total, percentage: Math.round((e.loaded / e.total) * 100) });
-      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve(JSON.parse(xhr.responseText).id) : reject(new Error(`Upload failed: ${xhr.statusText}`));
+      
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onProgress) {
+          onProgress({ 
+            loaded: e.loaded, 
+            total: e.total, 
+            percentage: Math.round((e.loaded / e.total) * 100) 
+          });
+        }
+      };
+      
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.id);
+          } catch (parseError) {
+            reject(new Error('Failed to parse upload response'));
+          }
+        } else {
+          reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
+        }
+      };
+      
       xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.ontimeout = () => reject(new Error('Upload timeout'));
+      
       xhr.open('PUT', uploadUrl);
+      xhr.timeout = UPLOAD_CONFIG.timeoutMs;
       xhr.send(blob);
     });
   }
 
   private static isRetryableError = (e: any) => e?.name === 'TypeError' || e?.name === 'TimeoutError' || (e?.status >= 500 && e?.status < 600) || e?.status === 429;
-  private static isAuthError = (e: any) => e?.status === 401 || e?.message?.includes('Authentication expired');
-  private static isUserCancelledError = (e: any) => e?.code === 'POPUP_CLOSED' || e?.message?.includes('access_denied');
-  private static isPopupBlockedError = (e: any) => e?.code === 'POPUP_BLOCKED';
-  private static isRedirectUriMismatchError = (e: any) => e?.message?.includes('redirect_uri_mismatch');
+  private static isAuthError = (e: any) => e?.status === 401 || e?.message?.includes('Authentication expired') || e?.message?.includes('invalid_grant');
+  private static isUserCancelledError = (e: any) => e?.code === 'POPUP_CLOSED' || e?.code === 'USER_CANCELLED' || e?.message?.includes('access_denied');
+  private static isPopupBlockedError = (e: any) => e?.code === 'POPUP_BLOCKED' || e?.message?.includes('popup');
+  private static isRedirectUriMismatchError = (e: any) => e?.message?.includes('redirect_uri_mismatch') || e?.error === 'redirect_uri_mismatch';
 }
 
+// Handle OAuth callback when the module loads
 if (typeof window !== 'undefined') {
   YouTubeService.handleOAuthCallback();
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog, 
@@ -29,9 +29,11 @@ import {
   Shield,
   CheckCircle,
   AlertTriangle,
+  RotateCcw,
 } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function SettingsModal() {
   const { 
@@ -44,18 +46,58 @@ export default function SettingsModal() {
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const { toast } = useToast();
 
   const isOpen = state.settingsOpen || false;
 
+  // Track changes to detect unsaved settings
+  const [localSettings, setLocalSettings] = useState(state.settings);
+
+  useEffect(() => {
+    setLocalSettings(state.settings);
+    setHasUnsavedChanges(false);
+  }, [state.settings, isOpen]);
+
   const handleClose = () => {
-    dispatch({ type: 'SET_SETTINGS_OPEN', payload: false });
+    if (hasUnsavedChanges) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+        setLocalSettings(state.settings);
+        setHasUnsavedChanges(false);
+        dispatch({ type: 'SET_SETTINGS_OPEN', payload: false });
+      }
+    } else {
+      dispatch({ type: 'SET_SETTINGS_OPEN', payload: false });
+    }
   };
 
   const handleSettingChange = (key: string, value: any) => {
+    const newSettings = { ...localSettings, [key]: value };
+    setLocalSettings(newSettings);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveSettings = () => {
     dispatch({
       type: 'UPDATE_SETTINGS',
-      payload: { [key]: value },
+      payload: localSettings,
     });
+    setHasUnsavedChanges(false);
+    toast({
+      title: "Settings Saved",
+      description: "Your preferences have been updated successfully.",
+    });
+  };
+
+  const handleResetSettings = () => {
+    if (window.confirm('Are you sure you want to reset all settings to their default values?')) {
+      dispatch({ type: 'RESET_SETTINGS' });
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Settings Reset",
+        description: "All settings have been reset to their default values.",
+      });
+    }
   };
 
   const handleDisconnect = async () => {
@@ -63,11 +105,20 @@ export default function SettingsModal() {
     try {
       await disconnectYouTube();
       setShowDisconnectConfirm(false);
+      toast({
+        title: "YouTube Disconnected",
+        description: "Successfully disconnected from YouTube",
+      });
       setTimeout(() => {
         handleClose();
       }, 1000);
     } catch (error) {
       console.error('Failed to disconnect:', error);
+      toast({
+        title: "Disconnect Failed",
+        description: "Failed to disconnect from YouTube. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsDisconnecting(false);
     }
@@ -79,12 +130,19 @@ export default function SettingsModal() {
     return 'disconnected';
   };
 
+  const getConnectionText = () => {
+    if (isDisconnecting) return 'Disconnecting...';
+    if (isConnecting) return 'Connecting...';
+    if (isConnected) return `Connected to ${userEmail}`;
+    return 'Not connected';
+  };
+
   if (!isOpen) {
     return null;
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={() => !isDisconnecting && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0">
         <ScrollArea className="max-h-[90vh]">
           <div className="p-6">
@@ -92,6 +150,11 @@ export default function SettingsModal() {
               <DialogTitle className="flex items-center space-x-2">
                 <SettingsIcon className="h-5 w-5" />
                 <span>Settings</span>
+                {hasUnsavedChanges && (
+                  <Badge variant="secondary" className="ml-2">
+                    Unsaved Changes
+                  </Badge>
+                )}
               </DialogTitle>
               <DialogDescription>
                 Manage your recording preferences and YouTube connection
@@ -111,15 +174,9 @@ export default function SettingsModal() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Connection Status */}
                     <ConnectionStatus 
                       status={getConnectionStatus()}
-                      text={
-                        isDisconnecting ? 'Disconnecting...' :
-                        isConnecting ? 'Connecting...' :
-                        isConnected ? `Connected to ${userEmail}` :
-                        'Not connected'
-                      }
+                      text={getConnectionText()}
                     />
 
                     {isConnected ? (
@@ -214,7 +271,7 @@ export default function SettingsModal() {
                         </p>
                       </div>
                       <Select
-                        value={state.settings.defaultResolution}
+                        value={localSettings.defaultResolution}
                         onValueChange={(value) => handleSettingChange('defaultResolution', value)}
                       >
                         <SelectTrigger className="w-32">
@@ -237,7 +294,7 @@ export default function SettingsModal() {
                         </p>
                       </div>
                       <Select
-                        value={state.settings.defaultFrameRate.toString()}
+                        value={localSettings.defaultFrameRate.toString()}
                         onValueChange={(value) => handleSettingChange('defaultFrameRate', parseInt(value))}
                       >
                         <SelectTrigger className="w-24">
@@ -259,7 +316,7 @@ export default function SettingsModal() {
                         </p>
                       </div>
                       <Switch
-                        checked={state.settings.highlightClicksDefault}
+                        checked={localSettings.highlightClicksDefault}
                         onCheckedChange={(checked) => handleSettingChange('highlightClicksDefault', checked)}
                       />
                     </div>
@@ -273,7 +330,7 @@ export default function SettingsModal() {
                         </p>
                       </div>
                       <Select
-                        value={state.settings.defaultPrivacy}
+                        value={localSettings.defaultPrivacy}
                         onValueChange={(value) => handleSettingChange('defaultPrivacy', value)}
                       >
                         <SelectTrigger className="w-40">
@@ -310,10 +367,43 @@ export default function SettingsModal() {
             )}
 
             {/* Footer */}
-            <div className="flex justify-end pt-6 border-t border-border">
-              <Button onClick={handleClose} disabled={isDisconnecting}>
-                Close
-              </Button>
+            <div className="flex justify-between pt-6 border-t border-border">
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleResetSettings}
+                  disabled={isDisconnecting}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset to Defaults
+                </Button>
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleClose} 
+                  disabled={isDisconnecting}
+                >
+                  Cancel
+                </Button>
+                {hasUnsavedChanges && (
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={isDisconnecting}
+                  >
+                    Save Changes
+                  </Button>
+                )}
+                {!hasUnsavedChanges && (
+                  <Button 
+                    onClick={handleClose} 
+                    disabled={isDisconnecting}
+                  >
+                    Close
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </ScrollArea>

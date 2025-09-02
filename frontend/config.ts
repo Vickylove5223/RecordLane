@@ -2,7 +2,6 @@
 
 // Google OAuth Configuration
 export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
-// Note: Client secret should NEVER be in frontend code - removed for security
 
 // YouTube API Configuration
 export const YOUTUBE_SCOPES = [
@@ -14,37 +13,39 @@ export const YOUTUBE_SCOPES = [
 export const OAUTH_CONFIG = {
   clientId: GOOGLE_CLIENT_ID,
   scope: YOUTUBE_SCOPES,
-  responseType: 'code', // Use authorization code flow
-  accessType: 'online', // For client-side only apps
-  prompt: 'consent', // Always show consent to ensure proper permissions
+  responseType: 'code',
+  accessType: 'offline',
+  prompt: 'consent',
   includeGrantedScopes: true,
-  codeChallenge: '', // Will be generated dynamically
+  codeChallenge: '',
   codeChallengeMethod: 'S256',
-  state: '', // Will be generated dynamically for security
+  state: '',
 };
 
-// Environment-specific configuration
+// Environment-specific configuration - FIXED
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    return 'https://recordlane-d2qv2u482vjq7vcc59sg.lp.dev';
+    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
   const origin = window.location.origin;
   
-  // Development URLs - handle Leap development environment
-  if (origin.includes('.lp.dev') || 
-      origin.includes('recordlane-d2qv2u482vjq7vcc59sg.lp.dev') ||
-      process.env.NODE_ENV === 'development') {
+  // For Leap development environment
+  if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
+    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
+  }
+  
+  // Development URLs
+  if (origin.includes('.lp.dev')) {
     return origin;
   }
   
-  // Local development fallback
-  if (origin.includes('localhost') || 
-      origin.includes('127.0.0.1')) {
+  // Local development
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
     return origin;
   }
   
-  // Production URL - replace with your actual production domain
+  // Production fallback
   return 'https://recordlane.com';
 };
 
@@ -57,7 +58,7 @@ export const POPUP_CONFIG = {
   centerscreen: 'yes',
   windowName: 'google_oauth',
   pollInterval: 1000,
-  timeout: 5 * 60 * 1000, // 5 minutes
+  timeout: 5 * 60 * 1000,
 };
 
 // Application Configuration
@@ -80,7 +81,7 @@ export const DEFAULT_RECORDING_SETTINGS = {
 
 // Upload Configuration
 export const UPLOAD_CONFIG = {
-  chunkSize: 8 * 1024 * 1024, // 8MB chunks for resumable uploads
+  chunkSize: 8 * 1024 * 1024,
   maxRetries: 3,
   retryDelayMs: 1000,
   timeoutMs: 30000,
@@ -88,9 +89,9 @@ export const UPLOAD_CONFIG = {
 
 // Performance Configuration
 export const PERFORMANCE_CONFIG = {
-  maxCacheSize: 50 * 1024 * 1024, // 50MB cache limit
-  cacheExpirationMs: 24 * 60 * 60 * 1000, // 24 hours
-  lazyLoadThreshold: 100, // pixels
+  maxCacheSize: 50 * 1024 * 1024,
+  cacheExpirationMs: 24 * 60 * 60 * 1000,
+  lazyLoadThreshold: 100,
   debounceMs: 300,
 };
 
@@ -106,12 +107,12 @@ export const UI_CONFIG = {
 
 // Feature Flags
 export const FEATURES = {
-  trimming: true, // Enable client-side trimming
-  drawing: true,  // Enable drawing overlays
-  clickHighlights: true, // Enable click highlighting
-  pip: true, // Enable picture-in-picture camera
-  offlineMode: false, // Offline recording (future feature)
-  analytics: true, // Usage analytics (privacy-respecting)
+  trimming: true,
+  drawing: true,
+  clickHighlights: true,
+  pip: true,
+  offlineMode: false,
+  analytics: true,
 };
 
 // Error Messages
@@ -141,8 +142,8 @@ export const ERROR_MESSAGES = {
 export const CACHE_CONFIG = {
   storageKey: 'recordlane-cache',
   version: '1.0',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  cleanupInterval: 60 * 60 * 1000, // 1 hour
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  cleanupInterval: 60 * 60 * 1000,
 };
 
 // Development Configuration
@@ -158,7 +159,7 @@ export const DEV_CONFIG = {
 export const ANALYTICS_CONFIG = {
   baseUrl: '/api',
   trackingEnabled: FEATURES.analytics,
-  sessionTimeout: 30 * 60 * 1000, // 30 minutes
+  sessionTimeout: 30 * 60 * 1000,
   batchSize: 10,
-  flushInterval: 5 * 60 * 1000, // 5 minutes
+  flushInterval: 5 * 60 * 1000,
 };
