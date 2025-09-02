@@ -1,7 +1,7 @@
 // Configuration for the RecordLane application
 
 // Google OAuth Configuration
-export const GOOGLE_CLIENT_ID = '946418844667-r1bc8nqhf0q39g1ks76v77ldmjn3f8sg.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
 // Note: Client secret should NEVER be in frontend code - removed for security
 
 // Google Drive API Configuration
@@ -23,17 +23,21 @@ export const OAUTH_CONFIG = {
 // Environment-specific configuration
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    return 'http://localhost:3000';
+    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
   const origin = window.location.origin;
   
-  // Development URLs - handle various development environments
-  if (origin.includes('localhost') || 
-      origin.includes('127.0.0.1') || 
-      origin.includes('.lp.dev') ||
+  // Development URLs - handle Leap development environment
+  if (origin.includes('.lp.dev') || 
       origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev') ||
       process.env.NODE_ENV === 'development') {
+    return origin;
+  }
+  
+  // Local development fallback
+  if (origin.includes('localhost') || 
+      origin.includes('127.0.0.1')) {
     return origin;
   }
   
