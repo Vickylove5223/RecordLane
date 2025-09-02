@@ -165,6 +165,8 @@ export class DriveService {
         throw ErrorHandler.createError('AUTH_FAILED', ERROR_MESSAGES.AUTH_FAILED, error);
       } else if (this.isPopupBlockedError(error)) {
         throw ErrorHandler.createError('POPUP_BLOCKED', ERROR_MESSAGES.POPUP_BLOCKED, error);
+      } else if (this.isRedirectUriMismatchError(error)) {
+        throw ErrorHandler.createError('REDIRECT_URI_MISMATCH', ERROR_MESSAGES.REDIRECT_URI_MISMATCH, error);
       }
       
       throw ErrorHandler.createError('CONNECTION_FAILED', 'Failed to connect to Google Drive', error);
@@ -459,7 +461,7 @@ export class DriveService {
       sessionStorage.setItem('oauth_code_verifier', codeVerifier);
       sessionStorage.setItem('oauth_state', state);
 
-      // Build authorization URL
+      // Build authorization URL with correct redirect URI
       const authUrl = this.buildAuthUrl(codeChallenge, state);
 
       // Try popup first, with fallback to redirect
@@ -495,9 +497,13 @@ export class DriveService {
   }
 
   private static buildAuthUrl(codeChallenge: string, state: string): string {
+    const redirectUri = getRedirectUri();
+    
+    console.log('Building auth URL with redirect URI:', redirectUri);
+    
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: getRedirectUri(),
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: DRIVE_SCOPE,
       state: state,
@@ -553,7 +559,9 @@ export class DriveService {
 
           // Check if we're back to our origin with authorization code
           const url = new URL(popupUrl);
-          if (url.origin === window.location.origin) {
+          const currentOrigin = window.location.origin;
+          
+          if (url.origin === currentOrigin) {
             clearInterval(pollTimer);
             popup.close();
 
@@ -604,12 +612,14 @@ export class DriveService {
     code: string, 
     codeVerifier: string
   ): Promise<{ access_token: string; expires_in: number }> {
+    const redirectUri = getRedirectUri();
+    
     const tokenData = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       code: code,
       code_verifier: codeVerifier,
       grant_type: 'authorization_code',
-      redirect_uri: getRedirectUri(),
+      redirect_uri: redirectUri,
     });
 
     const response = await fetch(TOKEN_ENDPOINT, {
@@ -896,6 +906,14 @@ export class DriveService {
     return (
       error?.message?.includes('popup') && 
       (error?.message?.includes('blocked') || error?.message?.includes('Failed to open'))
+    );
+  }
+
+  private static isRedirectUriMismatchError(error: any): boolean {
+    return (
+      error?.message?.includes('redirect_uri_mismatch') ||
+      error?.message?.includes('redirect_uri') ||
+      (error?.status === 400 && error?.message?.includes('invalid_request'))
     );
   }
 }

@@ -24,8 +24,11 @@ export const OAUTH_CONFIG = {
 export const getRedirectUri = (): string => {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   
-  // Development URLs
-  if (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('.lp.dev')) {
+  // Development URLs - handle .lp.dev domains specifically
+  if (origin.includes('localhost') || 
+      origin.includes('127.0.0.1') || 
+      origin.includes('.lp.dev') || 
+      origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
     return origin;
   }
   
@@ -103,6 +106,7 @@ export const ERROR_MESSAGES = {
   POPUP_BLOCKED: 'Authentication popup was blocked. Please allow popups and try again.',
   OAUTH_ERROR: 'Authentication failed. Please try again.',
   CONNECTION_TIMEOUT: 'Connection timeout. Please check your internet connection.',
+  REDIRECT_URI_MISMATCH: 'OAuth configuration error. Please contact support.',
 };
 
 // Cache Configuration
