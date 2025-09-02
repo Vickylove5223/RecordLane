@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { QuickActionsSkeleton, RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ConnectionStatus } from '@/components/ui/connection-status';
 import { Video, Monitor, Camera, Zap, Shield, Download, Folder, AlertTriangle } from 'lucide-react';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { withErrorBoundary } from '../ErrorBoundary';
 import { withPerformanceMonitoring } from '../../utils/performanceMonitor';
@@ -57,7 +57,7 @@ const RecordingCard = memo(({ recording }: { recording: any }) => (
 RecordingCard.displayName = 'RecordingCard';
 
 function MainPanelComponent() {
-  const { isConnected, isConnecting, selectedFolder, requiresFolderSetup, connectionError, retryConnection } = useDrive();
+  const { isConnected, isConnecting, connectionError, retryConnection } = useYouTube();
   const { state } = useApp();
 
   useEffect(() => {
@@ -81,10 +81,8 @@ function MainPanelComponent() {
 
   const getConnectionText = () => {
     if (connectionError) return `Error: ${connectionError}`;
-    if (isConnecting) return 'Connecting to Google Drive...';
-    if (isConnected && selectedFolder) return `Using folder: ${selectedFolder.name}`;
-    if (isConnected && requiresFolderSetup) return 'Folder setup required';
-    if (isConnected) return 'Connected to Google Drive';
+    if (isConnecting) return 'Connecting to YouTube...';
+    if (isConnected) return 'Connected to YouTube';
     return 'Not connected';
   };
 
@@ -98,7 +96,7 @@ function MainPanelComponent() {
     // Implement quick action logic
   };
 
-  if (!isConnected || !state.isOnboarded || requiresFolderSetup) {
+  if (!isConnected || !state.isOnboarded) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-2xl">
@@ -108,7 +106,7 @@ function MainPanelComponent() {
           
           <h1 className="text-4xl font-bold mb-4">Welcome to RecordLane</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Record your screen and camera with instant Google Drive sync
+            Record your screen and camera with instant YouTube sync
           </p>
 
           <div className="mb-6">
@@ -144,34 +142,14 @@ function MainPanelComponent() {
             </Card>
           )}
 
-          {requiresFolderSetup && (
-            <Card className="text-left mb-6">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <Folder className="h-6 w-6 text-blue-500 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Folder Setup Required</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Choose or create a folder in your Google Drive to store your recordings.
-                    </p>
-                    <Button size="sm">
-                      <Folder className="h-4 w-4 mr-2" />
-                      Setup Folder
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {!isConnected && !connectionError && (
             <Card className="text-left">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Connect Google Drive to get started</h3>
+                <h3 className="font-semibold mb-4">Connect YouTube to get started</h3>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-center space-x-3">
                     <Shield className="h-4 w-4 text-green-500" />
-                    <span>Your recordings are stored only in your Google Drive</span>
+                    <span>Your recordings are uploaded to your YouTube channel</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Zap className="h-4 w-4 text-blue-500" />

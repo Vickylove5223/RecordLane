@@ -25,13 +25,13 @@ import {
 } from 'lucide-react';
 import { useRecording, RecordingMode, RecordingOptions } from '../../contexts/RecordingContext';
 import { useApp } from '../../contexts/AppContext';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function FloatingRecordButton() {
   const { startRecording, options, updateOptions, state: recordingState } = useRecording();
   const { state } = useApp();
-  const { isConnected } = useDrive();
+  const { isConnected } = useYouTube();
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,8 +39,8 @@ export default function FloatingRecordButton() {
   const handleModeSelect = async (mode: RecordingMode) => {
     if (!isConnected) {
       toast({
-        title: "Drive Not Connected",
-        description: "Please connect Google Drive before recording",
+        title: "YouTube Not Connected",
+        description: "Please connect your YouTube account before recording",
         variant: "destructive",
       });
       return;
@@ -291,7 +291,7 @@ export default function FloatingRecordButton() {
             <>
               <DropdownMenuSeparator />
               <div className="px-2 py-2 text-xs text-muted-foreground">
-                Connect Google Drive to start recording
+                Connect YouTube to start recording
               </div>
             </>
           )}

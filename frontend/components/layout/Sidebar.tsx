@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ProgressIndicator } from '@/components/ui/progress-indicator';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Folder, Video, Clock, ExternalLink } from 'lucide-react';
+import { Video, Clock, ExternalLink } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function Sidebar() {
   const { state } = useApp();
-  const { selectedFolder, isConnected, isConnecting, requiresFolderSetup } = useDrive();
+  const { isConnected, isConnecting } = useYouTube();
 
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -29,9 +29,7 @@ export default function Sidebar() {
 
   const getConnectionText = () => {
     if (isConnecting) return 'Connecting...';
-    if (isConnected && selectedFolder) return selectedFolder.name;
-    if (isConnected && requiresFolderSetup) return 'Setup required';
-    if (isConnected) return 'Connected';
+    if (isConnected) return 'Connected to YouTube';
     return 'Not connected';
   };
 
@@ -48,19 +46,6 @@ export default function Sidebar() {
           status={getConnectionStatus()}
           text={getConnectionText()}
         />
-
-        {/* Folder Info */}
-        {selectedFolder && (
-          <div className="mt-3 p-2 bg-muted/50 rounded-lg">
-            <div className="flex items-center space-x-2 text-sm">
-              <Folder className="h-4 w-4 text-blue-500" />
-              <span className="font-medium">Saving to:</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1 truncate">
-              {selectedFolder.name}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Recordings List */}
@@ -104,7 +89,7 @@ export default function Sidebar() {
                       <Clock className="h-3 w-3" />
                       <span>{formatDuration(recording.duration)}</span>
                     </div>
-                    <span>{formatDistanceToNow(recording.createdAt, { addSuffix: true })}</span>
+                    <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
                   </div>
 
                   {/* Upload Progress */}
@@ -134,14 +119,14 @@ export default function Sidebar() {
                       {recording.uploadStatus === 'failed' && 'Failed'}
                     </Badge>
 
-                    {recording.driveLink && (
+                    {recording.youtubeLink && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(recording.driveLink, '_blank');
+                          window.open(recording.youtubeLink, '_blank');
                         }}
                       >
                         <ExternalLink className="h-3 w-3" />

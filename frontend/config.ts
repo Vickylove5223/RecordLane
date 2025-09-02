@@ -4,13 +4,16 @@
 export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
 // Note: Client secret should NEVER be in frontend code - removed for security
 
-// Google Drive API Configuration
-export const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+// YouTube API Configuration
+export const YOUTUBE_SCOPES = [
+  'https://www.googleapis.com/auth/youtube.upload',
+  'https://www.googleapis.com/auth/youtube.force-ssl',
+].join(' ');
 
 // OAuth Configuration with PKCE
 export const OAUTH_CONFIG = {
   clientId: GOOGLE_CLIENT_ID,
-  scope: GOOGLE_DRIVE_SCOPE,
+  scope: YOUTUBE_SCOPES,
   responseType: 'code', // Use authorization code flow
   accessType: 'online', // For client-side only apps
   prompt: 'consent', // Always show consent to ensure proper permissions
@@ -61,7 +64,7 @@ export const POPUP_CONFIG = {
 export const APP_CONFIG = {
   name: 'RecordLane',
   version: '1.0.0',
-  description: 'Privacy-first screen recording with Google Drive sync',
+  description: 'Privacy-first screen recording with YouTube sync',
   url: 'https://recordlane.com',
   supportEmail: 'support@recordlane.com',
 };
@@ -71,7 +74,7 @@ export const DEFAULT_RECORDING_SETTINGS = {
   resolution: '720p' as const,
   frameRate: 30 as const,
   highlightClicks: true,
-  privacy: 'anyone-viewer' as const,
+  privacy: 'unlisted' as const,
   folderName: 'RecordLane Recordings',
 };
 
@@ -113,17 +116,17 @@ export const FEATURES = {
 
 // Error Messages
 export const ERROR_MESSAGES = {
-  DRIVE_NOT_CONNECTED: 'Please connect Google Drive before recording',
+  DRIVE_NOT_CONNECTED: 'Please connect your YouTube account before recording',
   PERMISSIONS_DENIED: 'Camera or screen sharing permissions denied',
-  UPLOAD_FAILED: 'Failed to upload recording to Google Drive',
+  UPLOAD_FAILED: 'Failed to upload recording to YouTube',
   RECORDING_FAILED: 'Failed to start recording',
   NETWORK_ERROR: 'Network connection error. Please check your internet.',
-  STORAGE_QUOTA_EXCEEDED: 'Google Drive storage quota exceeded',
+  STORAGE_QUOTA_EXCEEDED: 'YouTube storage quota exceeded',
   BROWSER_NOT_SUPPORTED: 'Your browser does not support screen recording',
   FILE_TOO_LARGE: 'Recording file is too large to upload',
-  AUTH_FAILED: 'Google Drive authentication failed',
+  AUTH_FAILED: 'YouTube authentication failed',
   TOKEN_EXPIRED: 'Authentication session expired, please sign in again',
-  ACCESS_DENIED: 'Access to Google Drive was denied',
+  ACCESS_DENIED: 'Access to YouTube was denied',
   POPUP_BLOCKED: 'Authentication popup was blocked. Please allow popups and try again.',
   OAUTH_ERROR: 'Authentication failed. Please try again.',
   CONNECTION_TIMEOUT: 'Connection timeout. Please check your internet connection.',

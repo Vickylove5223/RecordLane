@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from './contexts/AppContext';
-import { DriveProvider } from './contexts/DriveContext';
+import { YouTubeProvider } from './contexts/YouTubeContext';
 import { RecordingProvider } from './contexts/RecordingContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from '@/components/ui/spinner';
@@ -130,7 +130,7 @@ function AppInner() {
       <ErrorBoundary>
         <AppProvider>
           <ErrorBoundary isolateError>
-            <DriveProvider>
+            <YouTubeProvider>
               <ErrorBoundary isolateError>
                 <RecordingProvider>
                   <Router>
@@ -143,7 +143,7 @@ function AppInner() {
                   </Router>
                 </RecordingProvider>
               </ErrorBoundary>
-            </DriveProvider>
+            </YouTubeProvider>
           </ErrorBoundary>
         </AppProvider>
       </ErrorBoundary>

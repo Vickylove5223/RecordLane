@@ -30,18 +30,18 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function ReviewPanel() {
   const { recordedBlob, deleteRecording, restartRecording, getPreviewUrl } = useRecording();
-  const { uploadFile } = useDrive();
+  const { uploadVideo } = useYouTube();
   const { dispatch } = useApp();
   const { toast } = useToast();
 
   const [title, setTitle] = useState(`Recording ${new Date().toLocaleDateString()}`);
-  const [privacy, setPrivacy] = useState('anyone-viewer');
+  const [privacy, setPrivacy] = useState<'private' | 'unlisted' | 'public'>('unlisted');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -51,7 +51,7 @@ export default function ReviewPanel() {
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [uploadResult, setUploadResult] = useState<{ shareLink: string; webViewLink: string } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{ videoId: string; videoUrl: string } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewUrl = getPreviewUrl();
@@ -105,7 +105,7 @@ export default function ReviewPanel() {
     setUploadSuccess(false);
 
     try {
-      const result = await uploadFile(recordedBlob, title, privacy, (progress) => {
+      const result = await uploadVideo(recordedBlob, title, privacy, (progress) => {
         setUploadProgress(progress.percentage);
       });
       
@@ -117,11 +117,11 @@ export default function ReviewPanel() {
       const recording = {
         id: Date.now().toString(),
         title,
-        driveFileId: result.fileId,
-        driveLink: result.shareLink,
+        youtubeVideoId: result.videoId,
+        youtubeLink: result.videoUrl,
         duration: duration * 1000,
         createdAt: new Date(),
-        privacy: privacy as any,
+        privacy: privacy,
         uploadStatus: 'completed' as const,
       };
 
@@ -129,14 +129,14 @@ export default function ReviewPanel() {
 
       toast({
         title: "Upload Complete",
-        description: "Your recording has been saved to Google Drive",
+        description: "Your recording has been saved to YouTube",
       });
 
       // Show share modal with the result
       dispatch({ 
         type: 'SET_SHARE_MODAL_DATA', 
         payload: { 
-          shareLink: result.shareLink, 
+          shareLink: result.videoUrl, 
           title 
         } 
       });
@@ -147,7 +147,7 @@ export default function ReviewPanel() {
       setUploadSuccess(false);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload recording to Google Drive",
+        description: "Failed to upload recording to YouTube",
         variant: "destructive",
       });
     } finally {
@@ -186,8 +186,8 @@ export default function ReviewPanel() {
           </DialogTitle>
           <DialogDescription>
             {uploadSuccess 
-              ? "Your recording has been successfully uploaded to Google Drive"
-              : "Review your recording and upload to Google Drive"
+              ? "Your recording has been successfully uploaded to YouTube"
+              : "Review your recording and upload to YouTube"
             }
           </DialogDescription>
         </DialogHeader>
@@ -231,7 +231,7 @@ export default function ReviewPanel() {
                     className="text-white mb-4"
                   />
                   <p className="text-white text-sm">
-                    {uploadSuccess ? 'Upload Complete!' : 'Uploading to Drive...'}
+                    {uploadSuccess ? 'Upload Complete!' : 'Uploading to YouTube...'}
                   </p>
                 </div>
               </div>
@@ -281,14 +281,14 @@ export default function ReviewPanel() {
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">Privacy</label>
-                <Select value={privacy} onValueChange={setPrivacy} disabled={isUploading}>
+                <Select value={privacy} onValueChange={(v) => setPrivacy(v as any)} disabled={isUploading}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="unlisted">Unlisted (Anyone with link)</SelectItem>
                     <SelectItem value="private">Private (Only you)</SelectItem>
-                    <SelectItem value="anyone-viewer">Anyone with link (Viewer)</SelectItem>
-                    <SelectItem value="anyone-commenter">Anyone with link (Commenter)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -314,24 +314,16 @@ export default function ReviewPanel() {
                     Recording uploaded successfully!
                   </h3>
                   <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                    Your recording is now available in Google Drive
+                    Your recording is now available on YouTube
                   </p>
                   <div className="flex space-x-2 mt-3">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => window.open(uploadResult.shareLink, '_blank')}
+                      onClick={() => window.open(uploadResult.videoUrl, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      View in Drive
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(uploadResult.webViewLink, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Preview
+                      View on YouTube
                     </Button>
                   </div>
                 </div>
@@ -384,7 +376,7 @@ export default function ReviewPanel() {
                     ) : (
                       <>
                         <Cloud className="h-4 w-4 mr-2" />
-                        Upload to Drive
+                        Upload to YouTube
                       </>
                     )}
                   </Button>

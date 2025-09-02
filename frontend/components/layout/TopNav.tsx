@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { Settings, Search } from 'lucide-react';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 
 export default function TopNav() {
-  const { userEmail, isConnecting } = useDrive();
+  const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
   const [showSettings, setShowSettings] = useState(false);
 

@@ -7,18 +7,18 @@ const db = new SQLDatabase("metadata", {
 
 export interface CreateRecordingRequest {
   title: string;
-  driveFileId: string;
-  driveLink: string;
+  youtubeVideoId: string;
+  youtubeLink: string;
   duration: number;
-  privacy: "private" | "anyone-viewer" | "anyone-commenter";
+  privacy: "private" | "unlisted" | "public";
   thumbnailUrl?: string;
 }
 
 export interface Recording {
   id: string;
   title: string;
-  driveFileId: string;
-  driveLink: string;
+  youtubeVideoId: string;
+  youtubeLink: string;
   duration: number;
   privacy: string;
   thumbnailUrl?: string;
@@ -34,15 +34,15 @@ export const create = api<CreateRecordingRequest, Recording>(
     const now = new Date();
     
     await db.exec`
-      INSERT INTO recordings (id, title, drive_file_id, drive_link, duration, privacy, thumbnail_url, created_at, updated_at)
-      VALUES (${id}, ${req.title}, ${req.driveFileId}, ${req.driveLink}, ${req.duration}, ${req.privacy}, ${req.thumbnailUrl || null}, ${now}, ${now})
+      INSERT INTO recordings (id, title, youtube_video_id, youtube_link, duration, privacy, thumbnail_url, created_at, updated_at)
+      VALUES (${id}, ${req.title}, ${req.youtubeVideoId}, ${req.youtubeLink}, ${req.duration}, ${req.privacy}, ${req.thumbnailUrl || null}, ${now}, ${now})
     `;
 
     return {
       id,
       title: req.title,
-      driveFileId: req.driveFileId,
-      driveLink: req.driveLink,
+      youtubeVideoId: req.youtubeVideoId,
+      youtubeLink: req.youtubeLink,
       duration: req.duration,
       privacy: req.privacy,
       thumbnailUrl: req.thumbnailUrl,

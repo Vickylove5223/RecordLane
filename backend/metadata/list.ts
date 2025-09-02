@@ -13,8 +13,8 @@ export interface ListRecordingsRequest {
 export interface Recording {
   id: string;
   title: string;
-  driveFileId: string;
-  driveLink: string;
+  youtubeVideoId: string;
+  youtubeLink: string;
   duration: number;
   privacy: string;
   thumbnailUrl?: string;
@@ -37,7 +37,7 @@ export const list = api<ListRecordingsRequest, ListRecordingsResponse>(
     const search = req.search?.trim();
 
     let query = `
-      SELECT id, title, drive_file_id, drive_link, duration, privacy, thumbnail_url, created_at, updated_at
+      SELECT id, title, youtube_video_id, youtube_link, duration, privacy, thumbnail_url, created_at, updated_at
       FROM recordings
     `;
     const params: any[] = [];
@@ -70,8 +70,8 @@ export const list = api<ListRecordingsRequest, ListRecordingsResponse>(
       recordings.push({
         id: row.id,
         title: row.title,
-        driveFileId: row.drive_file_id,
-        driveLink: row.drive_link,
+        youtubeVideoId: row.youtube_video_id,
+        youtubeLink: row.youtube_link,
         duration: row.duration,
         privacy: row.privacy,
         thumbnailUrl: row.thumbnail_url,

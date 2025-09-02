@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog, 
@@ -11,7 +11,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { FolderSetupModal } from './FolderSetupModal';
 import { 
   Shield, 
   Zap, 
@@ -20,20 +19,20 @@ import {
   ArrowRight,
   CheckCircle
 } from 'lucide-react';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 
 export default function OnboardingModal() {
-  const { connectDrive, isConnecting, isConnected, requiresFolderSetup } = useDrive();
+  const { connectYouTube, isConnecting, isConnected } = useYouTube();
   const { dispatch } = useApp();
-  const [showFolderSetup, setShowFolderSetup] = useState(false);
 
   const handleConnect = async () => {
     try {
-      await connectDrive();
+      await connectYouTube();
+      dispatch({ type: 'SET_ONBOARDED', payload: true });
     } catch (error) {
       console.error('Connection failed:', error);
-      // Error is handled in DriveContext
+      // Error is handled in YouTubeContext
     }
   };
 
@@ -41,23 +40,11 @@ export default function OnboardingModal() {
     dispatch({ type: 'SET_ONBOARDED', payload: true });
   };
 
-  // Show folder setup if connected but needs folder setup
-  useEffect(() => {
-    if (isConnected && requiresFolderSetup) {
-      setShowFolderSetup(true);
-    }
-  }, [isConnected, requiresFolderSetup]);
-
-  const handleFolderSetupComplete = () => {
-    setShowFolderSetup(false);
-    handleComplete();
-  };
-
   const features = [
     {
       icon: Shield,
       title: 'Privacy First',
-      description: 'Your recordings are stored only in your Google Drive, never on our servers.',
+      description: 'Your recordings are uploaded to your YouTube channel as unlisted videos.',
       color: 'text-green-500',
     },
     {
@@ -69,15 +56,10 @@ export default function OnboardingModal() {
     {
       icon: Cloud,
       title: 'Automatic Sync',
-      description: 'Recordings are automatically uploaded to your Drive with resumable uploads.',
+      description: 'Recordings are automatically uploaded to your YouTube channel.',
       color: 'text-purple-500',
     },
   ];
-
-  // If folder setup is needed, show that modal
-  if (showFolderSetup) {
-    return <FolderSetupModal onComplete={handleFolderSetupComplete} />;
-  }
 
   return (
     <Dialog open={true}>
@@ -90,14 +72,14 @@ export default function OnboardingModal() {
               </div>
               <DialogTitle className="text-2xl">Welcome to RecordLane</DialogTitle>
               <DialogDescription className="text-lg">
-                Record your screen and camera with instant Google Drive sync
+                Record your screen and camera with instant YouTube sync
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6">
               {/* Features */}
               <div className="grid gap-4">
-                {features.map((feature, index) => (
+                {features.map((feature) => (
                   <Card key={feature.title} className="border-border/50">
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-4">
@@ -108,7 +90,7 @@ export default function OnboardingModal() {
                           <h3 className="font-semibold mb-1">{feature.title}</h3>
                           <p className="text-sm text-muted-foreground">{feature.description}</p>
                         </div>
-                        {!isConnecting && isConnected && !requiresFolderSetup && (
+                        {!isConnecting && isConnected && (
                           <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                         )}
                       </div>
@@ -122,7 +104,7 @@ export default function OnboardingModal() {
                 <div className="text-center py-4">
                   <ConnectionStatus 
                     status="connecting" 
-                    text="Connecting to Google Drive..."
+                    text="Connecting to YouTube..."
                     className="mx-auto"
                   />
                 </div>
@@ -131,9 +113,9 @@ export default function OnboardingModal() {
               {/* Call to Action */}
               <div className="text-center space-y-4 pt-4">
                 <div className="space-y-2">
-                  <h3 className="font-semibold">Connect Google Drive to get started</h3>
+                  <h3 className="font-semibold">Connect YouTube to get started</h3>
                   <p className="text-sm text-muted-foreground">
-                    We'll help you choose or create a folder in your Drive to store your recordings.
+                    We'll upload your recordings to your YouTube channel.
                     You can change this anytime in settings.
                   </p>
                 </div>
@@ -141,25 +123,25 @@ export default function OnboardingModal() {
                 <Button
                   size="lg"
                   onClick={handleConnect}
-                  disabled={isConnecting || (isConnected && !requiresFolderSetup)}
+                  disabled={isConnecting || isConnected}
                   className="w-full max-w-xs"
                 >
                   {isConnecting ? (
                     <LoadingSpinner text="Connecting..." size="sm" />
-                  ) : isConnected && !requiresFolderSetup ? (
+                  ) : isConnected ? (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Connected
                     </>
                   ) : (
                     <>
-                      Connect Google Drive
+                      Connect YouTube
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}
                 </Button>
 
-                {isConnected && !requiresFolderSetup && (
+                {isConnected && (
                   <Button onClick={handleComplete} className="w-full max-w-xs">
                     Continue to RecordLane
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -167,7 +149,7 @@ export default function OnboardingModal() {
                 )}
 
                 <p className="text-xs text-muted-foreground">
-                  By connecting, you agree to let RecordLane access files it creates in your Google Drive.
+                  By connecting, you agree to let RecordLane upload videos to your YouTube account.
                   You can disconnect anytime from settings.
                 </p>
               </div>

@@ -22,32 +22,26 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { SettingsPageSkeleton } from '@/components/ui/loading-skeleton';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { FolderSetupModal } from '../onboarding/FolderSetupModal';
 import { 
   User, 
-  Folder, 
   Settings as SettingsIcon,
   Unlink,
   Shield,
   CheckCircle,
   AlertTriangle,
-  FolderOpen
 } from 'lucide-react';
-import { useDrive } from '../../contexts/DriveContext';
+import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 
 export default function SettingsModal() {
   const { 
     isConnected, 
     userEmail, 
-    selectedFolder, 
-    requiresFolderSetup,
-    disconnectDrive, 
+    disconnectYouTube, 
     isConnecting 
-  } = useDrive();
+  } = useYouTube();
   const { state, dispatch } = useApp();
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
-  const [showFolderSetup, setShowFolderSetup] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,7 +61,7 @@ export default function SettingsModal() {
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
-      await disconnectDrive();
+      await disconnectYouTube();
       setShowDisconnectConfirm(false);
       setTimeout(() => {
         handleClose();
@@ -79,23 +73,11 @@ export default function SettingsModal() {
     }
   };
 
-  const handleFolderSetup = () => {
-    setShowFolderSetup(true);
-  };
-
-  const handleFolderSetupComplete = () => {
-    setShowFolderSetup(false);
-  };
-
   const getConnectionStatus = () => {
     if (isConnecting || isDisconnecting) return 'connecting';
     if (isConnected) return 'connected';
     return 'disconnected';
   };
-
-  if (showFolderSetup) {
-    return <FolderSetupModal onComplete={handleFolderSetupComplete} />;
-  }
 
   if (!isOpen) {
     return null;
@@ -112,7 +94,7 @@ export default function SettingsModal() {
                 <span>Settings</span>
               </DialogTitle>
               <DialogDescription>
-                Manage your recording preferences and Google Drive connection
+                Manage your recording preferences and YouTube connection
               </DialogDescription>
             </DialogHeader>
 
@@ -120,12 +102,12 @@ export default function SettingsModal() {
               <SettingsPageSkeleton />
             ) : (
               <div className="space-y-6">
-                {/* Google Drive Connection */}
+                {/* YouTube Connection */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Shield className="h-5 w-5" />
-                      <span>Google Drive Connection</span>
+                      <span>YouTube Connection</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -157,50 +139,8 @@ export default function SettingsModal() {
                                 <span>Connected</span>
                               </Badge>
                             </div>
-                            {selectedFolder && (
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
-                                <Folder className="h-4 w-4" />
-                                <span>{selectedFolder.name}</span>
-                              </div>
-                            )}
                           </div>
                         </div>
-
-                        {/* Folder Management */}
-                        <Card className="bg-muted/30">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-start space-x-3">
-                                <FolderOpen className="h-5 w-5 text-blue-500 mt-0.5" />
-                                <div>
-                                  <h4 className="font-medium">Recording Folder</h4>
-                                  {selectedFolder ? (
-                                    <p className="text-sm text-muted-foreground">
-                                      Recordings are saved to: {selectedFolder.name}
-                                    </p>
-                                  ) : requiresFolderSetup ? (
-                                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                                      No folder selected - setup required
-                                    </p>
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">
-                                      No folder configured
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={handleFolderSetup}
-                                disabled={isDisconnecting}
-                              >
-                                <Folder className="h-4 w-4 mr-2" />
-                                {selectedFolder ? 'Change Folder' : 'Setup Folder'}
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
 
                         {showDisconnectConfirm ? (
                           <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
@@ -209,7 +149,7 @@ export default function SettingsModal() {
                               <div className="flex-1">
                                 <p className="text-sm text-destructive mb-3">
                                   Are you sure you want to disconnect? You'll need to reconnect to record new videos.
-                                  Your existing recordings in Google Drive will not be affected.
+                                  Your existing recordings on YouTube will not be affected.
                                 </p>
                                 <div className="flex space-x-2">
                                   <Button
@@ -244,15 +184,15 @@ export default function SettingsModal() {
                             className="text-destructive hover:text-destructive"
                           >
                             <Unlink className="h-4 w-4 mr-2" />
-                            Disconnect Drive
+                            Disconnect YouTube
                           </Button>
                         )}
                       </>
                     ) : (
                       <div className="text-center py-6">
-                        <p className="text-muted-foreground mb-4">No Google Drive connection</p>
+                        <p className="text-muted-foreground mb-4">No YouTube connection</p>
                         <Button onClick={handleClose}>
-                          Connect Google Drive
+                          Connect YouTube
                         </Button>
                       </div>
                     )}
@@ -341,8 +281,8 @@ export default function SettingsModal() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="private">Private</SelectItem>
-                          <SelectItem value="anyone-viewer">Anyone (Viewer)</SelectItem>
-                          <SelectItem value="anyone-commenter">Anyone (Commenter)</SelectItem>
+                          <SelectItem value="unlisted">Unlisted</SelectItem>
+                          <SelectItem value="public">Public</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -358,10 +298,10 @@ export default function SettingsModal() {
                     <div className="text-sm text-muted-foreground space-y-2">
                       <p>
                         RecordLane is an open-source screen recording tool that stores all recordings
-                        directly in your Google Drive for maximum privacy and control.
+                        directly in your YouTube account for maximum privacy and control.
                       </p>
                       <p>
-                        Version: 1.0.0 | Built with React, TypeScript, and Google Drive API
+                        Version: 1.0.0 | Built with React, TypeScript, and YouTube API
                       </p>
                     </div>
                   </CardContent>

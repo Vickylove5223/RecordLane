@@ -13,7 +13,7 @@ export interface AppState {
     defaultResolution: '720p' | '1080p' | '480p';
     defaultFrameRate: 30 | 60;
     highlightClicksDefault: boolean;
-    defaultPrivacy: 'private' | 'anyone-viewer' | 'anyone-commenter';
+    defaultPrivacy: 'private' | 'unlisted' | 'public';
   };
   recordings: Recording[];
   isLoading: boolean;
@@ -23,12 +23,12 @@ export interface AppState {
 export interface Recording {
   id: string;
   title: string;
-  driveFileId?: string;
-  driveLink?: string;
+  youtubeVideoId?: string;
+  youtubeLink?: string;
   thumbnail?: string;
   duration: number;
   createdAt: Date;
-  privacy: 'private' | 'anyone-viewer' | 'anyone-commenter';
+  privacy: 'private' | 'unlisted' | 'public';
   localBlob?: Blob;
   uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed';
   uploadProgress?: number;
@@ -55,7 +55,7 @@ const initialState: AppState = {
     defaultResolution: '720p',
     defaultFrameRate: 30,
     highlightClicksDefault: true,
-    defaultPrivacy: 'anyone-viewer',
+    defaultPrivacy: 'unlisted',
   },
   recordings: [],
   isLoading: false,
