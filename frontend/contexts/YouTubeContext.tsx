@@ -20,6 +20,7 @@ interface YouTubeContextType {
   ) => Promise<{ videoId: string; videoUrl: string }>;
   checkConnection: () => Promise<void>;
   retryConnection: () => Promise<void>;
+  refreshToken: () => Promise<void>;
 }
 
 const YouTubeContext = createContext<YouTubeContextType | undefined>(undefined);
@@ -167,7 +168,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
           maxRetries: 3,
           retryDelay: 2000,
           shouldRetry: (error) => {
-            if (error.code === 'AUTH_EXPIRED') {
+            if (error.code === 'AUTH_EXPIRED' || error.code === 'AUTH_TOKEN_INVALID') {
               setIsConnected(false);
               setUserEmail(null);
               setConnectionError('Authentication expired, please reconnect');
@@ -186,7 +187,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
         }
       );
     } catch (error) {
-      if (error.code === 'AUTH_EXPIRED') {
+      if (error.code === 'AUTH_EXPIRED' || error.code === 'AUTH_TOKEN_INVALID') {
         setIsConnected(false);
         setUserEmail(null);
         setConnectionError('Authentication expired, please reconnect');
@@ -194,6 +195,46 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   }, [isConnected, retryService, toast]);
+
+  const refreshToken = useCallback(async () => {
+    try {
+      const newToken = await TokenService.refreshAccessToken();
+      
+      if (newToken) {
+        // Check connection again after successful refresh
+        await checkConnection();
+        
+        toast({
+          title: "Token Refreshed",
+          description: "Authentication token has been refreshed successfully",
+        });
+      } else {
+        // Refresh failed, user needs to reconnect
+        setIsConnected(false);
+        setUserEmail(null);
+        setConnectionError('Session expired, please reconnect your YouTube account');
+        
+        toast({
+          title: "Session Expired",
+          description: "Please reconnect your YouTube account",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      ErrorHandler.logError('token-refresh-context', error);
+      
+      setIsConnected(false);
+      setUserEmail(null);
+      setConnectionError('Session expired, please reconnect your YouTube account');
+      
+      toast({
+        title: "Token Refresh Failed",
+        description: "Please reconnect your YouTube account",
+        variant: "destructive",
+      });
+    }
+  }, [checkConnection, toast]);
 
   const retryConnection = useCallback(async () => {
     if (connectionError) {
@@ -203,27 +244,73 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     }
   }, [connectionError, connectYouTube, checkConnection]);
 
+  // Enhanced connection monitoring with token refresh integration
   React.useEffect(() => {
     checkConnection();
     
-    const interval = setInterval(() => {
-      if (isConnected && TokenService.isTokenNearExpiry()) {
-        console.log('Token is near expiry, clearing connection state');
+    // Set up YouTube service connection listener
+    const unsubscribeYouTube = YouTubeService.addConnectionListener((connected) => {
+      setIsConnected(connected);
+      if (!connected) {
+        setUserEmail(null);
+        setConnectionError('Connection lost');
+      }
+    });
+    
+    // Set up token refresh listener
+    const unsubscribeToken = TokenService.addRefreshListener((success, token) => {
+      if (!success) {
+        console.log('Token refresh failed in context, updating connection state');
         setIsConnected(false);
         setUserEmail(null);
         setConnectionError('Authentication session expired, please reconnect');
-        TokenService.clearTokens();
+      } else {
+        console.log('Token refreshed successfully in context');
+        // Optionally recheck connection after successful refresh
+        checkConnection().catch(error => {
+          console.error('Failed to recheck connection after token refresh:', error);
+        });
       }
-    }, 60000);
+    });
     
-    return () => clearInterval(interval);
-  }, [checkConnection, isConnected]);
+    // Periodic token validation (every 5 minutes)
+    const tokenCheckInterval = setInterval(async () => {
+      if (isConnected) {
+        const tokenExpiry = TokenService.getTokenExpiry();
+        
+        if (tokenExpiry?.isExpired) {
+          console.log('Token expired, attempting refresh...');
+          await refreshToken();
+        } else if (tokenExpiry?.isNearExpiry) {
+          console.log('Token near expiry, proactively refreshing...');
+          try {
+            await TokenService.refreshAccessToken();
+          } catch (error) {
+            console.error('Proactive token refresh failed:', error);
+          }
+        }
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+    
+    return () => {
+      unsubscribeYouTube();
+      unsubscribeToken();
+      clearInterval(tokenCheckInterval);
+    };
+  }, [checkConnection, isConnected, refreshToken]);
 
+  // Handle page visibility changes for token validation
   React.useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && isConnected) {
-        const token = TokenService.getValidAccessToken();
-        if (!token) {
+        // Check token validity when page becomes visible
+        const tokenExpiry = TokenService.getTokenExpiry();
+        
+        if (tokenExpiry?.isExpired) {
+          console.log('Page visible and token expired, refreshing...');
+          refreshToken();
+        } else if (!TokenService.getValidAccessToken()) {
+          console.log('Page visible but no valid token, disconnecting...');
           setIsConnected(false);
           setUserEmail(null);
           setConnectionError('Authentication session expired, please reconnect');
@@ -233,7 +320,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isConnected]);
+  }, [isConnected, refreshToken]);
 
   return (
     <YouTubeContext.Provider value={{
@@ -246,6 +333,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       uploadVideo,
       checkConnection,
       retryConnection,
+      refreshToken,
     }}>
       {children}
     </YouTubeContext.Provider>

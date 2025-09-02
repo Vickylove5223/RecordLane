@@ -22,15 +22,15 @@ export const OAUTH_CONFIG = {
   state: '',
 };
 
-// Environment-specific configuration - FIXED
+// Environment-specific configuration - UPDATED for RecordLane
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
+    return 'https://recordlane.com';
   }
   
   const origin = window.location.origin;
   
-  // For Leap development environment
+  // For Leap development environment - RecordLane
   if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
     return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
   }
@@ -136,6 +136,8 @@ export const ERROR_MESSAGES = {
   POPUP_CLOSED: 'Authentication window was closed. Please try again.',
   INVALID_STATE: 'Invalid authentication state. Please try again.',
   CODE_EXCHANGE_FAILED: 'Failed to exchange authorization code. Please try again.',
+  TOKEN_REFRESH_FAILED: 'Failed to refresh authentication token. Please sign in again.',
+  AUTH_TOKEN_INVALID: 'Authentication token is invalid. Please sign in again.',
 };
 
 // Cache Configuration
@@ -162,4 +164,12 @@ export const ANALYTICS_CONFIG = {
   sessionTimeout: 30 * 60 * 1000,
   batchSize: 10,
   flushInterval: 5 * 60 * 1000,
+};
+
+// Token Refresh Configuration
+export const TOKEN_CONFIG = {
+  refreshThreshold: 5 * 60 * 1000, // 5 minutes before expiry
+  maxRefreshRetries: 3,
+  refreshRetryDelay: 1000,
+  autoRefreshEnabled: true,
 };

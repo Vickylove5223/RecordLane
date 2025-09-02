@@ -10,7 +10,8 @@ import {
   OAUTH_CONFIG, 
   POPUP_CONFIG,
   DEV_CONFIG,
-  YOUTUBE_SCOPES
+  YOUTUBE_SCOPES,
+  TOKEN_CONFIG
 } from '../config';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
@@ -37,18 +38,44 @@ export interface UploadProgress {
 export class YouTubeService {
   private static cache = new CacheService('youtube-service');
   private static retryService = new RetryService();
+  private static connectionListeners: Array<(connected: boolean) => void> = [];
+
+  // Add connection status listener
+  static addConnectionListener(listener: (connected: boolean) => void): () => void {
+    this.connectionListeners.push(listener);
+    
+    return () => {
+      const index = this.connectionListeners.indexOf(listener);
+      if (index > -1) {
+        this.connectionListeners.splice(index, 1);
+      }
+    };
+  }
+
+  // Notify connection status change
+  private static notifyConnectionChange(connected: boolean): void {
+    this.connectionListeners.forEach(listener => {
+      try {
+        listener(connected);
+      } catch (error) {
+        console.error('Error in connection listener:', error);
+      }
+    });
+  }
 
   static async checkConnection(): Promise<YouTubeConnection> {
     try {
+      // Check cache first (shorter duration for connection status)
       const cached = await this.cache.get('connection-status');
-      if (cached && Date.now() - cached.timestamp < 2 * 60 * 1000) {
+      if (cached && Date.now() - cached.timestamp < 60 * 1000) { // 1 minute cache
         return cached.data;
       }
 
-      const accessToken = TokenService.getValidAccessToken();
+      const accessToken = await TokenService.getValidAccessToken();
       if (!accessToken) {
         const result = { isConnected: false, userEmail: null };
-        await this.cache.set('connection-status', result, 2 * 60 * 1000);
+        await this.cache.set('connection-status', result, 30 * 1000); // 30 second cache for negative results
+        this.notifyConnectionChange(false);
         return result;
       }
 
@@ -59,7 +86,8 @@ export class YouTubeService {
         userEmail: userInfo.email,
       };
 
-      await this.cache.set('connection-status', result, 2 * 60 * 1000);
+      await this.cache.set('connection-status', result, 5 * 60 * 1000); // 5 minute cache for positive results
+      this.notifyConnectionChange(true);
       return result;
     } catch (error) {
       console.error('Failed to check YouTube connection:', error);
@@ -67,10 +95,12 @@ export class YouTubeService {
       
       if (this.isAuthError(error)) {
         TokenService.clearTokens();
+        this.notifyConnectionChange(false);
       }
       
       const result = { isConnected: false, userEmail: null };
       await this.cache.set('connection-status', result, 30 * 1000);
+      this.notifyConnectionChange(false);
       return result;
     }
   }
@@ -89,6 +119,7 @@ export class YouTubeService {
         userEmail: userInfo.email,
       }, 5 * 60 * 1000);
       
+      this.notifyConnectionChange(true);
       return { userEmail: userInfo.email };
     } catch (error) {
       console.error('Failed to connect to YouTube:', error);
@@ -96,6 +127,7 @@ export class YouTubeService {
       
       TokenService.clearTokens();
       await this.cache.delete('connection-status');
+      this.notifyConnectionChange(false);
       
       if (this.isUserCancelledError(error)) {
         throw ErrorHandler.createError('USER_CANCELLED', 'Authentication was cancelled');
@@ -117,7 +149,8 @@ export class YouTubeService {
       
       if (accessToken) {
         try {
-          await fetch(`https://oauth2.googleapis.com/revoke?token=${accessToken}`, {
+          // Revoke the token
+          await fetch(`https://oauth2.googleapis.com/revoke?token=${await accessToken}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           });
@@ -128,11 +161,13 @@ export class YouTubeService {
       
       TokenService.clearTokens();
       await this.cache.clear();
+      this.notifyConnectionChange(false);
     } catch (error) {
       console.error('Failed to disconnect from YouTube:', error);
       ErrorHandler.logError('youtube-disconnect', error);
       TokenService.clearTokens();
       await this.cache.clear();
+      this.notifyConnectionChange(false);
       throw error;
     }
   }
@@ -144,7 +179,7 @@ export class YouTubeService {
     onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadResult> {
     try {
-      const accessToken = TokenService.getValidAccessToken();
+      const accessToken = await TokenService.getValidAccessToken();
       if (!accessToken) {
         throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
       }
@@ -164,7 +199,10 @@ export class YouTubeService {
         {
           maxRetries: UPLOAD_CONFIG.maxRetries,
           retryDelay: UPLOAD_CONFIG.retryDelayMs,
-          shouldRetry: (error) => this.isRetryableError(error)
+          shouldRetry: (error) => this.isRetryableError(error),
+          onRetry: (error, attempt) => {
+            console.log(`Retrying upload initiation (attempt ${attempt}):`, error.message);
+          }
         }
       );
       
@@ -179,11 +217,62 @@ export class YouTubeService {
       
       if (this.isAuthError(error)) {
         TokenService.clearTokens();
+        this.notifyConnectionChange(false);
         throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
       }
       
       throw ErrorHandler.createError('UPLOAD_FAILED', ERROR_MESSAGES.UPLOAD_FAILED, error);
     }
+  }
+
+  // Enhanced API request method with automatic token refresh
+  private static async makeAuthenticatedRequest(
+    url: string, 
+    options: RequestInit = {}
+  ): Promise<Response> {
+    let accessToken = await TokenService.getValidAccessToken();
+    
+    if (!accessToken) {
+      throw ErrorHandler.createError('AUTH_REQUIRED', ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
+    }
+
+    const requestOptions: RequestInit = {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        ...options.headers,
+      },
+    };
+
+    let response = await fetch(url, requestOptions);
+
+    // If we get a 401, try to refresh token and retry once
+    if (response.status === 401) {
+      console.log('Received 401, attempting token refresh...');
+      
+      accessToken = await TokenService.refreshAccessToken();
+      
+      if (!accessToken) {
+        throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
+      }
+
+      // Retry request with new token
+      requestOptions.headers = {
+        ...requestOptions.headers,
+        'Authorization': `Bearer ${accessToken}`,
+      };
+
+      response = await fetch(url, requestOptions);
+      
+      // If still 401 after refresh, token is invalid
+      if (response.status === 401) {
+        TokenService.clearTokens();
+        this.notifyConnectionChange(false);
+        throw ErrorHandler.createError('AUTH_TOKEN_INVALID', ERROR_MESSAGES.AUTH_TOKEN_INVALID);
+      }
+    }
+
+    return response;
   }
 
   private static async startOAuthFlow(): Promise<{ access_token: string; expires_in: number }> {
@@ -214,7 +303,16 @@ export class YouTubeService {
       }
 
       const tokenResponse = await this.exchangeCodeForToken(authCode, codeVerifier);
-      TokenService.storeTokens(tokenResponse.access_token, tokenResponse.expires_in);
+      
+      // Store tokens using enhanced TokenService
+      TokenService.storeTokens({
+        access_token: tokenResponse.access_token,
+        refresh_token: tokenResponse.refresh_token,
+        expires_in: tokenResponse.expires_in,
+        token_type: tokenResponse.token_type || 'Bearer',
+        scope: tokenResponse.scope || YOUTUBE_SCOPES,
+      });
+      
       return tokenResponse;
     } catch (error) {
       sessionStorage.removeItem('oauth_code_verifier');
@@ -321,7 +419,7 @@ export class YouTubeService {
     return new Promise(() => {});
   }
 
-  private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<{ access_token: string; expires_in: number }> {
+  private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<any> {
     const tokenData = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       code,
@@ -339,6 +437,11 @@ export class YouTubeService {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Token exchange failed:', errorText);
+      
+      if (errorText.includes('redirect_uri_mismatch')) {
+        throw ErrorHandler.createError('REDIRECT_URI_MISMATCH', ERROR_MESSAGES.REDIRECT_URI_MISMATCH);
+      }
+      
       throw new Error(`Failed to exchange code for token: ${response.status} ${errorText}`);
     }
     
@@ -371,6 +474,9 @@ export class YouTubeService {
     });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
+      }
       throw new Error(`Failed to get user info: ${response.status}`);
     }
     
@@ -390,6 +496,9 @@ export class YouTubeService {
     });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
+      }
       throw new Error(`Failed to initiate resumable upload: ${response.status}`);
     }
     
@@ -423,6 +532,8 @@ export class YouTubeService {
           } catch (parseError) {
             reject(new Error('Failed to parse upload response'));
           }
+        } else if (xhr.status === 401) {
+          reject(ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED));
         } else {
           reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
         }
@@ -437,14 +548,81 @@ export class YouTubeService {
     });
   }
 
-  private static isRetryableError = (e: any) => e?.name === 'TypeError' || e?.name === 'TimeoutError' || (e?.status >= 500 && e?.status < 600) || e?.status === 429;
-  private static isAuthError = (e: any) => e?.status === 401 || e?.message?.includes('Authentication expired') || e?.message?.includes('invalid_grant');
-  private static isUserCancelledError = (e: any) => e?.code === 'POPUP_CLOSED' || e?.code === 'USER_CANCELLED' || e?.message?.includes('access_denied');
-  private static isPopupBlockedError = (e: any) => e?.code === 'POPUP_BLOCKED' || e?.message?.includes('popup');
-  private static isRedirectUriMismatchError = (e: any) => e?.message?.includes('redirect_uri_mismatch') || e?.error === 'redirect_uri_mismatch';
+  // Enhanced error detection methods
+  private static isRetryableError = (e: any) => {
+    // Network errors
+    if (e?.name === 'TypeError' || e?.name === 'TimeoutError') return true;
+    
+    // Server errors
+    if (e?.status >= 500 && e?.status < 600) return true;
+    
+    // Rate limiting
+    if (e?.status === 429) return true;
+    
+    // Temporary auth issues (but not permanent ones)
+    if (e?.status === 502 || e?.status === 503 || e?.status === 504) return true;
+    
+    return false;
+  };
+
+  private static isAuthError = (e: any) => {
+    return e?.status === 401 || 
+           e?.code === 'AUTH_EXPIRED' ||
+           e?.code === 'AUTH_TOKEN_INVALID' ||
+           e?.message?.includes('Authentication expired') || 
+           e?.message?.includes('invalid_grant') ||
+           e?.message?.includes('invalid_token');
+  };
+
+  private static isUserCancelledError = (e: any) => {
+    return e?.code === 'POPUP_CLOSED' || 
+           e?.code === 'USER_CANCELLED' || 
+           e?.message?.includes('access_denied') ||
+           e?.message?.includes('cancelled');
+  };
+
+  private static isPopupBlockedError = (e: any) => {
+    return e?.code === 'POPUP_BLOCKED' || 
+           e?.message?.includes('popup') ||
+           e?.message?.includes('blocked');
+  };
+
+  private static isRedirectUriMismatchError = (e: any) => {
+    return e?.message?.includes('redirect_uri_mismatch') || 
+           e?.error === 'redirect_uri_mismatch' ||
+           e?.code === 'REDIRECT_URI_MISMATCH';
+  };
+
+  // Token refresh integration
+  static async initialize(): Promise<void> {
+    // Set up token refresh listener
+    TokenService.addRefreshListener((success, token) => {
+      if (!success) {
+        console.log('Token refresh failed, clearing connection cache');
+        this.cache.delete('connection-status');
+        this.notifyConnectionChange(false);
+      } else {
+        console.log('Token refreshed successfully');
+        // Optionally update cache with new connection status
+        this.checkConnection().catch(error => {
+          console.error('Failed to verify connection after token refresh:', error);
+        });
+      }
+    });
+
+    // Check initial connection
+    this.checkConnection().catch(error => {
+      console.error('Initial connection check failed:', error);
+    });
+  }
 }
 
 // Handle OAuth callback when the module loads
 if (typeof window !== 'undefined') {
   YouTubeService.handleOAuthCallback();
+  
+  // Initialize the service
+  YouTubeService.initialize().catch(error => {
+    console.error('Failed to initialize YouTube service:', error);
+  });
 }

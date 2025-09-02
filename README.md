@@ -1,6 +1,6 @@
 # RecordLane
 
-A privacy-first, open-source screen recording application that stores all recordings directly in your Google Drive. Built with React, TypeScript, and Google Drive API integration.
+A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, and YouTube API integration.
 
 ## Features
 
@@ -15,35 +15,39 @@ A privacy-first, open-source screen recording application that stores all record
 - **Pause/Resume**: Control your recording flow with pause and resume
 - **Real-time Preview**: See exactly what you're recording
 
-### ☁️ Google Drive Integration
-- **Direct Storage**: All recordings saved directly to your Google Drive
+### ☁️ YouTube Integration
+- **Direct Storage**: All recordings saved directly to your YouTube channel
 - **Privacy First**: Videos never touch our servers
+- **Enhanced Token Management**: Automatic token refresh with robust error handling
 - **Persistent Auth**: Stay connected across browser sessions (device-specific)
-- **Automatic Folder**: Creates "RecordLane Recordings" folder in your Drive
+- **Automatic Upload**: Resume interrupted uploads seamlessly with retry logic
 
 ### ✂️ Editing & Sharing
 - **Client-side Trimming**: Cut your recordings before upload
-- **Instant Share Links**: Get shareable Google Drive links
+- **Instant Share Links**: Get shareable YouTube links
 - **Privacy Controls**: Set viewing permissions for each recording
-- **Automatic Upload**: Resume interrupted uploads seamlessly
+- **Reliable Uploads**: Enhanced retry mechanisms for upload reliability
 
 ### 🚀 Performance & Reliability
-- **Error Recovery**: Comprehensive error handling and retry logic
+- **Enhanced Error Recovery**: Comprehensive error handling with automatic retry logic
+- **Token Refresh**: Automatic authentication token refresh for uninterrupted sessions
+- **Connection Monitoring**: Real-time connection status with automatic reconnection
 - **Optimized Loading**: Lazy loading and intelligent caching
 - **Cross-browser Support**: Works on all modern browsers
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
 
 ## Getting Started
 
-1. **Connect Google Drive**: Authorize RecordLane to access your Google Drive
+1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
 2. **Choose Recording Mode**: Select screen, camera, or both
 3. **Start Recording**: Click the floating record button
 4. **Review & Share**: Edit your recording and get an instant share link
 
 ## Privacy & Security
 
-- **Zero Server Storage**: Your recordings never leave your Google Drive
-- **Encrypted Tokens**: Authentication tokens are encrypted client-side
+- **Zero Server Storage**: Your recordings never leave your YouTube channel
+- **Secure Token Management**: Authentication tokens are managed securely with automatic refresh
+- **Enhanced Privacy**: Advanced token encryption and secure storage
 - **Minimal Permissions**: Only accesses files that RecordLane creates
 - **Open Source**: Full transparency with open source code
 
@@ -57,11 +61,61 @@ A privacy-first, open-source screen recording application that stores all record
 
 RecordLane is built with:
 - React 18 with TypeScript
-- Google Drive API v3
+- YouTube API v3 with enhanced authentication
 - Web Media APIs (MediaRecorder, Screen Capture)
 - Tailwind CSS for styling
 - Vite for development and building
+- Encore.ts for backend services
+
+## Configuration
+
+### OAuth Setup
+
+RecordLane uses Google OAuth 2.0 with PKCE for secure authentication. The application is configured for:
+
+- **Production**: `https://recordlane.com`
+- **Development**: `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev`
+
+### Google Cloud Console Configuration
+
+Ensure your Google Cloud Console project has the following authorized redirect URIs:
+
+- `https://recordlane.com`
+- `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev`
+- `http://localhost:3000` (for local development)
+
+## Enhanced Features
+
+### Token Management
+- Automatic token refresh before expiration
+- Proactive token validation
+- Secure token storage with encryption
+- Real-time token status monitoring
+
+### Error Handling
+- Comprehensive retry logic for API calls
+- Graceful handling of authentication failures
+- User-friendly error messages and recovery options
+- Automatic fallback mechanisms
+
+### Performance
+- Optimized caching with intelligent cleanup
+- Lazy loading for better initial load times
+- Performance monitoring and optimization suggestions
+- Memory usage optimization
+
+## API Endpoints
+
+RecordLane includes a backend service built with Encore.ts:
+
+- **Metadata Service**: Manages recording metadata and listings
+- **Analytics Service**: Tracks usage statistics and performance metrics
+- **Health Service**: Monitors application health and service status
 
 ## License
 
 MIT License - see LICENSE file for details
+
+## Support
+
+For support, email support@recordlane.com or visit [recordlane.com](https://recordlane.com).

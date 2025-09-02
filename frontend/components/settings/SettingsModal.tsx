@@ -30,9 +30,12 @@ import {
   CheckCircle,
   AlertTriangle,
   RotateCcw,
+  RefreshCw,
+  Clock,
 } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { TokenService } from '../../services/tokenService';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function SettingsModal() {
@@ -40,13 +43,16 @@ export default function SettingsModal() {
     isConnected, 
     userEmail, 
     disconnectYouTube, 
-    isConnecting 
+    isConnecting,
+    refreshToken 
   } = useYouTube();
   const { state, dispatch } = useApp();
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [tokenInfo, setTokenInfo] = useState<any>(null);
   const { toast } = useToast();
 
   const isOpen = state.settingsOpen || false;
@@ -58,6 +64,19 @@ export default function SettingsModal() {
     setLocalSettings(state.settings);
     setHasUnsavedChanges(false);
   }, [state.settings, isOpen]);
+
+  // Update token info periodically
+  useEffect(() => {
+    const updateTokenInfo = () => {
+      const info = TokenService.getTokenExpiry();
+      setTokenInfo(info);
+    };
+
+    updateTokenInfo();
+    const interval = setInterval(updateTokenInfo, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isConnected]);
 
   const handleClose = () => {
     if (hasUnsavedChanges) {
@@ -100,6 +119,26 @@ export default function SettingsModal() {
     }
   };
 
+  const handleRefreshToken = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshToken();
+      toast({
+        title: "Token Refreshed",
+        description: "Authentication token has been refreshed successfully.",
+      });
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh authentication token.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
@@ -125,16 +164,32 @@ export default function SettingsModal() {
   };
 
   const getConnectionStatus = () => {
-    if (isConnecting || isDisconnecting) return 'connecting';
+    if (isConnecting || isDisconnecting || isRefreshing) return 'connecting';
     if (isConnected) return 'connected';
     return 'disconnected';
   };
 
   const getConnectionText = () => {
+    if (isRefreshing) return 'Refreshing token...';
     if (isDisconnecting) return 'Disconnecting...';
     if (isConnecting) return 'Connecting...';
     if (isConnected) return `Connected to ${userEmail}`;
     return 'Not connected';
+  };
+
+  const formatTimeRemaining = (seconds: number): string => {
+    if (seconds <= 0) return 'Expired';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m`;
+    } else {
+      return `${seconds}s`;
+    }
   };
 
   if (!isOpen) {
@@ -142,7 +197,7 @@ export default function SettingsModal() {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => !isDisconnecting && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={() => !isDisconnecting && !isRefreshing && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0">
         <ScrollArea className="max-h-[90vh]">
           <div className="p-6">
@@ -199,6 +254,47 @@ export default function SettingsModal() {
                           </div>
                         </div>
 
+                        {/* Token Information */}
+                        {tokenInfo && (
+                          <div className="p-3 bg-muted rounded-lg space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium">Session Status:</span>
+                              <div className="flex items-center space-x-2">
+                                <Clock className="h-4 w-4" />
+                                <span className={tokenInfo.isExpired ? 'text-red-500' : tokenInfo.isNearExpiry ? 'text-yellow-500' : 'text-green-500'}>
+                                  {tokenInfo.isExpired ? 'Expired' : tokenInfo.isNearExpiry ? 'Expires soon' : 'Active'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {!tokenInfo.isExpired && (
+                              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                <span>Time remaining:</span>
+                                <span>{formatTimeRemaining(tokenInfo.expiresIn)}</span>
+                              </div>
+                            )}
+
+                            {(tokenInfo.isExpired || tokenInfo.isNearExpiry) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleRefreshToken}
+                                disabled={isRefreshing}
+                                className="w-full mt-2"
+                              >
+                                {isRefreshing ? (
+                                  <LoadingSpinner text="Refreshing..." size="sm" />
+                                ) : (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Refresh Session
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        )}
+
                         {showDisconnectConfirm ? (
                           <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
                             <div className="flex items-start space-x-3">
@@ -237,7 +333,7 @@ export default function SettingsModal() {
                           <Button
                             variant="outline"
                             onClick={() => setShowDisconnectConfirm(true)}
-                            disabled={isDisconnecting}
+                            disabled={isDisconnecting || isRefreshing}
                             className="text-destructive hover:text-destructive"
                           >
                             <Unlink className="h-4 w-4 mr-2" />
@@ -360,6 +456,9 @@ export default function SettingsModal() {
                       <p>
                         Version: 1.0.0 | Built with React, TypeScript, and YouTube API
                       </p>
+                      <p>
+                        Visit <a href="https://recordlane.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">recordlane.com</a> for updates and documentation.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -372,7 +471,7 @@ export default function SettingsModal() {
                 <Button 
                   variant="outline" 
                   onClick={handleResetSettings}
-                  disabled={isDisconnecting}
+                  disabled={isDisconnecting || isRefreshing}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reset to Defaults
@@ -383,14 +482,14 @@ export default function SettingsModal() {
                 <Button 
                   variant="outline" 
                   onClick={handleClose} 
-                  disabled={isDisconnecting}
+                  disabled={isDisconnecting || isRefreshing}
                 >
                   Cancel
                 </Button>
                 {hasUnsavedChanges && (
                   <Button 
                     onClick={handleSaveSettings}
-                    disabled={isDisconnecting}
+                    disabled={isDisconnecting || isRefreshing}
                   >
                     Save Changes
                   </Button>
@@ -398,7 +497,7 @@ export default function SettingsModal() {
                 {!hasUnsavedChanges && (
                   <Button 
                     onClick={handleClose} 
-                    disabled={isDisconnecting}
+                    disabled={isDisconnecting || isRefreshing}
                   >
                     Close
                   </Button>
