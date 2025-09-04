@@ -70,8 +70,10 @@ export default function ReviewPanel() {
       const video = videoRef.current;
       
       const handleLoadedMetadata = () => {
-        setDuration(video.duration);
-        setTrimEnd(video.duration);
+        if (isFinite(video.duration)) {
+          setDuration(video.duration);
+          setTrimEnd(video.duration);
+        }
       };
 
       const handleTimeUpdate = () => {
@@ -132,10 +134,6 @@ export default function ReviewPanel() {
 
   const handleTrim = () => {
     setShowTrimming(true);
-    toast({
-      title: "Trim Feature",
-      description: "Video trimming is coming soon!",
-    });
   };
 
   const handleSaveLocally = async () => {
@@ -250,6 +248,9 @@ export default function ReviewPanel() {
   };
 
   const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) {
+      return '0:00';
+    }
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -282,6 +283,8 @@ export default function ReviewPanel() {
     return null;
   }
 
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <>
       <Dialog open={true} onOpenChange={() => !isUploading && handleClose()}>
@@ -313,6 +316,12 @@ export default function ReviewPanel() {
                   src={previewUrl}
                   className="w-full h-auto max-h-80"
                   controls={false}
+                  onLoadedMetadata={(e) => {
+                    if (isFinite(e.currentTarget.duration)) {
+                      setDuration(e.currentTarget.duration);
+                      setTrimEnd(e.currentTarget.duration);
+                    }
+                  }}
                 />
                 
                 {/* Play/Pause Overlay */}
@@ -352,7 +361,7 @@ export default function ReviewPanel() {
               </div>
 
               {/* Timeline */}
-              {!uploadSuccess && !savedLocally && (
+              {!uploadSuccess && !savedLocally && !showTrimming && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>{formatTime(currentTime)}</span>
@@ -360,7 +369,7 @@ export default function ReviewPanel() {
                   </div>
                   <div
                     className="h-2 bg-muted rounded-full cursor-pointer trim-timeline"
-                    style={{ '--progress': `${(currentTime / duration) * 100}%` } as any}
+                    style={{ '--progress': `${progressPercentage}%` } as any}
                     onClick={(e) => {
                       if (!isUploading) {
                         const rect = e.currentTarget.getBoundingClientRect();
@@ -371,7 +380,7 @@ export default function ReviewPanel() {
                   >
                     <div
                       className="h-full bg-primary rounded-full relative"
-                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                      style={{ width: `${progressPercentage}%` }}
                     >
                       <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background" />
                     </div>
@@ -380,7 +389,7 @@ export default function ReviewPanel() {
               )}
 
               {/* Recording Details */}
-              {!uploadSuccess && !savedLocally && (
+              {!uploadSuccess && !savedLocally && !showTrimming && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Title</label>
@@ -504,80 +513,93 @@ export default function ReviewPanel() {
 
           {/* Actions Footer */}
           <div className="p-6 border-t border-border">
-            <div className="flex flex-col space-y-4">
-              {!uploadSuccess && !savedLocally && (
-                <>
-                  {/* First row of buttons */}
-                  <div className="flex items-center justify-center space-x-3">
-                    <Button
-                      variant="outline"
-                      onClick={handleTrim}
-                      disabled={isUploading}
-                      className="flex-1 max-w-[200px]"
-                    >
-                      <Scissors className="h-4 w-4 mr-2" />
-                      Trim
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={handleDeleteClick}
-                      disabled={isUploading}
-                      className="flex-1 max-w-[200px]"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
+            {showTrimming ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Trim Video</h3>
+                <p className="text-sm text-muted-foreground">
+                  Trimming functionality is coming soon.
+                </p>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowTrimming(false)}>Cancel</Button>
+                  <Button disabled>Apply Trim</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-4">
+                {!uploadSuccess && !savedLocally && (
+                  <>
+                    {/* First row of buttons */}
+                    <div className="flex items-center justify-center space-x-3">
+                      <Button
+                        variant="outline"
+                        onClick={handleTrim}
+                        disabled={isUploading}
+                        className="flex-1 max-w-[200px]"
+                      >
+                        <Scissors className="h-4 w-4 mr-2" />
+                        Trim
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        onClick={handleDeleteClick}
+                        disabled={isUploading}
+                        className="flex-1 max-w-[200px]"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
 
-                  {/* Second row of buttons */}
-                  <div className="flex items-center justify-center space-x-3">
+                    {/* Second row of buttons */}
+                    <div className="flex items-center justify-center space-x-3">
+                      <Button
+                        variant="outline"
+                        onClick={restartRecording}
+                        disabled={isUploading}
+                        className="flex-1 max-w-[200px]"
+                      >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Restart
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        onClick={handleSaveLocally}
+                        disabled={isUploading || !title.trim()}
+                        className="flex-1 max-w-[200px]"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Locally
+                      </Button>
+                    </div>
+
+                    {/* Sync to YouTube button - full width */}
                     <Button
-                      variant="outline"
-                      onClick={restartRecording}
-                      disabled={isUploading}
-                      className="flex-1 max-w-[200px]"
-                    >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Restart
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={handleSaveLocally}
+                      onClick={handleSyncToYouTube}
                       disabled={isUploading || !title.trim()}
-                      className="flex-1 max-w-[200px]"
+                      className="w-full"
                     >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Locally
+                      {isUploading ? (
+                        <LoadingSpinner text="Syncing..." size="sm" />
+                      ) : (
+                        <>
+                          <Cloud className="h-4 w-4 mr-2" />
+                          Sync to YouTube
+                        </>
+                      )}
                     </Button>
-                  </div>
-
-                  {/* Sync to YouTube button - full width */}
-                  <Button
-                    onClick={handleSyncToYouTube}
-                    disabled={isUploading || !title.trim()}
-                    className="w-full"
-                  >
-                    {isUploading ? (
-                      <LoadingSpinner text="Syncing..." size="sm" />
-                    ) : (
-                      <>
-                        <Cloud className="h-4 w-4 mr-2" />
-                        Sync to YouTube
-                      </>
-                    )}
+                  </>
+                )}
+                
+                {(uploadSuccess || savedLocally) && (
+                  <Button onClick={deleteRecording} className="w-full">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Done
                   </Button>
-                </>
-              )}
-              
-              {(uploadSuccess || savedLocally) && (
-                <Button onClick={deleteRecording} className="w-full">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Done
-                </Button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
