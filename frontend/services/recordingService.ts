@@ -11,6 +11,7 @@ export class RecordingService {
   private animationFrame: number | null = null;
   private screenStream: MediaStream | null = null;
   private cameraStream: MediaStream | null = null;
+  private microphoneStream: MediaStream | null = null;
   private overlayCanvas: HTMLCanvasElement | null = null;
   private overlayContext: CanvasRenderingContext2D | null = null;
   private videoElements: Map<string, HTMLVideoElement> = new Map();
@@ -150,6 +151,11 @@ export class RecordingService {
         this.cameraStream.getTracks().forEach(track => track.stop());
         this.cameraStream = null;
       }
+      
+      if (this.microphoneStream) {
+        this.microphoneStream.getTracks().forEach(track => track.stop());
+        this.microphoneStream = null;
+      }
 
       if (this.stream) {
         this.stream.getTracks().forEach(track => track.stop());
@@ -207,6 +213,11 @@ export class RecordingService {
       streamPromises.push(this.getCameraStream(options));
     }
 
+    // Get microphone stream if needed
+    if (options.microphone) {
+      streamPromises.push(this.getMicrophoneStream(options));
+    }
+
     await Promise.all(streamPromises);
   }
 
@@ -240,10 +251,22 @@ export class RecordingService {
           height: { ideal: 240 },
           frameRate: options.frameRate,
         },
-        audio: options.microphone && options.mode === 'camera', // Only capture mic audio for camera-only mode
+        audio: false, // Microphone is handled separately
       });
     } catch (error) {
       console.error('Failed to get camera stream:', error);
+      throw error;
+    }
+  }
+
+  private async getMicrophoneStream(options: RecordingOptions): Promise<void> {
+    try {
+      this.microphoneStream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true,
+      });
+    } catch (error) {
+      console.error('Failed to get microphone stream:', error);
       throw error;
     }
   }
@@ -443,17 +466,17 @@ export class RecordingService {
     // Get video stream from canvas
     const videoStream = this.canvas.captureStream(options.frameRate);
     
-    // Get audio streams
+    // Get audio tracks
     const audioTracks: MediaStreamTrack[] = [];
     
+    // System audio from screen stream
     if (this.screenStream && options.systemAudio) {
-      const audioTrack = this.screenStream.getAudioTracks()[0];
-      if (audioTrack) audioTracks.push(audioTrack);
+      this.screenStream.getAudioTracks().forEach(track => audioTracks.push(track));
     }
     
-    if (this.cameraStream && options.microphone && options.mode === 'camera') {
-      const audioTrack = this.cameraStream.getAudioTracks()[0];
-      if (audioTrack) audioTracks.push(audioTrack);
+    // Microphone audio from its own stream
+    if (this.microphoneStream && options.microphone) {
+      this.microphoneStream.getAudioTracks().forEach(track => audioTracks.push(track));
     }
 
     // Combine streams
