@@ -6,10 +6,12 @@ import { ConnectionStatus } from '@/components/ui/connection-status';
 import { Video, Wifi, Shield, Download, Zap, AlertTriangle, Play, ExternalLink, Clock } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { useRecording } from '../../contexts/RecordingContext';
 import { withErrorBoundary } from '../ErrorBoundary';
 import { withPerformanceMonitoring } from '../../utils/performanceMonitor';
 import { formatDistanceToNow } from 'date-fns';
 import VideoModal from './VideoModal';
+import RecordingPanel from '../recording/RecordingPanel';
 
 const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: () => void }) => (
   <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
@@ -79,6 +81,7 @@ function formatDuration(ms: number) {
 function MainPanelComponent() {
   const { isConnected, isConnecting, connectionError, retryConnection, connectYouTube } = useYouTube();
   const { state } = useApp();
+  const { state: recordingState } = useRecording();
   const [selectedRecording, setSelectedRecording] = useState(null);
 
   useEffect(() => {
@@ -117,9 +120,16 @@ function MainPanelComponent() {
 
   return (
     <div className="flex-1 p-8">
+      {/* Recording Panel - Always at the top when recording */}
+      {(recordingState === 'recording' || recordingState === 'paused') && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+          <RecordingPanel />
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-20">
           <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <Video className="h-16 w-16 text-primary" />
           </div>
