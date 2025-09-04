@@ -34,7 +34,7 @@ export class PerformanceMonitor {
   private cacheHits = 0;
   private metricsCollectionInterval?: NodeJS.Timeout;
   private lastSuggestionTime = 0;
-  private suggestionCooldown = 60000; // 1 minute cooldown for suggestions
+  private suggestionCooldown = 300000; // 5 minutes cooldown for suggestions
 
   static getInstance(): PerformanceMonitor {
     if (!this.instance) {
@@ -69,7 +69,7 @@ export class PerformanceMonitor {
     // Start periodic metrics collection (reduced frequency)
     this.metricsCollectionInterval = setInterval(() => {
       this.collectMetrics();
-    }, 30000); // Every 30 seconds instead of 10
+    }, 300000); // Every 5 minutes instead of 30 seconds
   }
 
   private startFPSMonitoring(): void {
@@ -283,7 +283,7 @@ export class PerformanceMonitor {
     this.frameCount = 0;
   }
 
-  // Performance optimization suggestions with cooldown
+  // Performance optimization suggestions with reduced frequency
   getOptimizationSuggestions(): string[] {
     const now = Date.now();
     
@@ -320,6 +320,11 @@ export class PerformanceMonitor {
 
     if (metrics.errorCount > 20) {
       suggestions.push('High error count detected. Check error logs and improve error handling.');
+    }
+
+    // Cache hit rate warnings only every 5 minutes
+    if (metrics.cacheHitRate < 50 && this.cacheRequests > 20) {
+      suggestions.push('Low cache hit rate. Consider adjusting cache strategy or data patterns.');
     }
 
     // Update last suggestion time only if we have suggestions

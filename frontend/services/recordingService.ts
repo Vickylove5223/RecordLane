@@ -5,62 +5,180 @@ import { PERFORMANCE_CONFIG, ERROR_MESSAGES } from '../config';
 export class RecordingService {
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
-  private stream: MediaStream | null = null;
-  private canvas: HTMLCanvasElement | null = null;
-  private canvasContext: CanvasRenderingContext2D | null = null;
-  private animationFrame: number | null = null;
+  private composedStream: MediaStream | null = null;
   private screenStream: MediaStream | null = null;
   private cameraStream: MediaStream | null = null;
   private microphoneStream: MediaStream | null = null;
-  private overlayCanvas: HTMLCanvasElement | null = null;
-  private overlayContext: CanvasRenderingContext2D | null = null;
-  private videoElements: Map<string, HTMLVideoElement> = new Map();
-  private clickHandler: ((event: MouseEvent) => void) | null = null;
+  private isRecording = false;
   private retryAttempts = 0;
   private maxRetries = 3;
+  private startTime = 0;
+  private dataAvailableTimeout?: NodeJS.Timeout;
+  private recordingStartPromise?: Promise<void>;
 
   async startRecording(options: RecordingOptions): Promise<void> {
     try {
+      console.log('Starting recording with options:', options);
+      
+      // Reset state
       this.recordedChunks = [];
       this.retryAttempts = 0;
+      this.isRecording = false;
+      this.startTime = Date.now();
       
-      // Check browser support
+      // Clear any existing timeout
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
+      }
+      
       if (!this.checkBrowserSupport()) {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
       }
-      
-      // Get required streams based on mode
+
+      await this.checkAndRequestPermissions(options);
       await this.setupStreams(options);
+      await this.setupMediaRecorder(options);
       
-      // Setup canvas composition
-      this.setupCanvas(options);
-      
-      // Setup overlays if enabled
-      if (options.highlightClicks || options.enableDrawing) {
-        this.setupOverlays(options);
+      if (this.mediaRecorder) {
+        // Set up data available handler with better timing
+        this.mediaRecorder.ondataavailable = (event) => {
+          console.log('Data available:', {
+            dataSize: event.data.size,
+            type: event.data.type,
+            timestamp: Date.now() - this.startTime,
+            totalChunks: this.recordedChunks.length,
+          });
+          
+          if (event.data && event.data.size > 0) {
+            this.recordedChunks.push(event.data);
+            console.log('Chunk added:', {
+              chunkIndex: this.recordedChunks.length - 1,
+              chunkSize: event.data.size,
+              totalSize: this.getTotalSize(),
+              totalChunks: this.recordedChunks.length,
+            });
+          } else {
+            console.warn('Received empty data chunk');
+          }
+        };
+
+        this.mediaRecorder.onstart = () => {
+          console.log('MediaRecorder started successfully');
+          this.isRecording = true;
+          
+          // Set up a fallback timeout to ensure we get data
+          this.dataAvailableTimeout = setTimeout(() => {
+            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+              console.log('Requesting data manually after timeout');
+              try {
+                this.mediaRecorder.requestData();
+              } catch (error) {
+                console.warn('Failed to request data manually:', error);
+              }
+            }
+          }, 5000); // Request data after 5 seconds if none received
+        };
+
+        this.mediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+          ErrorHandler.logError('mediarecorder-runtime-error', event);
+          
+          // Clear timeout on error
+          if (this.dataAvailableTimeout) {
+            clearTimeout(this.dataAvailableTimeout);
+            this.dataAvailableTimeout = undefined;
+          }
+        };
+
+        this.mediaRecorder.onstop = () => {
+          console.log('MediaRecorder stopped');
+          this.isRecording = false;
+          
+          // Clear timeout when stopped
+          if (this.dataAvailableTimeout) {
+            clearTimeout(this.dataAvailableTimeout);
+            this.dataAvailableTimeout = undefined;
+          }
+        };
+
+        // Start recording with smaller timeslice for more frequent data events
+        console.log('Starting MediaRecorder with timeslice...');
+        this.mediaRecorder.start(100); // 100ms timeslice for more frequent data events
+        
+        // Also request data periodically to ensure we get chunks
+        const dataRequestInterval = setInterval(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            try {
+              this.mediaRecorder.requestData();
+            } catch (error) {
+              console.warn('Failed to request data:', error);
+            }
+          } else {
+            clearInterval(dataRequestInterval);
+          }
+        }, 1000); // Request data every second
+
+        console.log('Recording started successfully');
+      } else {
+        throw new Error('MediaRecorder not initialized');
       }
-      
-      // Create composed stream
-      const composedStream = this.createComposedStream(options);
-      
-      // Setup MediaRecorder with error handling
-      this.setupMediaRecorder(composedStream);
-      
-      // Start recording
-      this.mediaRecorder!.start(100); // 100ms timeslice for chunked recording
       
     } catch (error) {
       console.error('Failed to start recording:', error);
       ErrorHandler.logError('recording-start', error, { options });
       this.cleanup();
       
+      // Clear timeout on error
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
+      }
+      
       if (error.name === 'NotAllowedError') {
         throw ErrorHandler.createError('PERMISSIONS_DENIED', ERROR_MESSAGES.PERMISSIONS_DENIED);
       } else if (error.name === 'NotSupportedError') {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'Camera or microphone not found. Please check your devices.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Camera or microphone is already in use by another application.');
+      } else if (error.name === 'OverconstrainedError') {
+        throw ErrorHandler.createError('CONSTRAINTS_NOT_SATISFIED', 'Camera or recording constraints could not be satisfied.');
+      } else if (error.name === 'SecurityError') {
+        throw ErrorHandler.createError('SECURITY_ERROR', 'Recording blocked due to security restrictions. Please ensure you are on HTTPS.');
       }
       
       throw ErrorHandler.createError('RECORDING_FAILED', ERROR_MESSAGES.RECORDING_FAILED, error);
+    }
+  }
+
+  private getTotalSize(): number {
+    return this.recordedChunks.reduce((total, chunk) => total + chunk.size, 0);
+  }
+
+  private async checkAndRequestPermissions(options: RecordingOptions): Promise<void> {
+    try {
+      if (!window.isSecureContext) {
+        throw ErrorHandler.createError('SECURITY_ERROR', 'Recording requires a secure context (HTTPS). Please use HTTPS or localhost.');
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'getUserMedia is not supported in this browser.');
+      }
+
+      if ((options.mode === 'screen' || options.mode === 'screen-camera') && !navigator.mediaDevices.getDisplayMedia) {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'Screen capture is not supported in this browser.');
+      }
+
+    } catch (error) {
+      console.error('Permission check failed:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Recording permissions were denied. Please allow camera and microphone access in your browser settings.');
+      }
+      
+      throw error;
     }
   }
 
@@ -68,6 +186,7 @@ export class RecordingService {
     try {
       if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
         this.mediaRecorder.pause();
+        console.log('Recording paused');
       }
     } catch (error) {
       console.error('Failed to pause recording:', error);
@@ -79,6 +198,7 @@ export class RecordingService {
     try {
       if (this.mediaRecorder && this.mediaRecorder.state === 'paused') {
         this.mediaRecorder.resume();
+        console.log('Recording resumed');
       }
     } catch (error) {
       console.error('Failed to resume recording:', error);
@@ -95,19 +215,108 @@ export class RecordingService {
 
       const timeout = setTimeout(() => {
         reject(ErrorHandler.createError('STOP_TIMEOUT', 'Recording stop timeout'));
-      }, 10000); // 10 second timeout
+      }, 15000);
 
-      this.mediaRecorder.onstop = () => {
+      let dataCollectionComplete = false;
+      let finalDataReceived = false;
+
+      const finalizeRecording = () => {
+        if (dataCollectionComplete) return;
+        dataCollectionComplete = true;
+        
         clearTimeout(timeout);
+        
+        // Clear data request timeout
+        if (this.dataAvailableTimeout) {
+          clearTimeout(this.dataAvailableTimeout);
+          this.dataAvailableTimeout = undefined;
+        }
+        
         try {
-          const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-          this.cleanup();
+          console.log('Finalizing recording with chunks:', {
+            totalChunks: this.recordedChunks.length,
+            totalSize: this.getTotalSize(),
+            duration: Date.now() - this.startTime,
+            finalDataReceived,
+          });
+          
+          if (this.recordedChunks.length === 0) {
+            reject(ErrorHandler.createError('NO_DATA', 'No recording data available - recording may have failed to start properly'));
+            return;
+          }
+
+          const mimeType = this.getOptimalMimeType();
+          console.log('Creating blob with MIME type:', mimeType);
+          
+          // Validate chunks before creating blob
+          const validChunks = this.recordedChunks.filter(chunk => chunk && chunk.size > 0);
+          console.log('Valid chunks:', validChunks.length, 'of', this.recordedChunks.length);
+          
+          if (validChunks.length === 0) {
+            reject(ErrorHandler.createError('NO_VALID_DATA', 'No valid recording data chunks available'));
+            return;
+          }
+
+          const blob = new Blob(validChunks, { type: mimeType });
+          
+          console.log('Created blob:', {
+            size: blob.size,
+            type: blob.type,
+            chunkCount: validChunks.length,
+            duration: Date.now() - this.startTime,
+          });
+          
+          if (blob.size === 0) {
+            reject(ErrorHandler.createError('EMPTY_RECORDING', 'Recording is empty - no data was captured'));
+            return;
+          }
+          
+          // Validate blob can be used
+          try {
+            const url = URL.createObjectURL(blob);
+            URL.revokeObjectURL(url); // Clean up immediately
+            console.log('Blob validation successful');
+          } catch (blobError) {
+            console.error('Blob validation failed:', blobError);
+            reject(ErrorHandler.createError('INVALID_BLOB', 'Created blob is invalid'));
+            return;
+          }
+          
+          this.isRecording = false;
           resolve(blob);
         } catch (error) {
           console.error('Failed to create recording blob:', error);
           ErrorHandler.logError('recording-blob-creation', error);
           reject(ErrorHandler.createError('BLOB_CREATION_FAILED', 'Failed to create recording file'));
         }
+      };
+
+      // Enhanced data available handler for final collection
+      const originalDataHandler = this.mediaRecorder.ondataavailable;
+      this.mediaRecorder.ondataavailable = (event) => {
+        console.log('Final data chunk:', {
+          size: event.data.size,
+          type: event.data.type,
+          isFinal: true,
+        });
+        
+        if (event.data && event.data.size > 0) {
+          this.recordedChunks.push(event.data);
+          finalDataReceived = true;
+        }
+        
+        // Also call original handler if it exists
+        if (originalDataHandler) {
+          originalDataHandler(event);
+        }
+      };
+
+      this.mediaRecorder.onstop = () => {
+        console.log('MediaRecorder stopped, waiting for final data...');
+        // Give a short delay for any final data chunks
+        setTimeout(() => {
+          finalizeRecording();
+        }, 100);
       };
 
       this.mediaRecorder.onerror = (event) => {
@@ -118,7 +327,23 @@ export class RecordingService {
       };
 
       try {
-        this.mediaRecorder.stop();
+        console.log('Stopping MediaRecorder...');
+        
+        // Request final data before stopping
+        if (this.mediaRecorder.state === 'recording' || this.mediaRecorder.state === 'paused') {
+          try {
+            this.mediaRecorder.requestData();
+            console.log('Requested final data before stop');
+          } catch (requestError) {
+            console.warn('Failed to request final data:', requestError);
+          }
+        }
+        
+        if (this.mediaRecorder.state !== 'inactive') {
+          this.mediaRecorder.stop();
+        } else {
+          finalizeRecording();
+        }
       } catch (error) {
         clearTimeout(timeout);
         console.error('Failed to stop MediaRecorder:', error);
@@ -127,64 +352,86 @@ export class RecordingService {
     });
   }
 
+  private getOptimalMimeType(): string {
+    const mimeTypes = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=h264,opus',
+      'video/webm',
+      'video/mp4',
+    ];
+
+    for (const mimeType of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        console.log('Selected MIME type:', mimeType);
+        return mimeType;
+      }
+    }
+
+    console.log('Using fallback MIME type: video/webm');
+    return 'video/webm';
+  }
+
   cleanup(): void {
     try {
-      // Stop animation frame
-      if (this.animationFrame) {
-        cancelAnimationFrame(this.animationFrame);
-        this.animationFrame = null;
+      console.log('Cleaning up recording service');
+
+      // Clear data request timeout
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
       }
 
-      // Remove click handler
-      if (this.clickHandler) {
-        document.removeEventListener('click', this.clickHandler);
-        this.clickHandler = null;
+      if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+        try {
+          this.mediaRecorder.stop();
+        } catch (error) {
+          console.warn('Error stopping MediaRecorder during cleanup:', error);
+        }
       }
 
-      // Stop streams
+      if (this.composedStream) {
+        this.composedStream.getTracks().forEach(track => {
+          track.stop();
+          console.log('Stopped composed stream track:', track.kind);
+        });
+        this.composedStream = null;
+      }
+
       if (this.screenStream) {
-        this.screenStream.getTracks().forEach(track => track.stop());
+        this.screenStream.getTracks().forEach(track => {
+          track.stop();
+          console.log('Stopped screen stream track:', track.kind);
+        });
         this.screenStream = null;
       }
 
       if (this.cameraStream) {
-        this.cameraStream.getTracks().forEach(track => track.stop());
+        this.cameraStream.getTracks().forEach(track => {
+          track.stop();
+          console.log('Stopped camera stream track:', track.kind);
+        });
         this.cameraStream = null;
       }
       
       if (this.microphoneStream) {
-        this.microphoneStream.getTracks().forEach(track => track.stop());
+        this.microphoneStream.getTracks().forEach(track => {
+          track.stop();
+          console.log('Stopped microphone stream track:', track.kind);
+        });
         this.microphoneStream = null;
       }
 
-      if (this.stream) {
-        this.stream.getTracks().forEach(track => track.stop());
-        this.stream = null;
-      }
-
-      // Clean up video elements
-      this.videoElements.forEach(video => {
-        video.pause();
-        video.srcObject = null;
-        video.remove();
-      });
-      this.videoElements.clear();
-
-      // Clean up canvas
-      this.canvas = null;
-      this.canvasContext = null;
-      this.overlayCanvas = null;
-      this.overlayContext = null;
-
-      // Clean up MediaRecorder
       if (this.mediaRecorder) {
         this.mediaRecorder.onstop = null;
         this.mediaRecorder.onerror = null;
         this.mediaRecorder.ondataavailable = null;
+        this.mediaRecorder.onstart = null;
         this.mediaRecorder = null;
       }
       
-      this.recordedChunks = [];
+      this.isRecording = false;
+      console.log('Cleanup completed');
     } catch (error) {
       console.error('Error during cleanup:', error);
       ErrorHandler.logError('recording-cleanup', error);
@@ -201,350 +448,227 @@ export class RecordingService {
   }
 
   private async setupStreams(options: RecordingOptions): Promise<void> {
-    const streamPromises: Promise<void>[] = [];
+    console.log('Setting up streams for mode:', options.mode);
 
-    // Get screen stream if needed
     if (options.mode === 'screen' || options.mode === 'screen-camera') {
-      streamPromises.push(this.getScreenStream(options));
+      await this.getScreenStream(options);
     }
 
-    // Get camera stream if needed
     if (options.mode === 'camera' || options.mode === 'screen-camera') {
-      streamPromises.push(this.getCameraStream(options));
+      await this.getCameraStream(options);
     }
 
-    // Get microphone stream if needed
     if (options.microphone) {
-      streamPromises.push(this.getMicrophoneStream(options));
+      await this.getMicrophoneStream(options);
     }
-
-    await Promise.all(streamPromises);
   }
 
   private async getScreenStream(options: RecordingOptions): Promise<void> {
     try {
-      this.screenStream = await navigator.mediaDevices.getDisplayMedia({
+      console.log('Requesting screen stream...');
+      
+      const constraints: DisplayMediaStreamConstraints = {
         video: {
-          width: this.getResolutionDimensions(options.resolution).width,
-          height: this.getResolutionDimensions(options.resolution).height,
-          frameRate: options.frameRate,
+          width: { ideal: this.getResolutionDimensions(options.resolution).width },
+          height: { ideal: this.getResolutionDimensions(options.resolution).height },
+          frameRate: { ideal: options.frameRate },
         },
         audio: options.systemAudio,
+      };
+
+      this.screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+      
+      console.log('Screen stream obtained:', {
+        videoTracks: this.screenStream.getVideoTracks().length,
+        audioTracks: this.screenStream.getAudioTracks().length,
+        resolution: `${this.screenStream.getVideoTracks()[0]?.getSettings().width}x${this.screenStream.getVideoTracks()[0]?.getSettings().height}`,
       });
 
-      // Handle stream ending (user stops sharing)
       this.screenStream.getVideoTracks()[0].onended = () => {
         console.log('Screen sharing stopped by user');
-        // Could trigger recording stop here
       };
     } catch (error) {
       console.error('Failed to get screen stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Screen sharing permission was denied. Please allow screen sharing and try again.');
+      } else if (error.name === 'NotSupportedError') {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'Screen sharing is not supported in this browser.');
+      } else if (error.name === 'AbortError') {
+        throw ErrorHandler.createError('USER_CANCELLED', 'Screen sharing was cancelled by the user.');
+      }
+      
       throw error;
     }
   }
 
   private async getCameraStream(options: RecordingOptions): Promise<void> {
     try {
-      this.cameraStream = await navigator.mediaDevices.getUserMedia({
+      console.log('Requesting camera stream...');
+      
+      const constraints: MediaStreamConstraints = {
         video: {
-          width: { ideal: 320 },
-          height: { ideal: 240 },
-          frameRate: options.frameRate,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: options.frameRate },
+          facingMode: 'user',
         },
-        audio: false, // Microphone is handled separately
+        audio: false,
+      };
+
+      this.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      console.log('Camera stream obtained:', {
+        videoTracks: this.cameraStream.getVideoTracks().length,
+        audioTracks: this.cameraStream.getAudioTracks().length,
+        resolution: `${this.cameraStream.getVideoTracks()[0]?.getSettings().width}x${this.cameraStream.getVideoTracks()[0]?.getSettings().height}`,
       });
     } catch (error) {
       console.error('Failed to get camera stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Camera permission was denied. Please allow camera access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No camera found. Please connect a camera and try again.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Camera is already in use by another application.');
+      }
+      
       throw error;
     }
   }
 
   private async getMicrophoneStream(options: RecordingOptions): Promise<void> {
     try {
+      console.log('Requesting microphone stream...');
+      
       this.microphoneStream = await navigator.mediaDevices.getUserMedia({
         video: false,
-        audio: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100,
+          sampleSize: 16,
+        },
+      });
+      
+      console.log('Microphone stream obtained:', {
+        audioTracks: this.microphoneStream.getAudioTracks().length,
+        settings: this.microphoneStream.getAudioTracks()[0]?.getSettings(),
       });
     } catch (error) {
       console.error('Failed to get microphone stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Microphone permission was denied. Please allow microphone access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No microphone found. Please connect a microphone and try again.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Microphone is already in use by another application.');
+      }
+      
       throw error;
     }
   }
 
-  private setupCanvas(options: RecordingOptions): void {
-    const dimensions = this.getResolutionDimensions(options.resolution);
+  private async setupMediaRecorder(options: RecordingOptions): Promise<void> {
+    this.composedStream = this.createComposedStream(options);
     
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = dimensions.width;
-    this.canvas.height = dimensions.height;
-    this.canvasContext = this.canvas.getContext('2d', {
-      alpha: false,
-      desynchronized: true, // Optimize for performance
-    })!;
-    
-    // Start composition loop
-    this.startComposition(options);
-  }
-
-  private setupOverlays(options: RecordingOptions): void {
-    const dimensions = this.getResolutionDimensions(options.resolution);
-    
-    this.overlayCanvas = document.createElement('canvas');
-    this.overlayCanvas.width = dimensions.width;
-    this.overlayCanvas.height = dimensions.height;
-    this.overlayContext = this.overlayCanvas.getContext('2d')!;
-
-    if (options.highlightClicks) {
-      this.setupClickHighlights();
+    if (!this.composedStream) {
+      throw new Error('Failed to create composed stream');
     }
 
-    if (options.enableDrawing) {
-      this.setupDrawingTools();
+    console.log('Composed stream created:', {
+      videoTracks: this.composedStream.getVideoTracks().length,
+      audioTracks: this.composedStream.getAudioTracks().length,
+    });
+
+    const mimeType = this.getOptimalMimeType();
+    console.log('Selected MIME type:', mimeType);
+
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      throw new Error(`MIME type ${mimeType} is not supported`);
     }
-  }
 
-  private setupClickHighlights(): void {
-    // Listen for click events and draw ripple effects
-    this.clickHandler = (event: MouseEvent) => {
-      if (this.overlayContext) {
-        this.drawClickRipple(event.clientX, event.clientY);
-      }
-    };
-
-    document.addEventListener('click', this.clickHandler);
-  }
-
-  private setupDrawingTools(): void {
-    // This would implement drawing functionality
-    // For now, just a placeholder
-    console.log('Drawing tools would be implemented here');
-  }
-
-  private drawClickRipple(x: number, y: number): void {
-    if (!this.overlayContext) return;
-
-    const startTime = Date.now();
-    const duration = 500; // 500ms animation
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      if (progress < 1) {
-        // Clear previous frame
-        this.overlayContext!.clearRect(0, 0, this.overlayCanvas!.width, this.overlayCanvas!.height);
-        
-        // Draw ripple
-        const radius = progress * 50;
-        const opacity = 1 - progress;
-        
-        this.overlayContext!.beginPath();
-        this.overlayContext!.arc(x, y, radius, 0, 2 * Math.PI);
-        this.overlayContext!.strokeStyle = `rgba(66, 165, 245, ${opacity})`;
-        this.overlayContext!.lineWidth = 3;
-        this.overlayContext!.stroke();
-        
-        requestAnimationFrame(animate);
-      }
-    };
-    
-    animate();
-  }
-
-  private startComposition(options: RecordingOptions): void {
-    let lastFrameTime = 0;
-    const targetFrameInterval = 1000 / options.frameRate;
-
-    const compose = (currentTime: number) => {
-      if (!this.canvasContext || !this.canvas) return;
-
-      // Throttle frame rate
-      if (currentTime - lastFrameTime < targetFrameInterval) {
-        this.animationFrame = requestAnimationFrame(compose);
-        return;
-      }
-      lastFrameTime = currentTime;
-
-      try {
-        // Clear canvas
-        this.canvasContext.fillStyle = '#000000';
-        this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Draw screen if available
-        if (this.screenStream && (options.mode === 'screen' || options.mode === 'screen-camera')) {
-          const video = this.getOrCreateVideoElement('screen', this.screenStream);
-          if (video.readyState >= 2) {
-            this.canvasContext.drawImage(video, 0, 0, this.canvas.width, this.canvas.height);
-          }
-        }
-
-        // Draw camera if available
-        if (this.cameraStream && (options.mode === 'camera' || options.mode === 'screen-camera')) {
-          const video = this.getOrCreateVideoElement('camera', this.cameraStream);
-          if (video.readyState >= 2) {
-            if (options.mode === 'camera') {
-              // Full screen camera
-              this.canvasContext.drawImage(video, 0, 0, this.canvas.width, this.canvas.height);
-            } else {
-              // Picture-in-picture
-              this.drawPictureInPicture(video);
-            }
-          }
-        }
-
-        // Draw overlays
-        if (this.overlayCanvas) {
-          this.canvasContext.drawImage(this.overlayCanvas, 0, 0);
-        }
-
-        this.animationFrame = requestAnimationFrame(compose);
-      } catch (error) {
-        console.error('Error in composition loop:', error);
-        ErrorHandler.logError('composition-error', error);
-      }
-    };
-
-    this.animationFrame = requestAnimationFrame(compose);
-  }
-
-  private getOrCreateVideoElement(key: string, stream: MediaStream): HTMLVideoElement {
-    let video = this.videoElements.get(key);
-    
-    if (!video) {
-      video = document.createElement('video');
-      video.srcObject = stream;
-      video.muted = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      
-      // Handle video errors
-      video.onerror = (error) => {
-        console.error(`Video element error for ${key}:`, error);
-        ErrorHandler.logError('video-element-error', error, { key });
+    try {
+      const recorderOptions = {
+        mimeType,
+        videoBitsPerSecond: this.getVideoBitrate(options.resolution),
+        audioBitsPerSecond: 128000,
       };
-      
-      this.videoElements.set(key, video);
-      
-      // Start playing
-      video.play().catch(error => {
-        console.error(`Failed to play video for ${key}:`, error);
+
+      this.mediaRecorder = new MediaRecorder(this.composedStream, recorderOptions);
+
+      console.log('MediaRecorder created successfully:', {
+        mimeType: this.mediaRecorder.mimeType,
+        state: this.mediaRecorder.state,
+        videoBitsPerSecond: recorderOptions.videoBitsPerSecond,
+        audioBitsPerSecond: recorderOptions.audioBitsPerSecond,
       });
+    } catch (error) {
+      console.error('Failed to create MediaRecorder:', error);
+      throw new Error(`Failed to create MediaRecorder: ${error.message}`);
     }
-    
-    return video;
-  }
-
-  private drawPictureInPicture(video: HTMLVideoElement): void {
-    if (!this.canvasContext || !this.canvas) return;
-
-    const pipWidth = this.canvas.width * 0.25;
-    const pipHeight = pipWidth * (video.videoHeight / video.videoWidth);
-    const pipX = this.canvas.width - pipWidth - 20;
-    const pipY = 20;
-    
-    // Draw PiP background with rounded corners
-    this.canvasContext.save();
-    this.canvasContext.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    this.canvasContext.fillRect(pipX - 5, pipY - 5, pipWidth + 10, pipHeight + 10);
-    
-    // Clip to rounded rectangle for camera
-    const radius = 8;
-    this.canvasContext.beginPath();
-    this.canvasContext.roundRect(pipX, pipY, pipWidth, pipHeight, radius);
-    this.canvasContext.clip();
-    
-    // Draw camera
-    this.canvasContext.drawImage(video, pipX, pipY, pipWidth, pipHeight);
-    this.canvasContext.restore();
   }
 
   private createComposedStream(options: RecordingOptions): MediaStream {
-    if (!this.canvas) {
-      throw new Error('Canvas not initialized');
+    const tracks: MediaStreamTrack[] = [];
+
+    if (options.mode === 'screen' || options.mode === 'screen-camera') {
+      if (this.screenStream) {
+        const videoTrack = this.screenStream.getVideoTracks()[0];
+        if (videoTrack) {
+          tracks.push(videoTrack);
+          console.log('Added screen video track');
+        }
+      }
     }
 
-    // Get video stream from canvas
-    const videoStream = this.canvas.captureStream(options.frameRate);
-    
-    // Get audio tracks
-    const audioTracks: MediaStreamTrack[] = [];
-    
-    // System audio from screen stream
+    if (options.mode === 'camera') {
+      if (this.cameraStream) {
+        const videoTrack = this.cameraStream.getVideoTracks()[0];
+        if (videoTrack) {
+          tracks.push(videoTrack);
+          console.log('Added camera video track');
+        }
+      }
+    }
+
     if (this.screenStream && options.systemAudio) {
-      this.screenStream.getAudioTracks().forEach(track => audioTracks.push(track));
+      const audioTracks = this.screenStream.getAudioTracks();
+      audioTracks.forEach(track => {
+        tracks.push(track);
+        console.log('Added system audio track');
+      });
     }
-    
-    // Microphone audio from its own stream
+
     if (this.microphoneStream && options.microphone) {
-      this.microphoneStream.getAudioTracks().forEach(track => audioTracks.push(track));
+      const audioTracks = this.microphoneStream.getAudioTracks();
+      audioTracks.forEach(track => {
+        tracks.push(track);
+        console.log('Added microphone audio track');
+      });
     }
 
-    // Combine streams
-    const combinedStream = new MediaStream([
-      ...videoStream.getVideoTracks(),
-      ...audioTracks,
-    ]);
+    if (tracks.length === 0) {
+      throw new Error('No media tracks available for recording');
+    }
 
-    return combinedStream;
+    console.log('Creating MediaStream with', tracks.length, 'tracks');
+    return new MediaStream(tracks);
   }
 
-  private setupMediaRecorder(stream: MediaStream): void {
-    // Choose the best available codec
-    const mimeTypes = [
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm;codecs=h264,opus',
-      'video/webm',
-    ];
-
-    let mimeType = '';
-    for (const type of mimeTypes) {
-      if (MediaRecorder.isTypeSupported(type)) {
-        mimeType = type;
-        break;
-      }
-    }
-
-    if (!mimeType) {
-      throw new Error('No supported MediaRecorder mime type found');
-    }
-
-    this.mediaRecorder = new MediaRecorder(stream, {
-      mimeType,
-      videoBitsPerSecond: this.getVideoBitrate(),
-      audioBitsPerSecond: 128000, // 128 kbps for audio
-    });
-
-    this.mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        this.recordedChunks.push(event.data);
-      }
-    };
-
-    this.mediaRecorder.onerror = (event) => {
-      console.error('MediaRecorder error:', event);
-      ErrorHandler.logError('mediarecorder-error', event);
-    };
-
-    this.mediaRecorder.onstart = () => {
-      console.log('MediaRecorder started');
-    };
-
-    this.mediaRecorder.onstop = () => {
-      console.log('MediaRecorder stopped');
-    };
-  }
-
-  private getVideoBitrate(): number {
-    // Return appropriate bitrate based on resolution
-    const resolution = this.canvas?.width || 1280;
-    
-    if (resolution >= 1920) {
-      return 5000000; // 5 Mbps for 1080p
-    } else if (resolution >= 1280) {
-      return 2500000; // 2.5 Mbps for 720p
-    } else {
-      return 1000000; // 1 Mbps for 480p
+  private getVideoBitrate(resolution: string): number {
+    switch (resolution) {
+      case '480p':
+        return 1500000;
+      case '720p':
+        return 3000000;
+      case '1080p':
+        return 6000000;
+      default:
+        return 3000000;
     }
   }
 
@@ -559,5 +683,60 @@ export class RecordingService {
       default:
         return { width: 1280, height: 720 };
     }
+  }
+
+  static async checkPermissions(mode: 'screen' | 'camera' | 'screen-camera', microphone: boolean = false): Promise<{
+    camera: boolean;
+    microphone: boolean;
+    screenCapture: boolean;
+  }> {
+    const permissions = {
+      camera: false,
+      microphone: false,
+      screenCapture: false,
+    };
+
+    try {
+      if (!window.isSecureContext) {
+        return permissions;
+      }
+
+      if (!navigator.mediaDevices) {
+        return permissions;
+      }
+
+      if (mode === 'camera' || mode === 'screen-camera') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 1, height: 1 },
+            audio: false
+          });
+          stream.getTracks().forEach(track => track.stop());
+          permissions.camera = true;
+        } catch (error) {
+          permissions.camera = false;
+        }
+      }
+
+      if (microphone) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: true
+          });
+          stream.getTracks().forEach(track => track.stop());
+          permissions.microphone = true;
+        } catch (error) {
+          permissions.microphone = false;
+        }
+      }
+
+      permissions.screenCapture = !!(navigator.mediaDevices.getDisplayMedia);
+
+    } catch (error) {
+      console.error('Permission check failed:', error);
+    }
+
+    return permissions;
   }
 }

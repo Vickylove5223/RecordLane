@@ -111,7 +111,7 @@ export class TokenService {
     try {
       const tokenData = this.getStoredTokenData();
       if (!tokenData) {
-        console.log('No stored token data found');
+        console.debug('No stored token data found');
         return null;
       }
 

@@ -107,182 +107,167 @@ export default function OnboardingModal() {
 
   return (
     <Dialog open={true}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-        <ScrollArea className="max-h-[90vh]">
-          <div className="p-6">
-            <DialogHeader className="text-center mb-6">
-              <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                <Video className="h-8 w-8 text-primary" />
-              </div>
-              <DialogTitle className="text-2xl">Welcome to RecordLane</DialogTitle>
-              <DialogDescription className="text-lg">
-                Record your screen and camera instantly, with optional YouTube sync
-              </DialogDescription>
-            </DialogHeader>
+      <DialogContent className="max-w-lg max-h-[90vh] p-0 border-0 bg-transparent shadow-none">
+        <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-8 text-center overflow-hidden">
+          {/* Background blur effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl" />
+          
+          {/* Content */}
+          <div className="relative z-10">
+            {/* Logo/Icon */}
+            <div className="mx-auto mb-6 w-20 h-20 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+              <Video className="h-10 w-10 text-white" />
+            </div>
 
-            <div className="space-y-6">
-              {/* Features */}
-              <div className="grid gap-4">
-                {features.map((feature) => (
-                  <Card key={feature.title} className="border-border/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-4">
-                        <div className={`p-2 rounded-lg bg-background ${feature.color}`}>
-                          <feature.icon className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold mb-1">{feature.title}</h3>
-                          <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+            {/* Title */}
+            <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              RecordLane
+            </h1>
 
-              {/* YouTube Benefits */}
-              <Card className="border-dashed">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3 flex items-center">
-                    <Cloud className="h-5 w-5 mr-2 text-blue-500" />
-                    YouTube Sync Benefits (Optional)
-                  </h3>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center space-x-3">
-                      <Shield className="h-4 w-4 text-green-500" />
-                      <span>Automatic cloud backup to your YouTube channel</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Zap className="h-4 w-4 text-blue-500" />
-                      <span>Instant shareable links for collaboration</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
-                      <span>Access recordings from any device</span>
-                    </div>
+            {/* Subtitle */}
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+              Beautiful screen recordings with instant YouTube sync and privacy-first design
+            </p>
+
+            {/* Features */}
+            <div className="space-y-4 mb-8">
+              {features.map((feature) => (
+                <div key={feature.title} className="flex items-start space-x-3 text-left">
+                  <div className={`p-2 rounded-lg ${feature.color} bg-opacity-10`}>
+                    <feature.icon className={`h-4 w-4 ${feature.color}`} />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Connection Status */}
-              {isConnecting || connectionError ? (
-                <div className="text-center py-4">
-                  <ConnectionStatus 
-                    status={getConnectionStatus()}
-                    text={getConnectionText()}
-                    className="mx-auto"
-                  />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-sm text-gray-900 dark:text-white">{feature.title}</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{feature.description}</p>
+                  </div>
                 </div>
-              ) : null}
+              ))}
+            </div>
 
-              {/* Error Display */}
-              {connectionError && (
-                <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-red-800 dark:text-red-200 mb-1">
-                          Connection Failed
-                        </h3>
-                        <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                          {connectionError}
-                        </p>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={handleRetry}
-                            disabled={isConnecting}
-                            variant="outline"
-                            className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300"
-                          >
-                            {isConnecting ? (
-                              <LoadingSpinner text="Retrying..." size="sm" />
-                            ) : (
-                              <>
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                                Try Again
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleSkip}
-                            className="text-red-700 hover:bg-red-100 dark:text-red-300"
-                          >
-                            Skip for now
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+            {/* Connection Status */}
+            {(isConnecting || connectionError) && (
+              <div className="mb-6">
+                <ConnectionStatus 
+                  status={getConnectionStatus()}
+                  text={getConnectionText()}
+                  className="mx-auto"
+                />
+              </div>
+            )}
 
-              {/* Call to Action */}
-              <div className="text-center space-y-4 pt-4">
-                {!isConnected ? (
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold">Get Started</h3>
-                      <p className="text-sm text-muted-foreground">
-                        You can start recording immediately! Connect YouTube for cloud sync, or skip to record locally.
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {/* Error Display */}
+            {connectionError && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 text-left">
+                    <h3 className="font-medium text-red-800 dark:text-red-200 mb-1 text-sm">
+                      Connection Failed
+                    </h3>
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                      {connectionError}
+                    </p>
+                    <div className="flex space-x-2">
                       <Button
-                        size="lg"
-                        onClick={handleConnect}
+                        size="sm"
+                        onClick={handleRetry}
                         disabled={isConnecting}
-                        className="flex-1 sm:flex-none"
+                        variant="outline"
+                        className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300"
                       >
                         {isConnecting ? (
-                          <LoadingSpinner text="Connecting..." size="sm" />
+                          <LoadingSpinner text="Retrying..." size="sm" />
                         ) : (
                           <>
-                            <Cloud className="h-4 w-4 mr-2" />
-                            Connect YouTube
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Try Again
                           </>
                         )}
                       </Button>
-                      
                       <Button
-                        size="lg"
-                        variant="outline"
+                        size="sm"
+                        variant="ghost"
                         onClick={handleSkip}
-                        disabled={isConnecting}
-                        className="flex-1 sm:flex-none"
+                        className="text-red-700 hover:bg-red-100 dark:text-red-300"
                       >
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Recording
+                        Skip for now
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center space-x-2 text-green-600">
-                      <CheckCircle className="h-5 w-5" />
-                      <span className="font-medium">Connected Successfully!</span>
-                    </div>
-                    <Button onClick={handleComplete} size="lg" className="w-full max-w-xs">
-                      Continue to RecordLane
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                )}
-
-                <p className="text-xs text-muted-foreground">
-                  {!isConnected 
-                    ? "YouTube connection is optional. You can record locally and connect later from settings."
-                    : "You can disconnect or reconnect anytime from settings."
-                  }
-                </p>
+                </div>
               </div>
+            )}
+
+            {/* Call to Action */}
+            {!isConnected ? (
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Get Started</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    You can start recording immediately! Connect YouTube for cloud sync, or skip to record locally.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    size="lg"
+                    onClick={handleConnect}
+                    disabled={isConnecting}
+                    className="w-full h-12 bg-gradient-to-r from-red-500 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    {isConnecting ? (
+                      <LoadingSpinner text="Connecting..." size="sm" />
+                    ) : (
+                      <>
+                        <Cloud className="h-5 w-5 mr-2" />
+                        Connect YouTube
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={handleSkip}
+                    disabled={isConnecting}
+                    className="w-full h-12 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-all duration-200"
+                  >
+                    <Play className="h-5 w-5 mr-2" />
+                    Start Recording
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center space-x-2 text-green-600">
+                  <CheckCircle className="h-6 w-6" />
+                  <span className="font-medium">Connected Successfully!</span>
+                </div>
+                <Button 
+                  onClick={handleComplete} 
+                  size="lg" 
+                  className="w-full h-12 bg-gradient-to-r from-red-500 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Continue to RecordLane
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
+            )}
+
+            {/* Footer */}
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">
+              {!isConnected 
+                ? "YouTube connection is optional. You can record locally and connect later from settings."
+                : "You can disconnect or reconnect anytime from settings."
+              }
+            </p>
+
+            {/* Credits */}
+            <div className="mt-4 text-xs text-gray-400 dark:text-gray-600">
+              Created with lots of ☕ 💜 🎵 🐦 @RecordLaneHQ
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

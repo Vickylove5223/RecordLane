@@ -2,46 +2,45 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoadingSpinner } from '@/components/ui/spinner';
-import { Settings, Search } from 'lucide-react';
+import { Settings, Circle } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { useRecording } from '../../contexts/RecordingContext';
+import FloatingRecordButton from '../recording/FloatingRecordButton';
 
 export default function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
+  const { state: recordingState } = useRecording();
   const [showSettings, setShowSettings] = useState(false);
 
   const handleSettingsClick = () => {
     dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
   };
 
+  const showRecordButton = recordingState !== 'recording' && recordingState !== 'paused' && recordingState !== 'starting';
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-6">
       {/* Logo */}
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-purple-600 rounded-lg flex items-center justify-center">
             <div className="w-4 h-4 bg-primary-foreground rounded-full"></div>
           </div>
           <span className="font-semibold text-lg">RecordLane</span>
         </div>
       </div>
 
-      {/* Search (optional) */}
-      <div className="flex-1 max-w-md mx-8">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search recordings..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-            disabled={isConnecting}
-          />
-        </div>
-      </div>
-
       {/* Right Actions */}
       <div className="flex items-center space-x-4">
+        {/* Record Button - Only show when not recording */}
+        {showRecordButton && (
+          <div className="relative">
+            <FloatingRecordButton />
+          </div>
+        )}
+
         <Button
           variant="ghost"
           size="sm"

@@ -32,9 +32,14 @@ import {
   RotateCcw,
   RefreshCw,
   Clock,
+  Video,
+  Mic,
+  Camera,
+  Monitor,
 } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { useRecording } from '../../contexts/RecordingContext';
 import { TokenService } from '../../services/tokenService';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -44,9 +49,11 @@ export default function SettingsModal() {
     userEmail, 
     disconnectYouTube, 
     isConnecting,
-    refreshToken 
+    refreshToken,
+    connectYouTube
   } = useYouTube();
   const { state, dispatch } = useApp();
+  const { permissionStatus, checkPermissions, requestPermissions } = useRecording();
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -57,7 +64,6 @@ export default function SettingsModal() {
 
   const isOpen = state.settingsOpen || false;
 
-  // Track changes to detect unsaved settings
   const [localSettings, setLocalSettings] = useState(state.settings);
 
   useEffect(() => {
@@ -65,7 +71,6 @@ export default function SettingsModal() {
     setHasUnsavedChanges(false);
   }, [state.settings, isOpen]);
 
-  // Update token info periodically
   useEffect(() => {
     const updateTokenInfo = () => {
       const info = TokenService.getTokenExpiry();
@@ -73,10 +78,16 @@ export default function SettingsModal() {
     };
 
     updateTokenInfo();
-    const interval = setInterval(updateTokenInfo, 30000); // Update every 30 seconds
+    const interval = setInterval(updateTokenInfo, 30000);
 
     return () => clearInterval(interval);
   }, [isConnected]);
+
+  useEffect(() => {
+    if (isOpen) {
+      checkPermissions();
+    }
+  }, [isOpen, checkPermissions]);
 
   const handleClose = () => {
     if (hasUnsavedChanges) {
@@ -139,6 +150,18 @@ export default function SettingsModal() {
     }
   };
 
+  const handleConnect = async () => {
+    try {
+      await connectYouTube();
+      toast({
+        title: "YouTube Connected",
+        description: "Successfully connected to YouTube",
+      });
+    } catch (error) {
+      console.error('Failed to connect:', error);
+    }
+  };
+
   const handleDisconnect = async () => {
     setIsDisconnecting(true);
     try {
@@ -160,6 +183,20 @@ export default function SettingsModal() {
       });
     } finally {
       setIsDisconnecting(false);
+    }
+  };
+
+  const handleRequestPermission = async (type: 'camera' | 'microphone') => {
+    try {
+      const granted = await requestPermissions(type);
+      if (granted) {
+        toast({
+          title: "Permission Granted",
+          description: `${type.charAt(0).toUpperCase() + type.slice(1)} access has been granted.`,
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to request ${type} permission:`, error);
     }
   };
 
@@ -192,6 +229,28 @@ export default function SettingsModal() {
     }
   };
 
+  const getPermissionIcon = (status: string) => {
+    switch (status) {
+      case 'granted':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'denied':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'checking':
+        return <LoadingSpinner size="sm" />;
+      default:
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+    }
+  };
+
+  const getPermissionText = (status: string) => {
+    switch (status) {
+      case 'granted': return 'Granted';
+      case 'denied': return 'Denied';
+      case 'checking': return 'Checking...';
+      default: return 'Not requested';
+    }
+  };
+
   if (!isOpen) {
     return null;
   }
@@ -220,7 +279,6 @@ export default function SettingsModal() {
               <SettingsPageSkeleton />
             ) : (
               <div className="space-y-6">
-                {/* YouTube Connection */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -254,7 +312,6 @@ export default function SettingsModal() {
                           </div>
                         </div>
 
-                        {/* Token Information */}
                         {tokenInfo && (
                           <div className="p-3 bg-muted rounded-lg space-y-2">
                             <div className="flex items-center justify-between text-sm">
@@ -301,7 +358,7 @@ export default function SettingsModal() {
                               <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                               <div className="flex-1">
                                 <p className="text-sm text-destructive mb-3">
-                                  Are you sure you want to disconnect? You'll need to reconnect to record new videos.
+                                  Are you sure you want to disconnect? You'll need to reconnect to sync recordings to YouTube.
                                   Your existing recordings on YouTube will not be affected.
                                 </p>
                                 <div className="flex space-x-2">
@@ -343,22 +400,115 @@ export default function SettingsModal() {
                       </>
                     ) : (
                       <div className="text-center py-6">
-                        <p className="text-muted-foreground mb-4">No YouTube connection</p>
-                        <Button onClick={handleClose}>
-                          Connect YouTube
+                        <p className="text-muted-foreground mb-4">
+                          Connect YouTube to sync your recordings to the cloud
+                        </p>
+                        <Button 
+                          onClick={handleConnect}
+                          disabled={isConnecting}
+                          className="w-full"
+                        >
+                          {isConnecting ? (
+                            <LoadingSpinner text="Connecting..." size="sm" />
+                          ) : (
+                            'Connect YouTube'
+                          )}
                         </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          YouTube connection is optional. You can record locally without it.
+                        </p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                {/* Recording Settings */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recording Defaults</CardTitle>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Shield className="h-5 w-5" />
+                      <span>Device Permissions</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Camera className="h-4 w-4" />
+                          <div>
+                            <span className="font-medium">Camera Access</span>
+                            <p className="text-xs text-muted-foreground">Required for camera recording</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getPermissionIcon(permissionStatus.camera)}
+                          <span className="text-sm">{getPermissionText(permissionStatus.camera)}</span>
+                          {permissionStatus.camera === 'denied' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRequestPermission('camera')}
+                            >
+                              Request
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Mic className="h-4 w-4" />
+                          <div>
+                            <span className="font-medium">Microphone Access</span>
+                            <p className="text-xs text-muted-foreground">Required for audio recording</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getPermissionIcon(permissionStatus.microphone)}
+                          <span className="text-sm">{getPermissionText(permissionStatus.microphone)}</span>
+                          {permissionStatus.microphone === 'denied' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRequestPermission('microphone')}
+                            >
+                              Request
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Monitor className="h-4 w-4" />
+                          <div>
+                            <span className="font-medium">Screen Capture</span>
+                            <p className="text-xs text-muted-foreground">Required for screen recording</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getPermissionIcon(permissionStatus.screen)}
+                          <span className="text-sm">{getPermissionText(permissionStatus.screen)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Note:</strong> Screen capture permission is requested when you start recording. 
+                        Camera and microphone permissions are required for those specific features.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Video className="h-5 w-5" />
+                      <span>Recording Defaults</span>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Resolution */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Resolution</label>
@@ -381,7 +531,6 @@ export default function SettingsModal() {
                       </Select>
                     </div>
 
-                    {/* Frame Rate */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Frame Rate</label>
@@ -403,7 +552,6 @@ export default function SettingsModal() {
                       </Select>
                     </div>
 
-                    {/* Click Highlights */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Highlight Clicks by Default</label>
@@ -417,7 +565,6 @@ export default function SettingsModal() {
                       />
                     </div>
 
-                    {/* Default Privacy */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Privacy</label>
@@ -442,7 +589,6 @@ export default function SettingsModal() {
                   </CardContent>
                 </Card>
 
-                {/* About */}
                 <Card>
                   <CardHeader>
                     <CardTitle>About RecordLane</CardTitle>
@@ -452,6 +598,10 @@ export default function SettingsModal() {
                       <p>
                         RecordLane is an open-source screen recording tool that stores all recordings
                         directly in your YouTube account for maximum privacy and control.
+                      </p>
+                      <p>
+                        <strong>Features:</strong> Local recording, optional YouTube sync, privacy-first design, 
+                        and cross-browser support.
                       </p>
                       <p>
                         Version: 1.0.0 | Built with React, TypeScript, and YouTube API
@@ -465,7 +615,6 @@ export default function SettingsModal() {
               </div>
             )}
 
-            {/* Footer */}
             <div className="flex justify-between pt-6 border-t border-border">
               <div className="flex space-x-2">
                 <Button 
