@@ -121,6 +121,12 @@ export class AnalyticsService {
       return;
     }
 
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      console.log("Analytics flush skipped: browser is offline.");
+      // Don't clear the queue, it will be flushed when back online.
+      return;
+    }
+
     const eventsToSend = [...this.eventQueue];
     this.eventQueue = [];
 

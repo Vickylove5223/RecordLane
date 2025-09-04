@@ -87,11 +87,36 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Failed to start recording:', error);
       setState('idle');
-      toast({
-        title: "Recording Failed",
-        description: "Failed to start recording. Please check permissions.",
-        variant: "destructive",
-      });
+      
+      // Detailed error handling
+      if (error.code === 'PERMISSIONS_DENIED') {
+        toast({
+          title: "Permissions Required",
+          description: error.message || "Please allow camera and microphone access in your browser, then try again.",
+          variant: "destructive",
+        });
+      } else if (error.code === 'BROWSER_NOT_SUPPORTED') {
+        toast({
+          title: "Browser Not Supported",
+          description: error.message || "Please use Chrome, Edge, or Firefox for screen recording.",
+          variant: "destructive",
+        });
+      } else if (error.code === 'SECURITY_ERROR') {
+        toast({
+          title: "Security Error",
+          description: error.message || "Recording requires HTTPS. Please access the site securely.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Recording Failed",
+          description: error.message || "Failed to start recording. Please try again.",
+          variant: "destructive",
+        });
+      }
+      
+      // Re-throw the error so UI components can also react if needed
+      throw error;
     }
   }, [startTimer, toast]);
 

@@ -77,59 +77,13 @@ export default function FloatingRecordButton() {
     setIsMenuOpen(false);
     
     try {
-      // Check permissions first
-      const permissions = await RecordingService.checkPermissions(mode, options.microphone);
-      
-      // Check if required permissions are available
-      if ((mode === 'camera' || mode === 'screen-camera') && !permissions.camera) {
-        toast({
-          title: "Camera Permission Required",
-          description: "Please allow camera access in your browser settings and try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (options.microphone && !permissions.microphone) {
-        toast({
-          title: "Microphone Permission Required",
-          description: "Please allow microphone access in your browser settings and try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Start recording with the selected mode
+      // The context now handles detailed error toasts.
+      // We just call startRecording and the context will manage state and feedback.
       await startRecording({ ...options, mode });
     } catch (error) {
-      console.error('Failed to start recording:', error);
-      
-      // Show user-friendly error message
-      if (error.code === 'PERMISSIONS_DENIED') {
-        toast({
-          title: "Permissions Required",
-          description: "Please allow camera and microphone access in your browser, then try again.",
-          variant: "destructive",
-        });
-      } else if (error.code === 'BROWSER_NOT_SUPPORTED') {
-        toast({
-          title: "Browser Not Supported",
-          description: "Please use Chrome, Edge, or Firefox for screen recording.",
-          variant: "destructive",
-        });
-      } else if (error.code === 'SECURITY_ERROR') {
-        toast({
-          title: "Security Error",
-          description: "Recording requires HTTPS. Please access the site securely.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Recording Failed",
-          description: error.message || "Failed to start recording. Please try again.",
-          variant: "destructive",
-        });
-      }
+      // The error is already handled and toasted by the context.
+      // We can add component-specific logic here if needed, but for now, just log it for debugging.
+      console.log(`Recording start failed at component level for mode: ${mode}`, error);
     }
   };
 
