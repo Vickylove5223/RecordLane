@@ -66,6 +66,8 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
 
       const handleEnded = () => {
         setIsPlaying(false);
+        // Reset to beginning when video ends
+        video.currentTime = 0;
         setCurrentTime(0);
       };
 
@@ -90,6 +92,10 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
+        // If video has ended, restart from beginning
+        if (videoRef.current.ended || videoRef.current.currentTime >= videoRef.current.duration) {
+          videoRef.current.currentTime = 0;
+        }
         videoRef.current.play().catch(error => {
           console.error('Failed to play video:', error);
           toast({

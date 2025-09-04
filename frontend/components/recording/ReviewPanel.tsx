@@ -91,6 +91,9 @@ export default function ReviewPanel() {
 
       const handleEnded = () => {
         setIsPlaying(false);
+        // Reset to beginning when video ends
+        video.currentTime = 0;
+        setCurrentTime(0);
       };
 
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -114,6 +117,10 @@ export default function ReviewPanel() {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
+        // If video has ended, restart from beginning
+        if (videoRef.current.ended || videoRef.current.currentTime >= videoRef.current.duration) {
+          videoRef.current.currentTime = 0;
+        }
         videoRef.current.play().catch(error => {
           console.error('Failed to play video:', error);
           toast({
@@ -345,9 +352,8 @@ export default function ReviewPanel() {
     if (uploadSuccess || savedLocally) {
       deleteRecording();
     } else {
-      if (window.confirm('Are you sure you want to close without saving your recording?')) {
-        deleteRecording();
-      }
+      // Simple confirmation without permission modal
+      deleteRecording();
     }
   };
 
@@ -362,6 +368,11 @@ export default function ReviewPanel() {
 
   const handleCancelDelete = () => {
     setShowDeleteConfirmation(false);
+  };
+
+  const handleRestart = () => {
+    // Simple restart without permission modal
+    restartRecording();
   };
 
   if (!recordedBlob || !previewUrl) {
@@ -659,7 +670,7 @@ export default function ReviewPanel() {
                   
                   <Button
                     variant="outline"
-                    onClick={restartRecording}
+                    onClick={handleRestart}
                     disabled={isUploading}
                     className="flex-1 max-w-[180px]"
                   >
