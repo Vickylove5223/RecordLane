@@ -1,23 +1,19 @@
+import backend from '~backend/client';
 import { TokenService } from './tokenService';
 import { ErrorHandler } from '../utils/errorHandler';
 import { CacheService } from '../utils/cacheService';
 import { RetryService } from '../utils/retryService';
 import { 
-  GOOGLE_CLIENT_ID, 
   UPLOAD_CONFIG, 
   ERROR_MESSAGES, 
   getRedirectUri, 
-  OAUTH_CONFIG, 
   POPUP_CONFIG,
-  DEV_CONFIG,
   YOUTUBE_SCOPES,
-  TOKEN_CONFIG,
   PKCE_CONFIG
 } from '../config';
 
 const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 const YOUTUBE_UPLOAD_API_BASE = 'https://www.googleapis.com/upload/youtube/v3';
-const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 
 export interface YouTubeConnection {
@@ -40,6 +36,7 @@ export class YouTubeService {
   private static cache = new CacheService('youtube-service');
   private static retryService = new RetryService();
   private static connectionListeners: Array<(connected: boolean) => void> = [];
+  private static clientID: string | null = null;
 
   static addConnectionListener(listener: (connected: boolean) => void): () => void {
     this.connectionListeners.push(listener);
@@ -268,6 +265,15 @@ export class YouTubeService {
     return response;
   }
 
+  private static async getClientID(): Promise<string> {
+    if (this.clientID) {
+      return this.clientID;
+    }
+    const config = await backend.auth.getConfig();
+    this.clientID = config.clientID;
+    return this.clientID;
+  }
+
   private static async startOAuthFlow(): Promise<{ access_token: string; expires_in: number }> {
     try {
       const codeVerifier = this.generateCodeVerifier();
@@ -278,7 +284,7 @@ export class YouTubeService {
       sessionStorage.setItem('oauth_state', state);
       sessionStorage.setItem('oauth_redirect_uri', getRedirectUri());
 
-      const authUrl = this.buildAuthUrl(codeChallenge, state);
+      const authUrl = await this.buildAuthUrl(codeChallenge, state);
 
       let authCode: string;
 
@@ -311,12 +317,13 @@ export class YouTubeService {
     }
   }
 
-  private static buildAuthUrl(codeChallenge: string, state: string): string {
+  private static async buildAuthUrl(codeChallenge: string, state: string): Promise<string> {
+    const clientID = await this.getClientID();
     const redirectUri = getRedirectUri();
     console.log('Building auth URL with redirect URI:', redirectUri);
     
     const params = new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
+      client_id: clientID,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: YOUTUBE_SCOPES,
@@ -455,65 +462,32 @@ export class YouTubeService {
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<any> {
     const redirectUri = getRedirectUri();
     
-    const tokenData = new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      code,
-      code_verifier: codeVerifier,
-      grant_type: 'authorization_code',
-      redirect_uri: redirectUri,
-    });
-    
-    console.log('Exchanging authorization code for tokens...', {
+    console.log('Exchanging authorization code for tokens via backend...', {
       redirectUri,
       hasCode: !!code,
       hasCodeVerifier: !!codeVerifier,
     });
     
-    const response = await fetch(TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-      },
-      body: tokenData,
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Token exchange failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText,
+    try {
+      const tokenResponse = await backend.auth.exchangeCode({
+        code,
+        codeVerifier,
+        redirectUri,
+      });
+
+      console.log('Token exchange successful:', {
+        hasAccessToken: !!tokenResponse.access_token,
+        hasRefreshToken: !!tokenResponse.refresh_token,
+        expiresIn: tokenResponse.expires_in,
+        tokenType: tokenResponse.token_type,
+        scope: tokenResponse.scope,
       });
       
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { error: 'unknown_error', error_description: errorText };
-      }
-      
-      if (errorData.error === 'redirect_uri_mismatch') {
-        throw ErrorHandler.createError('REDIRECT_URI_MISMATCH', ERROR_MESSAGES.REDIRECT_URI_MISMATCH);
-      }
-      
-      if (errorData.error === 'invalid_grant') {
-        throw ErrorHandler.createError('INVALID_GRANT', ERROR_MESSAGES.INVALID_GRANT);
-      }
-      
-      throw new Error(`Token exchange failed: ${response.status} ${errorData.error_description || errorData.error}`);
+      return tokenResponse;
+    } catch (error) {
+      console.error('Backend token exchange failed:', error);
+      throw error;
     }
-    
-    const tokenResponse = await response.json();
-    console.log('Token exchange successful:', {
-      hasAccessToken: !!tokenResponse.access_token,
-      hasRefreshToken: !!tokenResponse.refresh_token,
-      expiresIn: tokenResponse.expires_in,
-      tokenType: tokenResponse.token_type,
-      scope: tokenResponse.scope,
-    });
-    
-    return tokenResponse;
   }
 
   private static generateCodeVerifier(): string {

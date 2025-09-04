@@ -71,22 +71,35 @@ RecordLane is built with:
 
 ### OAuth Setup
 
-RecordLane uses Google OAuth 2.0 with PKCE for secure authentication. The application is configured for development:
-
-- **Development**: `http://localhost:8089` (or your preferred port)
+RecordLane uses a backend-proxied Google OAuth 2.0 flow for secure authentication.
 
 ### Google Cloud Console Configuration
 
-Ensure your Google Cloud Console project has the following authorized redirect URIs:
+1.  **Create OAuth Credentials**
+    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    - Navigate to "APIs & Services" > "Credentials".
+    - Click "Create Credentials" > "OAuth client ID".
+    - Select **"Web application"** as the application type.
+    - Give it a name (e.g., "RecordLane Web Client").
 
-<<<<<<< HEAD
-- `http://localhost:8089/auth/callback` (for local development)
-- `http://localhost:5173/auth/callback` (for Vite default port)
-- `http://localhost:3000/auth/callback` (alternative port)
-=======
-- `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev/auth/callback`
-- `http://localhost:3000/auth/callback` (for local development)
->>>>>>> 5e9d3b03bfb090ad01a07028fb707e813e785e29
+2.  **Configure Authorized Redirect URIs**
+    - Under "Authorized redirect URIs", add the following URIs. You will need to add the URI for your Leap development environment and any production URLs.
+    - `https://<your-app-url>.lp.dev/auth/callback`
+    - `http://localhost:8089/auth/callback` (for local development)
+    - `http://localhost:5173/auth/callback` (for Vite default port)
+
+3.  **Get Client ID and Secret**
+    - After creating the credential, you will be given a **Client ID** and a **Client Secret**.
+
+4.  **Set Encore Secrets**
+    - Go to the Infrastructure tab in your Leap application.
+    - Create two secrets:
+        - `GoogleClientID`: Paste your Client ID here.
+        - `GoogleClientSecret`: Paste your Client Secret here.
+
+5.  **Enable APIs**
+    - Go to "APIs & Services" > "Library".
+    - Search for and enable the **"YouTube Data API v3"**.
 
 ## Enhanced Features
 
@@ -112,6 +125,7 @@ Ensure your Google Cloud Console project has the following authorized redirect U
 
 RecordLane includes a backend service built with Encore.ts:
 
+- **Auth Service**: Manages secure OAuth 2.0 flow with Google.
 - **Metadata Service**: Manages recording metadata and listings
 - **Analytics Service**: Tracks usage statistics and performance metrics
 - **Health Service**: Monitors application health and service status

@@ -1,8 +1,5 @@
 // Configuration for the RecordLane application
 
-// Google OAuth Configuration
-export const GOOGLE_CLIENT_ID = '104046752889-schirpg4cp1ckr4i587dmc97qhlkmjnt.apps.googleusercontent.com';
-
 // YouTube API Configuration
 export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
@@ -13,7 +10,7 @@ export const YOUTUBE_SCOPES = [
 
 // OAuth Configuration with PKCE
 export const OAUTH_CONFIG = {
-  clientId: GOOGLE_CLIENT_ID,
+  clientId: '', // This will be fetched from the backend
   scope: YOUTUBE_SCOPES,
   responseType: 'code',
   accessType: 'offline',

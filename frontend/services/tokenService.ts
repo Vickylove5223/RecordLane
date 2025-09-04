@@ -1,5 +1,6 @@
+import backend from '~backend/client';
 import { ErrorHandler } from '../utils/errorHandler';
-import { TOKEN_CONFIG, ERROR_MESSAGES, GOOGLE_CLIENT_ID } from '../config';
+import { TOKEN_CONFIG, ERROR_MESSAGES } from '../config';
 
 // Enhanced token management with automatic refresh
 
@@ -170,65 +171,15 @@ export class TokenService {
 
         console.log(`Attempting to refresh access token (attempt ${attempt + 1}/${maxRetries})...`);
 
-        const response = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            client_id: GOOGLE_CLIENT_ID,
-            refresh_token: tokenData.refreshToken,
-            grant_type: 'refresh_token',
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Token refresh failed:', response.status, errorText);
-          
-          // Parse error response
-          let errorData;
-          try {
-            errorData = JSON.parse(errorText);
-          } catch (e) {
-            errorData = { error: 'unknown_error', error_description: errorText };
-          }
-
-          // Handle specific error cases
-          if (response.status === 400) {
-            if (errorData.error === 'invalid_grant') {
-              console.log('Refresh token is invalid or expired, clearing tokens');
-              this.clearTokens();
-              this.notifyRefreshListeners(false);
-              throw ErrorHandler.createError('REFRESH_TOKEN_EXPIRED', ERROR_MESSAGES.REFRESH_TOKEN_EXPIRED);
-            }
-          }
-
-          // For server errors, retry
-          if (response.status >= 500 && attempt < maxRetries - 1) {
-            console.log(`Server error ${response.status}, retrying in ${TOKEN_CONFIG.refreshRetryDelay}ms...`);
-            await this.delay(TOKEN_CONFIG.refreshRetryDelay);
-            attempt++;
-            continue;
-          }
-          
-          throw new Error(`Token refresh failed: ${response.status} ${errorData.error_description || errorData.error}`);
-        }
-
-        const refreshData = await response.json();
-        
-        // Validate refresh response
-        if (!refreshData.access_token) {
-          throw new Error('No access token in refresh response');
-        }
+        const refreshData = await backend.auth.refreshToken({ refreshToken: tokenData.refreshToken });
 
         // Create new token data
         const newTokenData: TokenData = {
           access_token: refreshData.access_token,
-          refresh_token: refreshData.refresh_token || tokenData.refreshToken, // Keep old refresh token if new one not provided
-          expires_in: refreshData.expires_in || 3600,
-          token_type: refreshData.token_type || 'Bearer',
-          scope: refreshData.scope || tokenData.scope,
+          refresh_token: tokenData.refreshToken, // Refresh token doesn't change on refresh
+          expires_in: refreshData.expires_in,
+          token_type: refreshData.token_type,
+          scope: refreshData.scope,
           id_token: refreshData.id_token,
         };
 
@@ -271,10 +222,12 @@ export class TokenService {
       'unauthorized_client',
     ];
 
+    const errorMessage = error?.message?.toLowerCase() || '';
+    const errorCode = error?.code?.toLowerCase() || '';
+
     return nonRetryableCodes.some(code => 
-      error.code === code || 
-      error.message?.includes(code) || 
-      error.error === code
+      errorCode.includes(code) || 
+      errorMessage.includes(code)
     );
   }
 
