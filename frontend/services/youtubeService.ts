@@ -41,7 +41,6 @@ export class YouTubeService {
   private static retryService = new RetryService();
   private static connectionListeners: Array<(connected: boolean) => void> = [];
 
-  // Add connection status listener
   static addConnectionListener(listener: (connected: boolean) => void): () => void {
     this.connectionListeners.push(listener);
     
@@ -53,7 +52,6 @@ export class YouTubeService {
     };
   }
 
-  // Notify connection status change
   private static notifyConnectionChange(connected: boolean): void {
     this.connectionListeners.forEach(listener => {
       try {
@@ -66,16 +64,15 @@ export class YouTubeService {
 
   static async checkConnection(): Promise<YouTubeConnection> {
     try {
-      // Check cache first (shorter duration for connection status)
       const cached = await this.cache.get('connection-status');
-      if (cached && Date.now() - cached.timestamp < 60 * 1000) { // 1 minute cache
+      if (cached && Date.now() - cached.timestamp < 60 * 1000) {
         return cached.data;
       }
 
       const accessToken = await TokenService.getValidAccessToken();
       if (!accessToken) {
         const result = { isConnected: false, userEmail: null };
-        await this.cache.set('connection-status', result, 30 * 1000); // 30 second cache for negative results
+        await this.cache.set('connection-status', result, 30 * 1000);
         this.notifyConnectionChange(false);
         return result;
       }
@@ -87,7 +84,7 @@ export class YouTubeService {
         userEmail: userInfo.email,
       };
 
-      await this.cache.set('connection-status', result, 5 * 60 * 1000); // 5 minute cache for positive results
+      await this.cache.set('connection-status', result, 5 * 60 * 1000);
       this.notifyConnectionChange(true);
       return result;
     } catch (error) {
@@ -150,7 +147,6 @@ export class YouTubeService {
       
       if (accessToken) {
         try {
-          // Revoke the token
           await fetch(`https://oauth2.googleapis.com/revoke?token=${accessToken}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -226,7 +222,6 @@ export class YouTubeService {
     }
   }
 
-  // Enhanced API request method with automatic token refresh
   private static async makeAuthenticatedRequest(
     url: string, 
     options: RequestInit = {}
@@ -247,7 +242,6 @@ export class YouTubeService {
 
     let response = await fetch(url, requestOptions);
 
-    // If we get a 401, try to refresh token and retry once
     if (response.status === 401) {
       console.log('Received 401, attempting token refresh...');
       
@@ -257,7 +251,6 @@ export class YouTubeService {
         throw ErrorHandler.createError('AUTH_EXPIRED', ERROR_MESSAGES.TOKEN_EXPIRED);
       }
 
-      // Retry request with new token
       requestOptions.headers = {
         ...requestOptions.headers,
         'Authorization': `Bearer ${accessToken}`,
@@ -265,7 +258,6 @@ export class YouTubeService {
 
       response = await fetch(url, requestOptions);
       
-      // If still 401 after refresh, token is invalid
       if (response.status === 401) {
         TokenService.clearTokens();
         this.notifyConnectionChange(false);
@@ -282,7 +274,6 @@ export class YouTubeService {
       const codeChallenge = await this.generateCodeChallenge(codeVerifier);
       const state = this.generateState();
 
-      // Store PKCE data in sessionStorage
       sessionStorage.setItem('oauth_code_verifier', codeVerifier);
       sessionStorage.setItem('oauth_state', state);
       sessionStorage.setItem('oauth_redirect_uri', getRedirectUri());
@@ -297,7 +288,6 @@ export class YouTubeService {
       console.log('Authorization code received, exchanging for tokens...');
       const tokenResponse = await this.exchangeCodeForToken(authCode, codeVerifier);
       
-      // Store tokens using enhanced TokenService
       TokenService.storeTokens({
         access_token: tokenResponse.access_token,
         refresh_token: tokenResponse.refresh_token,
@@ -309,14 +299,12 @@ export class YouTubeService {
       
       return tokenResponse;
     } catch (error) {
-      // Cleanup session storage on error
       sessionStorage.removeItem('oauth_code_verifier');
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_redirect_uri');
       console.error('OAuth flow failed:', error);
       throw error;
     } finally {
-      // Cleanup session storage
       sessionStorage.removeItem('oauth_code_verifier');
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_redirect_uri');
@@ -347,7 +335,6 @@ export class YouTubeService {
 
   private static async openOAuthPopup(authUrl: string, expectedState: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      // Calculate popup position to center it
       const screenWidth = window.screen.width;
       const screenHeight = window.screen.height;
       const popupWidth = POPUP_CONFIG.width;
@@ -384,14 +371,12 @@ export class YouTubeService {
           try {
             currentUrl = popup.location.href;
           } catch (e) {
-            // Cross-origin error, popup still on Google's domain
             return;
           }
 
           const url = new URL(currentUrl);
           const redirectUri = getRedirectUri();
           
-          // Check if we're back on our domain
           if (url.origin === new URL(redirectUri).origin) {
             clearInterval(pollTimer);
             clearTimeout(timeout);
@@ -420,7 +405,6 @@ export class YouTubeService {
             }
           }
         } catch (error) {
-          // Ignore cross-origin errors during polling
           if (error.name !== 'SecurityError') {
             console.warn('Unexpected error during popup polling:', error);
           }
@@ -493,7 +477,6 @@ export class YouTubeService {
     return tokenResponse;
   }
 
-  // PKCE utility methods
   private static generateCodeVerifier(): string {
     const array = new Uint8Array(PKCE_CONFIG.codeVerifierLength / 2);
     crypto.getRandomValues(array);
@@ -521,7 +504,6 @@ export class YouTubeService {
   }
 
   static handleOAuthCallback() {
-    // Check if we're handling an OAuth callback
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
@@ -621,20 +603,11 @@ export class YouTubeService {
     });
   }
 
-  // Enhanced error detection methods
   private static isRetryableError = (e: any) => {
-    // Network errors
     if (e?.name === 'TypeError' || e?.name === 'TimeoutError') return true;
-    
-    // Server errors
     if (e?.status >= 500 && e?.status < 600) return true;
-    
-    // Rate limiting
     if (e?.status === 429) return true;
-    
-    // Temporary auth issues (but not permanent ones)
     if (e?.status === 502 || e?.status === 503 || e?.status === 504) return true;
-    
     return false;
   };
 
@@ -666,9 +639,7 @@ export class YouTubeService {
            e?.code === 'REDIRECT_URI_MISMATCH';
   };
 
-  // Token refresh integration
   static async initialize(): Promise<void> {
-    // Set up token refresh listener
     TokenService.addRefreshListener((success, token) => {
       if (!success) {
         console.log('Token refresh failed, clearing connection cache');
@@ -676,25 +647,21 @@ export class YouTubeService {
         this.notifyConnectionChange(false);
       } else {
         console.log('Token refreshed successfully');
-        // Optionally update cache with new connection status
         this.checkConnection().catch(error => {
           console.error('Failed to verify connection after token refresh:', error);
         });
       }
     });
 
-    // Check initial connection
     this.checkConnection().catch(error => {
       console.error('Initial connection check failed:', error);
     });
   }
 }
 
-// Handle OAuth callback when the module loads
 if (typeof window !== 'undefined') {
   YouTubeService.handleOAuthCallback();
   
-  // Initialize the service
   YouTubeService.initialize().catch(error => {
     console.error('Failed to initialize YouTube service:', error);
   });

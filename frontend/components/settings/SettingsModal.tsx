@@ -64,7 +64,6 @@ export default function SettingsModal() {
 
   const isOpen = state.settingsOpen || false;
 
-  // Track changes to detect unsaved settings
   const [localSettings, setLocalSettings] = useState(state.settings);
 
   useEffect(() => {
@@ -72,7 +71,6 @@ export default function SettingsModal() {
     setHasUnsavedChanges(false);
   }, [state.settings, isOpen]);
 
-  // Update token info periodically
   useEffect(() => {
     const updateTokenInfo = () => {
       const info = TokenService.getTokenExpiry();
@@ -80,12 +78,11 @@ export default function SettingsModal() {
     };
 
     updateTokenInfo();
-    const interval = setInterval(updateTokenInfo, 30000); // Update every 30 seconds
+    const interval = setInterval(updateTokenInfo, 30000);
 
     return () => clearInterval(interval);
   }, [isConnected]);
 
-  // Check permissions when modal opens
   useEffect(() => {
     if (isOpen) {
       checkPermissions();
@@ -162,7 +159,6 @@ export default function SettingsModal() {
       });
     } catch (error) {
       console.error('Failed to connect:', error);
-      // Error is already handled in YouTubeContext
     }
   };
 
@@ -283,7 +279,6 @@ export default function SettingsModal() {
               <SettingsPageSkeleton />
             ) : (
               <div className="space-y-6">
-                {/* YouTube Connection */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -317,7 +312,6 @@ export default function SettingsModal() {
                           </div>
                         </div>
 
-                        {/* Token Information */}
                         {tokenInfo && (
                           <div className="p-3 bg-muted rounded-lg space-y-2">
                             <div className="flex items-center justify-between text-sm">
@@ -428,7 +422,6 @@ export default function SettingsModal() {
                   </CardContent>
                 </Card>
 
-                {/* Permissions */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -508,7 +501,6 @@ export default function SettingsModal() {
                   </CardContent>
                 </Card>
 
-                {/* Recording Settings */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -517,7 +509,6 @@ export default function SettingsModal() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Resolution */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Resolution</label>
@@ -540,7 +531,6 @@ export default function SettingsModal() {
                       </Select>
                     </div>
 
-                    {/* Frame Rate */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Frame Rate</label>
@@ -562,7 +552,6 @@ export default function SettingsModal() {
                       </Select>
                     </div>
 
-                    {/* Click Highlights */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Highlight Clicks by Default</label>
@@ -576,7 +565,6 @@ export default function SettingsModal() {
                       />
                     </div>
 
-                    {/* Default Privacy */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Default Privacy</label>
@@ -601,7 +589,6 @@ export default function SettingsModal() {
                   </CardContent>
                 </Card>
 
-                {/* About */}
                 <Card>
                   <CardHeader>
                     <CardTitle>About RecordLane</CardTitle>
@@ -628,7 +615,6 @@ export default function SettingsModal() {
               </div>
             )}
 
-            {/* Footer */}
             <div className="flex justify-between pt-6 border-t border-border">
               <div className="flex space-x-2">
                 <Button 

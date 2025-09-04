@@ -50,7 +50,7 @@ type AppAction =
   | { type: 'RESET_SETTINGS' };
 
 const initialState: AppState = {
-  isOnboarded: true, // Set to true to skip onboarding
+  isOnboarded: true,
   settingsOpen: false,
   shareModalOpen: false,
   settings: {
@@ -69,7 +69,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
     switch (action.type) {
       case 'SET_ONBOARDED':
         const newOnboardedState = { ...state, isOnboarded: action.payload };
-        // Save to localStorage immediately
         saveStateToStorage(newOnboardedState);
         return newOnboardedState;
         
@@ -91,7 +90,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
           ...state, 
           settings: { ...state.settings, ...action.payload } 
         };
-        // Save to localStorage immediately
         saveStateToStorage(newSettingsState);
         return newSettingsState;
         
@@ -150,7 +148,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-// Helper function to save state to localStorage
 function saveStateToStorage(state: AppState): void {
   try {
     const stateToSave = {
@@ -160,10 +157,9 @@ function saveStateToStorage(state: AppState): void {
       shareModalData: undefined,
       isLoading: false,
       error: null,
-      // Don't save blob data to localStorage
       recordings: state.recordings.map(recording => ({
         ...recording,
-        localBlob: undefined, // Remove blob data for storage
+        localBlob: undefined,
       })),
     };
     
@@ -204,7 +200,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Load state from localStorage on mount
   React.useEffect(() => {
     const loadState = async () => {
       try {
@@ -239,7 +234,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadState();
   }, []);
 
-  // Handle state errors
   React.useEffect(() => {
     if (state.error) {
       console.error('App state error:', state.error);

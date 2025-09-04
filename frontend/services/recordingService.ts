@@ -23,23 +23,15 @@ export class RecordingService {
       this.isRecording = false;
       this.startTime = Date.now();
       
-      // Check browser support first
       if (!this.checkBrowserSupport()) {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
       }
 
-      // Check and request permissions before attempting to get streams
       await this.checkAndRequestPermissions(options);
-      
-      // Get required streams based on mode
       await this.setupStreams(options);
-      
-      // Create MediaRecorder with proper configuration
       await this.setupMediaRecorder(options);
       
-      // Start recording
       if (this.mediaRecorder) {
-        // Set up data available handler before starting
         this.mediaRecorder.ondataavailable = (event) => {
           console.log('Data available:', event.data.size, 'bytes');
           if (event.data && event.data.size > 0) {
@@ -58,9 +50,7 @@ export class RecordingService {
           ErrorHandler.logError('mediarecorder-runtime-error', event);
         };
 
-        // Start with timeslice to ensure data is collected regularly
-        this.mediaRecorder.start(1000); // 1 second timeslice
-        
+        this.mediaRecorder.start(250);
         console.log('Recording started successfully');
       } else {
         throw new Error('MediaRecorder not initialized');
@@ -95,12 +85,10 @@ export class RecordingService {
 
   private async checkAndRequestPermissions(options: RecordingOptions): Promise<void> {
     try {
-      // Check if we're on a secure context (HTTPS or localhost)
       if (!window.isSecureContext) {
         throw ErrorHandler.createError('SECURITY_ERROR', 'Recording requires a secure context (HTTPS). Please use HTTPS or localhost.');
       }
 
-      // Check if required APIs are available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'getUserMedia is not supported in this browser.');
       }
@@ -153,7 +141,7 @@ export class RecordingService {
 
       const timeout = setTimeout(() => {
         reject(ErrorHandler.createError('STOP_TIMEOUT', 'Recording stop timeout'));
-      }, 15000); // 15 second timeout
+      }, 15000);
 
       let dataCollectionComplete = false;
 
@@ -172,7 +160,6 @@ export class RecordingService {
             return;
           }
 
-          // Create blob with proper MIME type
           const mimeType = this.getOptimalMimeType();
           const blob = new Blob(this.recordedChunks, { type: mimeType });
           
@@ -197,7 +184,6 @@ export class RecordingService {
         }
       };
 
-      // Handle data available one more time to catch any remaining data
       this.mediaRecorder.ondataavailable = (event) => {
         console.log('Final data chunk:', event.data.size, 'bytes');
         if (event.data && event.data.size > 0) {
@@ -207,7 +193,6 @@ export class RecordingService {
 
       this.mediaRecorder.onstop = () => {
         console.log('MediaRecorder stopped');
-        // Give a small delay to ensure all data is collected
         setTimeout(finalizeRecording, 500);
       };
 
@@ -223,7 +208,6 @@ export class RecordingService {
           console.log('Stopping MediaRecorder...');
           this.mediaRecorder.stop();
         } else {
-          // Already stopped, finalize immediately
           finalizeRecording();
         }
       } catch (error) {
@@ -249,14 +233,13 @@ export class RecordingService {
       }
     }
 
-    return 'video/webm'; // Fallback
+    return 'video/webm';
   }
 
   cleanup(): void {
     try {
       console.log('Cleaning up recording service');
 
-      // Stop MediaRecorder
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         try {
           this.mediaRecorder.stop();
@@ -265,7 +248,6 @@ export class RecordingService {
         }
       }
 
-      // Stop streams
       if (this.composedStream) {
         this.composedStream.getTracks().forEach(track => {
           track.stop();
@@ -298,7 +280,6 @@ export class RecordingService {
         this.microphoneStream = null;
       }
 
-      // Clean up MediaRecorder
       if (this.mediaRecorder) {
         this.mediaRecorder.onstop = null;
         this.mediaRecorder.onerror = null;
@@ -327,17 +308,14 @@ export class RecordingService {
   private async setupStreams(options: RecordingOptions): Promise<void> {
     console.log('Setting up streams for mode:', options.mode);
 
-    // Get screen stream if needed
     if (options.mode === 'screen' || options.mode === 'screen-camera') {
       await this.getScreenStream(options);
     }
 
-    // Get camera stream if needed
     if (options.mode === 'camera' || options.mode === 'screen-camera') {
       await this.getCameraStream(options);
     }
 
-    // Get microphone stream if needed
     if (options.microphone) {
       await this.getMicrophoneStream(options);
     }
@@ -364,7 +342,6 @@ export class RecordingService {
         resolution: `${this.screenStream.getVideoTracks()[0]?.getSettings().width}x${this.screenStream.getVideoTracks()[0]?.getSettings().height}`,
       });
 
-      // Handle stream ending (user stops sharing)
       this.screenStream.getVideoTracks()[0].onended = () => {
         console.log('Screen sharing stopped by user');
       };
@@ -394,7 +371,7 @@ export class RecordingService {
           frameRate: { ideal: options.frameRate },
           facingMode: 'user',
         },
-        audio: false, // Microphone is handled separately
+        audio: false,
       };
 
       this.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -454,7 +431,6 @@ export class RecordingService {
   }
 
   private async setupMediaRecorder(options: RecordingOptions): Promise<void> {
-    // Create composed stream based on mode
     this.composedStream = this.createComposedStream(options);
     
     if (!this.composedStream) {
@@ -466,7 +442,6 @@ export class RecordingService {
       audioTracks: this.composedStream.getAudioTracks().length,
     });
 
-    // Choose the best available codec
     const mimeType = this.getOptimalMimeType();
     console.log('Selected MIME type:', mimeType);
 
@@ -478,7 +453,7 @@ export class RecordingService {
       this.mediaRecorder = new MediaRecorder(this.composedStream, {
         mimeType,
         videoBitsPerSecond: this.getVideoBitrate(options.resolution),
-        audioBitsPerSecond: 128000, // 128 kbps for audio
+        audioBitsPerSecond: 128000,
       });
 
       console.log('MediaRecorder created successfully:', {
@@ -496,7 +471,6 @@ export class RecordingService {
   private createComposedStream(options: RecordingOptions): MediaStream {
     const tracks: MediaStreamTrack[] = [];
 
-    // Add video tracks based on mode
     if (options.mode === 'screen' || options.mode === 'screen-camera') {
       if (this.screenStream) {
         const videoTrack = this.screenStream.getVideoTracks()[0];
@@ -517,10 +491,6 @@ export class RecordingService {
       }
     }
 
-    // For screen-camera mode, we'll use screen as primary
-    // Camera PiP would need canvas composition (more complex)
-
-    // Add audio tracks
     if (this.screenStream && options.systemAudio) {
       const audioTracks = this.screenStream.getAudioTracks();
       audioTracks.forEach(track => {
@@ -548,13 +518,13 @@ export class RecordingService {
   private getVideoBitrate(resolution: string): number {
     switch (resolution) {
       case '480p':
-        return 1500000; // 1.5 Mbps
+        return 1500000;
       case '720p':
-        return 3000000; // 3 Mbps
+        return 3000000;
       case '1080p':
-        return 6000000; // 6 Mbps
+        return 6000000;
       default:
-        return 3000000; // Default to 720p bitrate
+        return 3000000;
     }
   }
 
@@ -571,7 +541,6 @@ export class RecordingService {
     }
   }
 
-  // Static method to check permissions before starting recording
   static async checkPermissions(mode: 'screen' | 'camera' | 'screen-camera', microphone: boolean = false): Promise<{
     camera: boolean;
     microphone: boolean;
@@ -584,7 +553,6 @@ export class RecordingService {
     };
 
     try {
-      // Check if we're on a secure context
       if (!window.isSecureContext) {
         return permissions;
       }
@@ -593,7 +561,6 @@ export class RecordingService {
         return permissions;
       }
 
-      // Check camera permission
       if (mode === 'camera' || mode === 'screen-camera') {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -607,7 +574,6 @@ export class RecordingService {
         }
       }
 
-      // Check microphone permission
       if (microphone) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -621,8 +587,6 @@ export class RecordingService {
         }
       }
 
-      // Screen capture permission cannot be pre-checked
-      // It requires user interaction and is granted on-demand
       permissions.screenCapture = !!(navigator.mediaDevices.getDisplayMedia);
 
     } catch (error) {

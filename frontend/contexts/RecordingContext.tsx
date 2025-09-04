@@ -54,7 +54,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
 
   const { state: appState } = useApp();
 
-  // Initialize options from app settings
   const [options, setOptions] = useState<RecordingOptions>({
     mode: 'screen',
     highlightClicks: appState.settings.highlightClicksDefault,
@@ -99,48 +98,47 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
 
       // Check camera permission
       try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasCamera = devices.some(device => device.kind === 'videoinput' && device.label);
-        
-        if (hasCamera) {
-          setPermissionStatus(prev => ({ ...prev, camera: 'granted' }));
-        } else {
-          // Try to get camera stream to check permission
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            stream.getTracks().forEach(track => track.stop());
-            setPermissionStatus(prev => ({ ...prev, camera: 'granted' }));
-          } catch (error) {
-            const status = error.name === 'NotAllowedError' ? 'denied' : 'prompt';
-            setPermissionStatus(prev => ({ ...prev, camera: status }));
-          }
-        }
+        const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        setPermissionStatus(prev => ({ 
+          ...prev, 
+          camera: cameraPermission.state === 'granted' ? 'granted' : 
+                   cameraPermission.state === 'denied' ? 'denied' : 'prompt'
+        }));
       } catch (error) {
-        setPermissionStatus(prev => ({ ...prev, camera: 'denied' }));
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          stream.getTracks().forEach(track => track.stop());
+          setPermissionStatus(prev => ({ ...prev, camera: 'granted' }));
+        } catch (cameraError) {
+          setPermissionStatus(prev => ({ 
+            ...prev, 
+            camera: cameraError.name === 'NotAllowedError' ? 'denied' : 'prompt'
+          }));
+        }
       }
 
       // Check microphone permission
       try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasMicrophone = devices.some(device => device.kind === 'audioinput' && device.label);
-        
-        if (hasMicrophone) {
-          setPermissionStatus(prev => ({ ...prev, microphone: 'granted' }));
-        } else {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-            stream.getTracks().forEach(track => track.stop());
-            setPermissionStatus(prev => ({ ...prev, microphone: 'granted' }));
-          } catch (error) {
-            const status = error.name === 'NotAllowedError' ? 'denied' : 'prompt';
-            setPermissionStatus(prev => ({ ...prev, microphone: status }));
-          }
-        }
+        const microphonePermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        setPermissionStatus(prev => ({ 
+          ...prev, 
+          microphone: microphonePermission.state === 'granted' ? 'granted' : 
+                      microphonePermission.state === 'denied' ? 'denied' : 'prompt'
+        }));
       } catch (error) {
-        setPermissionStatus(prev => ({ ...prev, microphone: 'denied' }));
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+          stream.getTracks().forEach(track => track.stop());
+          setPermissionStatus(prev => ({ ...prev, microphone: 'granted' }));
+        } catch (micError) {
+          setPermissionStatus(prev => ({ 
+            ...prev, 
+            microphone: micError.name === 'NotAllowedError' ? 'denied' : 'prompt'
+          }));
+        }
       }
 
-      // Screen capture permission cannot be pre-checked - set to prompt if supported
+      // Screen capture permission cannot be pre-checked
       const hasScreenCapture = navigator.mediaDevices.getDisplayMedia !== undefined;
       setPermissionStatus(prev => ({ 
         ...prev, 
@@ -225,12 +223,10 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       setRecordedBlob(null);
       setOptions(recordingOptions);
 
-      // Check if required permissions are available
       const needsCamera = recordingOptions.mode === 'camera' || recordingOptions.mode === 'screen-camera';
       const needsScreen = recordingOptions.mode === 'screen' || recordingOptions.mode === 'screen-camera';
       const needsMicrophone = recordingOptions.microphone;
 
-      // Request permissions if needed
       if (needsCamera && permissionStatus.camera !== 'granted') {
         const granted = await requestPermissions('camera');
         if (!granted) {
@@ -270,7 +266,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       console.error('Failed to start recording:', error);
       setState('idle');
       
-      // Enhanced error handling with user-friendly messages
       if (error.code === 'PERMISSIONS_DENIED') {
         toast({
           title: "Permissions Required",
@@ -344,7 +339,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       try {
         const blob = await recordingServiceRef.current.stopRecording();
         
-        // Validate blob
         if (!blob || blob.size === 0) {
           throw new Error('Recording failed: No data recorded');
         }
@@ -376,7 +370,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
     
     if (recordedBlob) {
-      // Clean up blob URL if it exists
       try {
         URL.revokeObjectURL(URL.createObjectURL(recordedBlob));
       } catch (error) {
@@ -392,7 +385,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
 
   const restartRecording = useCallback(async () => {
     deleteRecording();
-    // Wait a bit for cleanup
     setTimeout(() => {
       startRecording(options);
     }, 100);
@@ -413,12 +405,10 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
   }, [recordedBlob]);
 
-  // Initialize permissions check on mount
   React.useEffect(() => {
     checkPermissions();
   }, [checkPermissions]);
 
-  // Update options when app settings change
   React.useEffect(() => {
     setOptions(prev => ({
       ...prev,
@@ -428,7 +418,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }));
   }, [appState.settings]);
 
-  // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       if (recordingServiceRef.current) {

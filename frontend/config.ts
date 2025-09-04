@@ -24,7 +24,7 @@ export const OAUTH_CONFIG = {
   state: '',
 };
 
-// Environment-specific configuration - UPDATED for RecordLane
+// Environment-specific configuration - RecordLane URLs
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
     return 'https://recordlane.com';
@@ -34,8 +34,8 @@ export const getRedirectUri = (): string => {
   const hostname = window.location.hostname;
   
   // For Leap development environment - RecordLane
-  if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
-    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
+  if (origin.includes('recordlane-d2qv2u482vjq7vcc59sg.lp.dev')) {
+    return 'https://recordlane-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
   // Development URLs (any *.lp.dev domain)
@@ -163,7 +163,7 @@ export const DEV_CONFIG = {
   mockAPI: false,
   skipOnboarding: false,
   allowPopupFallback: true,
-  enableRedirectFallback: false, // Disabled for PKCE flow
+  enableRedirectFallback: false,
 };
 
 // Analytics Configuration
@@ -177,11 +177,11 @@ export const ANALYTICS_CONFIG = {
 
 // Token Refresh Configuration
 export const TOKEN_CONFIG = {
-  refreshThreshold: 5 * 60 * 1000, // 5 minutes before expiry
+  refreshThreshold: 5 * 60 * 1000,
   maxRefreshRetries: 3,
   refreshRetryDelay: 1000,
   autoRefreshEnabled: true,
-  proactiveRefreshThreshold: 15 * 60 * 1000, // 15 minutes before expiry
+  proactiveRefreshThreshold: 15 * 60 * 1000,
 };
 
 // PKCE Configuration
