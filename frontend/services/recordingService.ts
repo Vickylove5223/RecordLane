@@ -13,15 +13,24 @@ export class RecordingService {
   private retryAttempts = 0;
   private maxRetries = 3;
   private startTime = 0;
+  private dataAvailableTimeout?: NodeJS.Timeout;
+  private recordingStartPromise?: Promise<void>;
 
   async startRecording(options: RecordingOptions): Promise<void> {
     try {
       console.log('Starting recording with options:', options);
       
+      // Reset state
       this.recordedChunks = [];
       this.retryAttempts = 0;
       this.isRecording = false;
       this.startTime = Date.now();
+      
+      // Clear any existing timeout
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
+      }
       
       if (!this.checkBrowserSupport()) {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
@@ -32,25 +41,84 @@ export class RecordingService {
       await this.setupMediaRecorder(options);
       
       if (this.mediaRecorder) {
+        // Set up data available handler with better timing
         this.mediaRecorder.ondataavailable = (event) => {
-          console.log('Data available:', event.data.size, 'bytes');
+          console.log('Data available:', {
+            dataSize: event.data.size,
+            type: event.data.type,
+            timestamp: Date.now() - this.startTime,
+            totalChunks: this.recordedChunks.length,
+          });
+          
           if (event.data && event.data.size > 0) {
             this.recordedChunks.push(event.data);
-            console.log('Total chunks:', this.recordedChunks.length, 'Total size:', this.getTotalSize());
+            console.log('Chunk added:', {
+              chunkIndex: this.recordedChunks.length - 1,
+              chunkSize: event.data.size,
+              totalSize: this.getTotalSize(),
+              totalChunks: this.recordedChunks.length,
+            });
+          } else {
+            console.warn('Received empty data chunk');
           }
         };
 
         this.mediaRecorder.onstart = () => {
           console.log('MediaRecorder started successfully');
           this.isRecording = true;
+          
+          // Set up a fallback timeout to ensure we get data
+          this.dataAvailableTimeout = setTimeout(() => {
+            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+              console.log('Requesting data manually after timeout');
+              try {
+                this.mediaRecorder.requestData();
+              } catch (error) {
+                console.warn('Failed to request data manually:', error);
+              }
+            }
+          }, 5000); // Request data after 5 seconds if none received
         };
 
         this.mediaRecorder.onerror = (event) => {
           console.error('MediaRecorder error:', event);
           ErrorHandler.logError('mediarecorder-runtime-error', event);
+          
+          // Clear timeout on error
+          if (this.dataAvailableTimeout) {
+            clearTimeout(this.dataAvailableTimeout);
+            this.dataAvailableTimeout = undefined;
+          }
         };
 
-        this.mediaRecorder.start(250);
+        this.mediaRecorder.onstop = () => {
+          console.log('MediaRecorder stopped');
+          this.isRecording = false;
+          
+          // Clear timeout when stopped
+          if (this.dataAvailableTimeout) {
+            clearTimeout(this.dataAvailableTimeout);
+            this.dataAvailableTimeout = undefined;
+          }
+        };
+
+        // Start recording with smaller timeslice for more frequent data events
+        console.log('Starting MediaRecorder with timeslice...');
+        this.mediaRecorder.start(100); // 100ms timeslice for more frequent data events
+        
+        // Also request data periodically to ensure we get chunks
+        const dataRequestInterval = setInterval(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            try {
+              this.mediaRecorder.requestData();
+            } catch (error) {
+              console.warn('Failed to request data:', error);
+            }
+          } else {
+            clearInterval(dataRequestInterval);
+          }
+        }, 1000); // Request data every second
+
         console.log('Recording started successfully');
       } else {
         throw new Error('MediaRecorder not initialized');
@@ -60,6 +128,12 @@ export class RecordingService {
       console.error('Failed to start recording:', error);
       ErrorHandler.logError('recording-start', error, { options });
       this.cleanup();
+      
+      // Clear timeout on error
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
+      }
       
       if (error.name === 'NotAllowedError') {
         throw ErrorHandler.createError('PERMISSIONS_DENIED', ERROR_MESSAGES.PERMISSIONS_DENIED);
@@ -144,6 +218,7 @@ export class RecordingService {
       }, 15000);
 
       let dataCollectionComplete = false;
+      let finalDataReceived = false;
 
       const finalizeRecording = () => {
         if (dataCollectionComplete) return;
@@ -151,27 +226,59 @@ export class RecordingService {
         
         clearTimeout(timeout);
         
+        // Clear data request timeout
+        if (this.dataAvailableTimeout) {
+          clearTimeout(this.dataAvailableTimeout);
+          this.dataAvailableTimeout = undefined;
+        }
+        
         try {
-          console.log('Finalizing recording with', this.recordedChunks.length, 'chunks');
-          console.log('Total recording size:', this.getTotalSize(), 'bytes');
+          console.log('Finalizing recording with chunks:', {
+            totalChunks: this.recordedChunks.length,
+            totalSize: this.getTotalSize(),
+            duration: Date.now() - this.startTime,
+            finalDataReceived,
+          });
           
           if (this.recordedChunks.length === 0) {
-            reject(ErrorHandler.createError('NO_DATA', 'No recording data available'));
+            reject(ErrorHandler.createError('NO_DATA', 'No recording data available - recording may have failed to start properly'));
             return;
           }
 
           const mimeType = this.getOptimalMimeType();
-          const blob = new Blob(this.recordedChunks, { type: mimeType });
+          console.log('Creating blob with MIME type:', mimeType);
+          
+          // Validate chunks before creating blob
+          const validChunks = this.recordedChunks.filter(chunk => chunk && chunk.size > 0);
+          console.log('Valid chunks:', validChunks.length, 'of', this.recordedChunks.length);
+          
+          if (validChunks.length === 0) {
+            reject(ErrorHandler.createError('NO_VALID_DATA', 'No valid recording data chunks available'));
+            return;
+          }
+
+          const blob = new Blob(validChunks, { type: mimeType });
           
           console.log('Created blob:', {
             size: blob.size,
             type: blob.type,
-            chunkCount: this.recordedChunks.length,
+            chunkCount: validChunks.length,
             duration: Date.now() - this.startTime,
           });
           
           if (blob.size === 0) {
-            reject(ErrorHandler.createError('EMPTY_RECORDING', 'Recording is empty'));
+            reject(ErrorHandler.createError('EMPTY_RECORDING', 'Recording is empty - no data was captured'));
+            return;
+          }
+          
+          // Validate blob can be used
+          try {
+            const url = URL.createObjectURL(blob);
+            URL.revokeObjectURL(url); // Clean up immediately
+            console.log('Blob validation successful');
+          } catch (blobError) {
+            console.error('Blob validation failed:', blobError);
+            reject(ErrorHandler.createError('INVALID_BLOB', 'Created blob is invalid'));
             return;
           }
           
@@ -184,16 +291,32 @@ export class RecordingService {
         }
       };
 
+      // Enhanced data available handler for final collection
+      const originalDataHandler = this.mediaRecorder.ondataavailable;
       this.mediaRecorder.ondataavailable = (event) => {
-        console.log('Final data chunk:', event.data.size, 'bytes');
+        console.log('Final data chunk:', {
+          size: event.data.size,
+          type: event.data.type,
+          isFinal: true,
+        });
+        
         if (event.data && event.data.size > 0) {
           this.recordedChunks.push(event.data);
+          finalDataReceived = true;
+        }
+        
+        // Also call original handler if it exists
+        if (originalDataHandler) {
+          originalDataHandler(event);
         }
       };
 
       this.mediaRecorder.onstop = () => {
-        console.log('MediaRecorder stopped');
-        setTimeout(finalizeRecording, 500);
+        console.log('MediaRecorder stopped, waiting for final data...');
+        // Give a short delay for any final data chunks
+        setTimeout(() => {
+          finalizeRecording();
+        }, 100);
       };
 
       this.mediaRecorder.onerror = (event) => {
@@ -204,8 +327,19 @@ export class RecordingService {
       };
 
       try {
+        console.log('Stopping MediaRecorder...');
+        
+        // Request final data before stopping
+        if (this.mediaRecorder.state === 'recording' || this.mediaRecorder.state === 'paused') {
+          try {
+            this.mediaRecorder.requestData();
+            console.log('Requested final data before stop');
+          } catch (requestError) {
+            console.warn('Failed to request final data:', requestError);
+          }
+        }
+        
         if (this.mediaRecorder.state !== 'inactive') {
-          console.log('Stopping MediaRecorder...');
           this.mediaRecorder.stop();
         } else {
           finalizeRecording();
@@ -229,16 +363,24 @@ export class RecordingService {
 
     for (const mimeType of mimeTypes) {
       if (MediaRecorder.isTypeSupported(mimeType)) {
+        console.log('Selected MIME type:', mimeType);
         return mimeType;
       }
     }
 
+    console.log('Using fallback MIME type: video/webm');
     return 'video/webm';
   }
 
   cleanup(): void {
     try {
       console.log('Cleaning up recording service');
+
+      // Clear data request timeout
+      if (this.dataAvailableTimeout) {
+        clearTimeout(this.dataAvailableTimeout);
+        this.dataAvailableTimeout = undefined;
+      }
 
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         try {
@@ -450,17 +592,19 @@ export class RecordingService {
     }
 
     try {
-      this.mediaRecorder = new MediaRecorder(this.composedStream, {
+      const recorderOptions = {
         mimeType,
         videoBitsPerSecond: this.getVideoBitrate(options.resolution),
         audioBitsPerSecond: 128000,
-      });
+      };
+
+      this.mediaRecorder = new MediaRecorder(this.composedStream, recorderOptions);
 
       console.log('MediaRecorder created successfully:', {
         mimeType: this.mediaRecorder.mimeType,
         state: this.mediaRecorder.state,
-        videoBitsPerSecond: this.getVideoBitrate(options.resolution),
-        audioBitsPerSecond: 128000,
+        videoBitsPerSecond: recorderOptions.videoBitsPerSecond,
+        audioBitsPerSecond: recorderOptions.audioBitsPerSecond,
       });
     } catch (error) {
       console.error('Failed to create MediaRecorder:', error);
