@@ -2,18 +2,23 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoadingSpinner } from '@/components/ui/spinner';
-import { Settings, Search } from 'lucide-react';
+import { Settings, Search, Circle } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
+import { useRecording } from '../../contexts/RecordingContext';
+import FloatingRecordButton from '../recording/FloatingRecordButton';
 
 export default function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
+  const { state: recordingState } = useRecording();
   const [showSettings, setShowSettings] = useState(false);
 
   const handleSettingsClick = () => {
     dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
   };
+
+  const showRecordButton = recordingState !== 'recording' && recordingState !== 'paused' && recordingState !== 'starting';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-6">
@@ -42,6 +47,13 @@ export default function TopNav() {
 
       {/* Right Actions */}
       <div className="flex items-center space-x-4">
+        {/* Record Button - Only show when not recording */}
+        {showRecordButton && (
+          <div className="relative">
+            <FloatingRecordButton />
+          </div>
+        )}
+
         <Button
           variant="ghost"
           size="sm"

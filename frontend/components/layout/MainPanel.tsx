@@ -1,38 +1,18 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { QuickActionsSkeleton, RecordingSkeleton } from '@/components/ui/loading-skeleton';
+import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Video, Monitor, Camera, Zap, Shield, Download, Folder, AlertTriangle, Wifi, Play } from 'lucide-react';
+import { Video, Wifi, Shield, Download, Zap, AlertTriangle, Play, ExternalLink, Clock } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { withErrorBoundary } from '../ErrorBoundary';
 import { withPerformanceMonitoring } from '../../utils/performanceMonitor';
+import { formatDistanceToNow } from 'date-fns';
+import VideoModal from './VideoModal';
 
-const QuickActionCard = memo(({ icon: Icon, title, description, color, onClick, disabled }: {
-  icon: React.ComponentType<any>;
-  title: string;
-  description: string;
-  color: string;
-  onClick?: () => void;
-  disabled?: boolean;
-}) => (
-  <Card 
-    className={`hover:shadow-lg transition-shadow ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-    onClick={disabled ? undefined : onClick}
-  >
-    <CardContent className="p-6 text-center">
-      <Icon className={`h-12 w-12 ${color} mx-auto mb-4`} />
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </CardContent>
-  </Card>
-));
-
-QuickActionCard.displayName = 'QuickActionCard';
-
-const RecordingCard = memo(({ recording }: { recording: any }) => (
-  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: () => void }) => (
+  <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
     <CardContent className="p-4">
       <div className="aspect-video bg-muted rounded mb-3 flex items-center justify-center">
         {recording.thumbnail ? (
@@ -47,24 +27,59 @@ const RecordingCard = memo(({ recording }: { recording: any }) => (
         )}
       </div>
       <h3 className="font-medium truncate mb-1">{recording.title}</h3>
-      <p className="text-sm text-muted-foreground">
-        {new Date(recording.createdAt).toLocaleDateString()}
-      </p>
-      {recording.uploadStatus === 'local' && (
-        <div className="flex items-center text-xs text-blue-600 mt-1">
-          <Download className="h-3 w-3 mr-1" />
-          <span>Local</span>
+      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+        <div className="flex items-center space-x-2">
+          <Clock className="h-3 w-3" />
+          <span>{formatDuration(recording.duration)}</span>
         </div>
-      )}
+        <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-1">
+          {recording.uploadStatus === 'local' && (
+            <div className="flex items-center text-xs text-blue-600">
+              <Download className="h-3 w-3 mr-1" />
+              <span>Local</span>
+            </div>
+          )}
+          {recording.uploadStatus === 'completed' && recording.youtubeLink && (
+            <div className="flex items-center text-xs text-green-600">
+              <Wifi className="h-3 w-3 mr-1" />
+              <span>Synced</span>
+            </div>
+          )}
+        </div>
+        {recording.youtubeLink && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(recording.youtubeLink, '_blank');
+            }}
+          >
+            <ExternalLink className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
     </CardContent>
   </Card>
 ));
 
 RecordingCard.displayName = 'RecordingCard';
 
+function formatDuration(ms: number) {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 function MainPanelComponent() {
   const { isConnected, isConnecting, connectionError, retryConnection, connectYouTube } = useYouTube();
   const { state } = useApp();
+  const [selectedRecording, setSelectedRecording] = useState(null);
 
   useEffect(() => {
     // Check for connection issues and auto-retry
@@ -92,14 +107,17 @@ function MainPanelComponent() {
     return 'Not connected';
   };
 
-  const handleQuickAction = (action: string) => {
-    console.log(`Quick action: ${action}`);
-    // Quick actions now work without YouTube connection
+  const handleRecordingClick = (recording: any) => {
+    setSelectedRecording(recording);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedRecording(null);
   };
 
   return (
     <div className="flex-1 p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-8">
           <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -159,61 +177,28 @@ function MainPanelComponent() {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-6">Quick Start</h2>
-          {isConnecting ? (
-            <QuickActionsSkeleton />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <QuickActionCard
-                icon={Monitor}
-                title="Screen Recording"
-                description="Capture your entire screen or specific windows"
-                color="text-blue-500"
-                onClick={() => handleQuickAction('screen')}
-              />
-              <QuickActionCard
-                icon={Camera}
-                title="Camera Recording"
-                description="Record with your webcam for personal messages"
-                color="text-green-500"
-                onClick={() => handleQuickAction('camera')}
-              />
-              <QuickActionCard
-                icon={() => (
-                  <div className="relative">
-                    <Monitor className="h-12 w-12 text-purple-500" />
-                    <Camera className="h-6 w-6 text-purple-500 absolute -bottom-1 -right-1 bg-background rounded" />
-                  </div>
-                )}
-                title="Screen + Camera"
-                description="Combine screen capture with picture-in-picture camera"
-                color=""
-                onClick={() => handleQuickAction('screen-camera')}
-              />
-            </div>
-          )}
-        </div>
-
         {/* Recent Activity */}
         {state.recordings.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Recent Recordings</h2>
+              <h2 className="text-2xl font-semibold">Your Recordings</h2>
               <div className="text-sm text-muted-foreground">
                 {state.recordings.filter(r => r.uploadStatus === 'local').length} local, {' '}
                 {state.recordings.filter(r => r.uploadStatus === 'completed').length} synced
               </div>
             </div>
             {isConnecting ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <RecordingSkeleton count={6} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <RecordingSkeleton count={8} />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {state.recordings.slice(0, 6).map((recording) => (
-                  <RecordingCard key={recording.id} recording={recording} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {state.recordings.map((recording) => (
+                  <RecordingCard 
+                    key={recording.id} 
+                    recording={recording} 
+                    onClick={() => handleRecordingClick(recording)}
+                  />
                 ))}
               </div>
             )}
@@ -227,7 +212,7 @@ function MainPanelComponent() {
               <Play className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Ready to Record!</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Click the red record button in the bottom-left corner to start your first recording. 
+                Click the red record button in the top-right corner to start your first recording. 
                 You can record immediately without connecting YouTube.
               </p>
               <div className="text-xs text-muted-foreground">
@@ -237,6 +222,14 @@ function MainPanelComponent() {
           </Card>
         )}
       </div>
+
+      {/* Video Modal */}
+      {selectedRecording && (
+        <VideoModal 
+          recording={selectedRecording} 
+          onClose={handleCloseModal} 
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import TopNav from './layout/TopNav';
-import Sidebar from './layout/Sidebar';
 import MainPanel from './layout/MainPanel';
-import FloatingRecordButton from './recording/FloatingRecordButton';
 import RecordingOverlay from './recording/RecordingOverlay';
 import OnboardingModal from './onboarding/OnboardingModal';
 import ReviewPanel from './recording/ReviewPanel';
@@ -23,9 +21,6 @@ export default function AppShell() {
       
       {/* Main Layout */}
       <div className="flex flex-1 pt-16">
-        {/* Sidebar */}
-        <Sidebar />
-        
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
           <Routes>
@@ -33,11 +28,6 @@ export default function AppShell() {
           </Routes>
         </main>
       </div>
-
-      {/* Floating Record Button */}
-      {recordingState !== 'recording' && recordingState !== 'paused' && recordingState !== 'starting' && (
-        <FloatingRecordButton />
-      )}
 
       {/* Recording Overlay */}
       {(recordingState === 'recording' || recordingState === 'paused') && (
