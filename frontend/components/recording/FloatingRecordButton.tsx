@@ -138,7 +138,7 @@ export default function FloatingRecordButton() {
         <Button
           size="sm"
           disabled={isStarting}
-          className="h-10 px-4 bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transition-all group relative"
+          className="h-10 px-4 bg-gradient-to-r from-red-500 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group relative"
         >
           {isStarting ? (
             <LoadingSpinner size="sm" className="text-white mr-2" />
@@ -281,7 +281,7 @@ export default function FloatingRecordButton() {
             <Button
               onClick={handleStartRecording}
               disabled={isStarting}
-              className="w-full bg-red-500 hover:bg-red-600 text-white"
+              className="w-full bg-gradient-to-r from-red-500 to-purple-600 hover:from-red-600 hover:to-purple-700 text-white"
               size="lg"
             >
               {isStarting ? (
