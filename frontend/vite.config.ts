@@ -17,5 +17,10 @@ export default defineConfig({
   mode: "development",
   build: {
     minify: false,
-  }
+  },
+  server: {
+    port: 8089,
+    host: true,
+  },
+  publicDir: 'public',
 })
