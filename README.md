@@ -79,9 +79,14 @@ RecordLane uses Google OAuth 2.0 with PKCE for secure authentication. The applic
 
 Ensure your Google Cloud Console project has the following authorized redirect URIs:
 
+<<<<<<< HEAD
 - `http://localhost:8089/auth/callback` (for local development)
 - `http://localhost:5173/auth/callback` (for Vite default port)
 - `http://localhost:3000/auth/callback` (alternative port)
+=======
+- `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev/auth/callback`
+- `http://localhost:3000/auth/callback` (for local development)
+>>>>>>> 5e9d3b03bfb090ad01a07028fb707e813e785e29
 
 ## Enhanced Features
 

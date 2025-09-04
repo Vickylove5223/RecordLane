@@ -111,6 +111,10 @@ export const FEATURES = {
   clickHighlights: true,
   pip: true,
   offlineMode: true,
+<<<<<<< HEAD
+=======
+  analytics: true,
+>>>>>>> 5e9d3b03bfb090ad01a07028fb707e813e785e29
 };
 
 // Error Messages
