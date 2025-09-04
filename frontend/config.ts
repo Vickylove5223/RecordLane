@@ -121,12 +121,12 @@ export const FEATURES = {
 // Error Messages
 export const ERROR_MESSAGES = {
   DRIVE_NOT_CONNECTED: 'Please connect your YouTube account before recording',
-  PERMISSIONS_DENIED: 'Camera or screen sharing permissions denied',
+  PERMISSIONS_DENIED: 'Recording permissions were denied. Please allow camera and screen access in your browser settings, then try again.',
   UPLOAD_FAILED: 'Failed to upload recording to YouTube',
-  RECORDING_FAILED: 'Failed to start recording',
+  RECORDING_FAILED: 'Failed to start recording. Please check your browser permissions and try again.',
   NETWORK_ERROR: 'Network connection error. Please check your internet.',
   STORAGE_QUOTA_EXCEEDED: 'YouTube storage quota exceeded',
-  BROWSER_NOT_SUPPORTED: 'Your browser does not support screen recording',
+  BROWSER_NOT_SUPPORTED: 'Your browser does not support screen recording. Please use Chrome, Edge, or Firefox.',
   FILE_TOO_LARGE: 'Recording file is too large to upload',
   AUTH_FAILED: 'YouTube authentication failed',
   TOKEN_EXPIRED: 'Authentication session expired, please sign in again',
@@ -143,6 +143,10 @@ export const ERROR_MESSAGES = {
   AUTH_TOKEN_INVALID: 'Authentication token is invalid. Please sign in again.',
   INVALID_GRANT: 'Invalid grant. Please re-authenticate.',
   REFRESH_TOKEN_EXPIRED: 'Refresh token has expired. Please sign in again.',
+  DEVICE_NOT_FOUND: 'Recording device not found. Please check your camera and microphone connections.',
+  DEVICE_IN_USE: 'Recording device is currently in use by another application. Please close other apps and try again.',
+  SECURITY_ERROR: 'Recording blocked due to security restrictions. Please ensure you are using HTTPS.',
+  CONSTRAINTS_NOT_SATISFIED: 'Recording settings could not be applied. Please try with different settings.',
 };
 
 // Cache Configuration

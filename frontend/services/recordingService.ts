@@ -24,10 +24,13 @@ export class RecordingService {
       this.recordedChunks = [];
       this.retryAttempts = 0;
       
-      // Check browser support
+      // Check browser support first
       if (!this.checkBrowserSupport()) {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
       }
+
+      // Check and request permissions before attempting to get streams
+      await this.checkAndRequestPermissions(options);
       
       // Get required streams based on mode
       await this.setupStreams(options);
@@ -58,9 +61,103 @@ export class RecordingService {
         throw ErrorHandler.createError('PERMISSIONS_DENIED', ERROR_MESSAGES.PERMISSIONS_DENIED);
       } else if (error.name === 'NotSupportedError') {
         throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'Camera or microphone not found. Please check your devices.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Camera or microphone is already in use by another application.');
+      } else if (error.name === 'OverconstrainedError') {
+        throw ErrorHandler.createError('CONSTRAINTS_NOT_SATISFIED', 'Camera or recording constraints could not be satisfied.');
+      } else if (error.name === 'SecurityError') {
+        throw ErrorHandler.createError('SECURITY_ERROR', 'Recording blocked due to security restrictions. Please ensure you are on HTTPS.');
       }
       
       throw ErrorHandler.createError('RECORDING_FAILED', ERROR_MESSAGES.RECORDING_FAILED, error);
+    }
+  }
+
+  private async checkAndRequestPermissions(options: RecordingOptions): Promise<void> {
+    try {
+      // Check if we're on a secure context (HTTPS or localhost)
+      if (!window.isSecureContext) {
+        throw ErrorHandler.createError('SECURITY_ERROR', 'Recording requires a secure context (HTTPS). Please use HTTPS or localhost.');
+      }
+
+      // Check if required APIs are available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'getUserMedia is not supported in this browser.');
+      }
+
+      if ((options.mode === 'screen' || options.mode === 'screen-camera') && !navigator.mediaDevices.getDisplayMedia) {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'Screen capture is not supported in this browser.');
+      }
+
+      // Check camera permissions if needed
+      if (options.mode === 'camera' || options.mode === 'screen-camera') {
+        await this.checkCameraPermission();
+      }
+
+      // Check microphone permissions if needed
+      if (options.microphone) {
+        await this.checkMicrophonePermission();
+      }
+
+      // For screen recording, we can't pre-check permissions as it always requires user interaction
+      // The permission check will happen when we call getDisplayMedia
+
+    } catch (error) {
+      console.error('Permission check failed:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Recording permissions were denied. Please allow camera and microphone access in your browser settings.');
+      }
+      
+      throw error;
+    }
+  }
+
+  private async checkCameraPermission(): Promise<void> {
+    try {
+      // Try to get camera permission with minimal constraints
+      const testStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1, height: 1 },
+        audio: false
+      });
+      
+      // Immediately stop the test stream
+      testStream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+      console.error('Camera permission check failed:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Camera access was denied. Please allow camera access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No camera found. Please connect a camera and try again.');
+      }
+      
+      throw error;
+    }
+  }
+
+  private async checkMicrophonePermission(): Promise<void> {
+    try {
+      // Try to get microphone permission
+      const testStream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true
+      });
+      
+      // Immediately stop the test stream
+      testStream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+      console.error('Microphone permission check failed:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Microphone access was denied. Please allow microphone access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No microphone found. Please connect a microphone and try again.');
+      }
+      
+      throw error;
     }
   }
 
@@ -223,38 +320,58 @@ export class RecordingService {
 
   private async getScreenStream(options: RecordingOptions): Promise<void> {
     try {
-      this.screenStream = await navigator.mediaDevices.getDisplayMedia({
+      const constraints: DisplayMediaStreamConstraints = {
         video: {
           width: this.getResolutionDimensions(options.resolution).width,
           height: this.getResolutionDimensions(options.resolution).height,
           frameRate: options.frameRate,
         },
         audio: options.systemAudio,
-      });
+      };
+
+      this.screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
       // Handle stream ending (user stops sharing)
       this.screenStream.getVideoTracks()[0].onended = () => {
         console.log('Screen sharing stopped by user');
-        // Could trigger recording stop here
+        // Could trigger recording stop here if needed
       };
     } catch (error) {
       console.error('Failed to get screen stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Screen sharing permission was denied. Please allow screen sharing and try again.');
+      } else if (error.name === 'NotSupportedError') {
+        throw ErrorHandler.createError('BROWSER_NOT_SUPPORTED', 'Screen sharing is not supported in this browser.');
+      }
+      
       throw error;
     }
   }
 
   private async getCameraStream(options: RecordingOptions): Promise<void> {
     try {
-      this.cameraStream = await navigator.mediaDevices.getUserMedia({
+      const constraints: MediaStreamConstraints = {
         video: {
           width: { ideal: 320 },
           height: { ideal: 240 },
           frameRate: options.frameRate,
         },
         audio: false, // Microphone is handled separately
-      });
+      };
+
+      this.cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     } catch (error) {
       console.error('Failed to get camera stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Camera permission was denied. Please allow camera access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No camera found. Please connect a camera and try again.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Camera is already in use by another application.');
+      }
+      
       throw error;
     }
   }
@@ -267,6 +384,15 @@ export class RecordingService {
       });
     } catch (error) {
       console.error('Failed to get microphone stream:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        throw ErrorHandler.createError('PERMISSIONS_DENIED', 'Microphone permission was denied. Please allow microphone access and try again.');
+      } else if (error.name === 'NotFoundError') {
+        throw ErrorHandler.createError('DEVICE_NOT_FOUND', 'No microphone found. Please connect a microphone and try again.');
+      } else if (error.name === 'NotReadableError') {
+        throw ErrorHandler.createError('DEVICE_IN_USE', 'Microphone is already in use by another application.');
+      }
+      
       throw error;
     }
   }
@@ -559,5 +685,66 @@ export class RecordingService {
       default:
         return { width: 1280, height: 720 };
     }
+  }
+
+  // Static method to check permissions before starting recording
+  static async checkPermissions(mode: 'screen' | 'camera' | 'screen-camera', microphone: boolean = false): Promise<{
+    camera: boolean;
+    microphone: boolean;
+    screenCapture: boolean;
+  }> {
+    const permissions = {
+      camera: false,
+      microphone: false,
+      screenCapture: false,
+    };
+
+    try {
+      // Check if we're on a secure context
+      if (!window.isSecureContext) {
+        return permissions;
+      }
+
+      if (!navigator.mediaDevices) {
+        return permissions;
+      }
+
+      // Check camera permission
+      if (mode === 'camera' || mode === 'screen-camera') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 1, height: 1 },
+            audio: false
+          });
+          stream.getTracks().forEach(track => track.stop());
+          permissions.camera = true;
+        } catch (error) {
+          permissions.camera = false;
+        }
+      }
+
+      // Check microphone permission
+      if (microphone) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: true
+          });
+          stream.getTracks().forEach(track => track.stop());
+          permissions.microphone = true;
+        } catch (error) {
+          permissions.microphone = false;
+        }
+      }
+
+      // Screen capture permission cannot be pre-checked
+      // It requires user interaction and is granted on-demand
+      permissions.screenCapture = !!(navigator.mediaDevices.getDisplayMedia);
+
+    } catch (error) {
+      console.error('Permission check failed:', error);
+    }
+
+    return permissions;
   }
 }
