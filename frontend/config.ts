@@ -27,29 +27,21 @@ export const OAUTH_CONFIG = {
 // Environment-specific configuration - RecordLane URLs
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    return 'https://recordlane.com';
+    // Default for server-side or non-browser environments, using the primary dev URL.
+    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev/auth/callback';
   }
   
   const origin = window.location.origin;
   const hostname = window.location.hostname;
   
-  // For Leap development environment - RecordLane
-  if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
-    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
+  // For any Leap development environment or local development
+  if (hostname.includes('.lp.dev') || hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${origin}/auth/callback`;
   }
   
-  // Development URLs (any *.lp.dev domain)
-  if (hostname.includes('.lp.dev')) {
-    return origin;
-  }
-  
-  // Local development
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3000';
-  }
-  
-  // Production fallback
-  return 'https://recordlane.com';
+  // Fallback to the specific Leap dev URL if no other condition is met.
+  // This case should ideally not be hit in a known environment.
+  return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev/auth/callback';
 };
 
 // Popup configuration for OAuth

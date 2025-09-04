@@ -27,7 +27,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 export default function ShareModal() {
   const { state, dispatch } = useApp();
-  const [privacy, setPrivacy] = useState('anyone-viewer');
+  const [privacy, setPrivacy] = useState('unlisted');
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -83,7 +83,7 @@ export default function ShareModal() {
         <DialogHeader>
           <DialogTitle>Share Recording</DialogTitle>
           <DialogDescription>
-            Your recording has been uploaded to Google Drive
+            Your recording has been uploaded to YouTube
           </DialogDescription>
         </DialogHeader>
 
@@ -114,18 +114,18 @@ export default function ShareModal() {
           {/* Privacy Settings */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Privacy</label>
-            <Select value={privacy} onValueChange={setPrivacy}>
+            <Select value={privacy} onValueChange={(v) => setPrivacy(v as any)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="unlisted">Unlisted (Anyone with link)</SelectItem>
                 <SelectItem value="private">Private (Only you)</SelectItem>
-                <SelectItem value="anyone-viewer">Anyone with link (Viewer)</SelectItem>
-                <SelectItem value="anyone-commenter">Anyone with link (Commenter)</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Changes to privacy settings are applied in Google Drive
+              Changes to privacy settings are applied on YouTube.
             </p>
           </div>
 
@@ -169,7 +169,7 @@ export default function ShareModal() {
             </Button>
             <Button onClick={() => window.open(shareLink, '_blank')}>
               <ExternalLink className="h-4 w-4 mr-2" />
-              Open in Drive
+              Open in YouTube
             </Button>
           </div>
         </div>

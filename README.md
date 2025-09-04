@@ -71,18 +71,16 @@ RecordLane is built with:
 
 ### OAuth Setup
 
-RecordLane uses Google OAuth 2.0 with PKCE for secure authentication. The application is configured for:
+RecordLane uses Google OAuth 2.0 with PKCE for secure authentication. The application is configured for development on Leap:
 
-- **Production**: `https://recordlane.com`
 - **Development**: `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev`
 
 ### Google Cloud Console Configuration
 
 Ensure your Google Cloud Console project has the following authorized redirect URIs:
 
-- `https://recordlane.com`
-- `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev`
-- `http://localhost:3000` (for local development)
+- `https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev/auth/callback`
+- `http://localhost:3000/auth/callback` (for local development)
 
 ## Enhanced Features
 
@@ -118,4 +116,4 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-For support, email support@recordlane.com or visit [recordlane.com](https://recordlane.com).
+For support, please use the project's issue tracker.

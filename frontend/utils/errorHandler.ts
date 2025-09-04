@@ -149,15 +149,15 @@ export class ErrorHandler {
     if (error?.code) {
       switch (error.code) {
         case 'CONNECTION_FAILED':
-          return 'Failed to connect to Google Drive. Please check your internet connection and try again.';
+          return 'Failed to connect to YouTube. Please check your internet connection and try again.';
         case 'PERMISSIONS_DENIED':
           return 'Camera or screen sharing permissions were denied. Please allow access and try again.';
         case 'UPLOAD_FAILED':
-          return 'Failed to upload recording to Google Drive. Please check your connection and try again.';
+          return 'Failed to upload recording to YouTube. Please check your connection and try again.';
         case 'RECORDING_FAILED':
           return 'Failed to start recording. Please check your browser permissions and try again.';
         case 'QUOTA_EXCEEDED':
-          return 'Your Google Drive storage is full. Please free up space and try again.';
+          return 'Your YouTube storage quota is full. Please free up space and try again.';
         case 'BROWSER_NOT_SUPPORTED':
           return 'Your browser does not support screen recording. Please use Chrome, Edge, or Firefox.';
         default:
