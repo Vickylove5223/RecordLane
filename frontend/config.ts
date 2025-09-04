@@ -34,8 +34,8 @@ export const getRedirectUri = (): string => {
   const hostname = window.location.hostname;
   
   // For Leap development environment - RecordLane
-  if (origin.includes('recordlane-d2qv2u482vjq7vcc59sg.lp.dev')) {
-    return 'https://recordlane-d2qv2u482vjq7vcc59sg.lp.dev';
+  if (origin.includes('loom-clone-d2qv2u482vjq7vcc59sg.lp.dev')) {
+    return 'https://loom-clone-d2qv2u482vjq7vcc59sg.lp.dev';
   }
   
   // Development URLs (any *.lp.dev domain)
