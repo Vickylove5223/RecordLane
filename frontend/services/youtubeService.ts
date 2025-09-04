@@ -358,7 +358,7 @@ export class YouTubeService {
           return;
         }
         
-        if (event.data.type === 'oauth_success' || event.data.type === 'OAUTH_SUCCESS') {
+        if (event.data.type === 'OAUTH_SUCCESS') {
           clearTimeout(timeout);
           clearInterval(pollTimer);
           window.removeEventListener('message', messageHandler);
@@ -370,7 +370,7 @@ export class YouTubeService {
           
           console.log('Authorization code received via message');
           resolve(event.data.code);
-        } else if (event.data.type === 'oauth_error' || event.data.type === 'OAUTH_ERROR') {
+        } else if (event.data.type === 'OAUTH_ERROR') {
           clearTimeout(timeout);
           clearInterval(pollTimer);
           window.removeEventListener('message', messageHandler);
@@ -398,17 +398,13 @@ export class YouTubeService {
           if (popup.closed) {
             clearInterval(pollTimer);
             clearTimeout(timeout);
-            window.removeEventListener('message', messageHandler);
             return reject(ErrorHandler.createError('POPUP_CLOSED', ERROR_MESSAGES.POPUP_CLOSED));
           }
 
-          // Try to access popup location, but handle COOP errors gracefully
           let currentUrl;
           try {
             currentUrl = popup.location.href;
           } catch (e) {
-            // COOP error - this is expected and normal
-            // The callback page will handle the OAuth flow via postMessage
             return;
           }
 
@@ -418,7 +414,6 @@ export class YouTubeService {
           if (url.origin === new URL(redirectUri).origin) {
             clearInterval(pollTimer);
             clearTimeout(timeout);
-            window.removeEventListener('message', messageHandler);
             popup.close();
             
             const code = url.searchParams.get('code');

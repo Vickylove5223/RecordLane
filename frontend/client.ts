@@ -34,6 +34,7 @@ const BROWSER = typeof globalThis === "object" && ("window" in globalThis);
  */
 export class Client {
     public readonly analytics: analytics.ServiceClient
+    public readonly auth: auth.ServiceClient
     public readonly health: health.ServiceClient
     public readonly metadata: metadata.ServiceClient
     private readonly options: ClientOptions
@@ -51,6 +52,7 @@ export class Client {
         this.options = options ?? {}
         const base = new BaseClient(this.target, this.options)
         this.analytics = new analytics.ServiceClient(base)
+        this.auth = new auth.ServiceClient(base)
         this.health = new health.ServiceClient(base)
         this.metadata = new metadata.ServiceClient(base)
     }
@@ -121,6 +123,54 @@ export namespace analytics {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/analytics/events`, {method: "POST", body: JSON.stringify(params)})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_analytics_track_event_trackEvent>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { exchangeCode as api_auth_exchange_code_exchangeCode } from "~backend/auth/exchange_code";
+import { getConfig as api_auth_get_config_getConfig } from "~backend/auth/get_config";
+import { refreshToken as api_auth_refresh_token_refreshToken } from "~backend/auth/refresh_token";
+
+export namespace auth {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.exchangeCode = this.exchangeCode.bind(this)
+            this.getConfig = this.getConfig.bind(this)
+            this.refreshToken = this.refreshToken.bind(this)
+        }
+
+        /**
+         * Exchanges an authorization code for an access token.
+         */
+        public async exchangeCode(params: RequestType<typeof api_auth_exchange_code_exchangeCode>): Promise<ResponseType<typeof api_auth_exchange_code_exchangeCode>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/auth/google/exchange-code`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_exchange_code_exchangeCode>
+        }
+
+        /**
+         * Retrieves the public configuration for the auth service.
+         */
+        public async getConfig(): Promise<ResponseType<typeof api_auth_get_config_getConfig>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/auth/config`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_get_config_getConfig>
+        }
+
+        /**
+         * Refreshes an access token using a refresh token.
+         */
+        public async refreshToken(params: RequestType<typeof api_auth_refresh_token_refreshToken>): Promise<ResponseType<typeof api_auth_refresh_token_refreshToken>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/auth/google/refresh-token`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_refresh_token_refreshToken>
         }
     }
 }
