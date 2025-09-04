@@ -1,15 +1,10 @@
 {
-  "name": "recordlane",
+  "name": "leap-app",
   "version": "1.0.0",
   "type": "module",
   "packageManager": "bun",
   "workspaces": [
     "backend",
     "frontend"
-  ],
-  "scripts": {
-    "dev": "cd frontend && bun run dev",
-    "dev:frontend": "cd frontend && bun run dev",
-    "dev:backend": "cd backend && encore run"
-  }
+  ]
 }
