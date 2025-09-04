@@ -25,7 +25,8 @@ import {
   AlertTriangle,
   Shield,
   CheckCircle,
-  Settings
+  Settings,
+  Play
 } from 'lucide-react';
 import { useRecording, RecordingMode, RecordingOptions } from '../../contexts/RecordingContext';
 import { RecordingService } from '../../services/recordingService';
@@ -36,19 +37,38 @@ export default function FloatingRecordButton() {
   const { startRecording, options, updateOptions, state: recordingState, permissionStatus } = useRecording();
   const { dispatch } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedMode, setSelectedMode] = useState<RecordingMode>('screen');
+  const [localOptions, setLocalOptions] = useState(options);
   const { toast } = useToast();
 
-  const handleModeSelect = async (mode: RecordingMode) => {
-    setIsMenuOpen(false);
-    
+  // Update local options when context options change
+  useEffect(() => {
+    setLocalOptions(options);
+    setSelectedMode(options.mode);
+  }, [options]);
+
+  const handleModeSelect = (mode: RecordingMode) => {
+    setSelectedMode(mode);
+    setLocalOptions(prev => ({ ...prev, mode }));
+  };
+
+  const handleOptionChange = (key: keyof RecordingOptions, value: any) => {
+    setLocalOptions(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleStartRecording = async () => {
     try {
-      // Update options and start recording
-      const updatedOptions = { ...options, mode };
-      updateOptions({ mode });
-      await startRecording(updatedOptions);
+      // Update global options
+      updateOptions(localOptions);
+      
+      // Start recording with selected options
+      await startRecording(localOptions);
+      
+      // Close menu after successful start
+      setIsMenuOpen(false);
     } catch (error) {
+      console.log(`Recording start failed at component level for mode: ${localOptions.mode}`, error);
       // Error is already handled and toasted by the context
-      console.log(`Recording start failed at component level for mode: ${mode}`, error);
     }
   };
 
@@ -86,6 +106,30 @@ export default function FloatingRecordButton() {
     return hasPermission ? 'Ready' : 'Need Permission';
   };
 
+  const getModeIcon = (mode: RecordingMode) => {
+    switch (mode) {
+      case 'screen': return Monitor;
+      case 'camera': return Camera;
+      case 'screen-camera': return MonitorSpeaker;
+    }
+  };
+
+  const getModeLabel = (mode: RecordingMode) => {
+    switch (mode) {
+      case 'screen': return 'Screen Only';
+      case 'camera': return 'Camera Only';
+      case 'screen-camera': return 'Screen + Camera';
+    }
+  };
+
+  const getModeDescription = (mode: RecordingMode) => {
+    switch (mode) {
+      case 'screen': return 'Capture your screen';
+      case 'camera': return 'Record with webcam';
+      case 'screen-camera': return 'Screen with PiP camera';
+    }
+  };
+
   const isStarting = recordingState === 'starting';
 
   return (
@@ -111,167 +155,171 @@ export default function FloatingRecordButton() {
       <DropdownMenuContent 
         side="bottom" 
         align="end" 
-        className="w-80 mt-2"
+        className="w-80 mt-2 p-0"
         sideOffset={8}
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="px-2 py-1">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Recording Mode</p>
-        </div>
-        
-        <DropdownMenuItem 
-          onClick={() => handleModeSelect('screen')}
-          className="cursor-pointer"
-        >
-          <Monitor className="h-4 w-4 mr-3" />
-          <div className="flex-1">
-            <div className="font-medium">Screen Only</div>
-            <div className="text-xs text-muted-foreground">Capture your screen</div>
-          </div>
-          <div className="flex items-center ml-2">
-            <span className="text-xs text-muted-foreground mr-1">
-              {getPermissionStatusText('screen')}
-            </span>
-            {getPermissionIcon(getModePermissionStatus('screen'), permissionStatus.screen === 'checking')}
-          </div>
-        </DropdownMenuItem>
+        <div className="p-4 space-y-4">
+          {/* Recording Mode Selection */}
+          <div>
+            <p className="text-sm font-medium text-foreground mb-3">Recording Mode</p>
+            <div className="space-y-2">
+              {(['screen', 'camera', 'screen-camera'] as RecordingMode[]).map((mode) => {
+                const Icon = getModeIcon(mode);
+                const isSelected = selectedMode === mode;
+                const hasPermission = getModePermissionStatus(mode);
+                const statusText = getPermissionStatusText(mode);
+                const isChecking = mode === 'camera' ? permissionStatus.camera === 'checking' :
+                                 mode === 'screen' ? permissionStatus.screen === 'checking' :
+                                 permissionStatus.camera === 'checking' || permissionStatus.screen === 'checking';
 
-        <DropdownMenuItem 
-          onClick={() => handleModeSelect('camera')}
-          className="cursor-pointer"
-        >
-          <Camera className="h-4 w-4 mr-3" />
-          <div className="flex-1">
-            <div className="font-medium">Camera Only</div>
-            <div className="text-xs text-muted-foreground">Record with webcam</div>
-          </div>
-          <div className="flex items-center ml-2">
-            <span className="text-xs text-muted-foreground mr-1">
-              {getPermissionStatusText('camera')}
-            </span>
-            {getPermissionIcon(getModePermissionStatus('camera'), permissionStatus.camera === 'checking')}
-          </div>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem 
-          onClick={() => handleModeSelect('screen-camera')}
-          className="cursor-pointer"
-        >
-          <MonitorSpeaker className="h-4 w-4 mr-3" />
-          <div className="flex-1">
-            <div className="font-medium">Screen + Camera</div>
-            <div className="text-xs text-muted-foreground">Screen with PiP camera</div>
-          </div>
-          <div className="flex items-center ml-2">
-            <span className="text-xs text-muted-foreground mr-1">
-              {getPermissionStatusText('screen-camera')}
-            </span>
-            {getPermissionIcon(getModePermissionStatus('screen-camera'), 
-              permissionStatus.camera === 'checking' || permissionStatus.screen === 'checking')}
-          </div>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <div className="px-2 py-1">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Audio</p>
-        </div>
-
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-transparent cursor-default">
-          <div className="flex items-center w-full">
-            {options.systemAudio ? <Volume2 className="h-4 w-4 mr-3" /> : <VolumeX className="h-4 w-4 mr-3" />}
-            <div className="flex-1 flex items-center justify-between">
-              <span>System Audio</span>
-              <Switch
-                checked={options.systemAudio}
-                onCheckedChange={(checked) => updateOptions({ systemAudio: checked })}
-              />
-            </div>
-          </div>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-transparent cursor-default">
-          <div className="flex items-center w-full">
-            {options.microphone ? <Mic className="h-4 w-4 mr-3" /> : <MicOff className="h-4 w-4 mr-3" />}
-            <div className="flex-1 flex items-center justify-between">
-              <div className="flex items-center">
-                <span>Microphone</span>
-                {options.microphone && (
-                  <div className="ml-2">
-                    {getPermissionIcon(permissionStatus.microphone === 'granted', permissionStatus.microphone === 'checking')}
+                return (
+                  <div
+                    key={mode}
+                    onClick={() => handleModeSelect(mode)}
+                    className={`
+                      p-3 rounded-lg border-2 cursor-pointer transition-all hover:bg-accent/50
+                      ${isSelected ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-border'}
+                    `}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`h-5 w-5 ${isSelected ? 'text-red-500' : 'text-muted-foreground'}`} />
+                        <div>
+                          <div className={`font-medium text-sm ${isSelected ? 'text-red-700 dark:text-red-300' : 'text-foreground'}`}>
+                            {getModeLabel(mode)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {getModeDescription(mode)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center ml-2">
+                        <span className="text-xs text-muted-foreground mr-1">
+                          {statusText}
+                        </span>
+                        {getPermissionIcon(hasPermission, isChecking)}
+                      </div>
+                    </div>
                   </div>
-                )}
+                );
+              })}
+            </div>
+          </div>
+
+          <DropdownMenuSeparator />
+
+          {/* Audio Options */}
+          <div>
+            <p className="text-sm font-medium text-foreground mb-3">Audio</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {localOptions.systemAudio ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                  <span className="text-sm">System Audio</span>
+                </div>
+                <Switch
+                  checked={localOptions.systemAudio}
+                  onCheckedChange={(checked) => handleOptionChange('systemAudio', checked)}
+                />
               </div>
-              <Switch
-                checked={options.microphone}
-                onCheckedChange={(checked) => updateOptions({ microphone: checked })}
-              />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {localOptions.microphone ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm">Microphone</span>
+                    {localOptions.microphone && (
+                      <div>
+                        {getPermissionIcon(permissionStatus.microphone === 'granted', permissionStatus.microphone === 'checking')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Switch
+                  checked={localOptions.microphone}
+                  onCheckedChange={(checked) => handleOptionChange('microphone', checked)}
+                />
+              </div>
             </div>
           </div>
-        </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <div className="px-2 py-1">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Visual Effects</p>
-        </div>
+          {/* Visual Effects */}
+          <div>
+            <p className="text-sm font-medium text-foreground mb-3">Visual Effects</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <MousePointer className="h-4 w-4" />
+                  <span className="text-sm">Highlight Clicks</span>
+                </div>
+                <Switch
+                  checked={localOptions.highlightClicks}
+                  onCheckedChange={(checked) => handleOptionChange('highlightClicks', checked)}
+                />
+              </div>
 
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-transparent cursor-default">
-          <div className="flex items-center w-full">
-            <MousePointer className="h-4 w-4 mr-3" />
-            <div className="flex-1 flex items-center justify-between">
-              <span>Highlight Clicks</span>
-              <Switch
-                checked={options.highlightClicks}
-                onCheckedChange={(checked) => updateOptions({ highlightClicks: checked })}
-              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Pen className="h-4 w-4" />
+                  <span className="text-sm">Drawing Tools</span>
+                </div>
+                <Switch
+                  checked={localOptions.enableDrawing}
+                  onCheckedChange={(checked) => handleOptionChange('enableDrawing', checked)}
+                />
+              </div>
             </div>
           </div>
-        </DropdownMenuItem>
 
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-transparent cursor-default">
-          <div className="flex items-center w-full">
-            <Pen className="h-4 w-4 mr-3" />
-            <div className="flex-1 flex items-center justify-between">
-              <span>Drawing Tools</span>
-              <Switch
-                checked={options.enableDrawing}
-                onCheckedChange={(checked) => updateOptions({ enableDrawing: checked })}
-              />
-            </div>
+          <DropdownMenuSeparator />
+
+          {/* Start Recording Button */}
+          <div className="pt-2">
+            <Button
+              onClick={handleStartRecording}
+              disabled={isStarting}
+              className="w-full bg-red-500 hover:bg-red-600 text-white"
+              size="lg"
+            >
+              {isStarting ? (
+                <LoadingSpinner text="Starting..." size="sm" />
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Recording
+                </>
+              )}
+            </Button>
           </div>
-        </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        {/* Settings */}
-        <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
-          <Settings className="h-4 w-4 mr-3" />
-          <span>Settings</span>
-        </DropdownMenuItem>
+          {/* Settings Link */}
+          <div className="flex items-center justify-between pt-2">
+            <button
+              onClick={handleSettingsClick}
+              className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </button>
 
-        <DropdownMenuSeparator />
-
-        {/* Security Status */}
-        <div className="px-2 py-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Browser Security:</span>
-            <div className="flex items-center">
-              <Shield className="h-3 w-3 mr-1" />
+            {/* Security Status */}
+            <div className="flex items-center space-x-1 text-xs">
+              <Shield className="h-3 w-3" />
               <span className={window.isSecureContext ? "text-green-600" : "text-red-600"}>
                 {window.isSecureContext ? "Secure" : "Insecure"}
               </span>
             </div>
           </div>
-          {!window.isSecureContext && (
-            <p className="text-xs text-red-600 mt-1">
-              HTTPS required for recording
-            </p>
-          )}
-        </div>
-        
-        <div className="px-2 py-2 text-xs text-muted-foreground border-t border-border">
-          Recording works offline. Connect YouTube to sync.
+
+          {/* Footer Note */}
+          <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border">
+            Recording works offline. Connect YouTube to sync.
+          </div>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
