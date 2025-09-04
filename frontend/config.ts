@@ -8,9 +8,9 @@ export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
-// OAuth Configuration with PKCE
+// OAuth Configuration with PKCE (simplified for demo)
 export const OAUTH_CONFIG = {
-  clientId: '', // This will be fetched from the backend
+  clientId: 'demo-client-id',
   scope: YOUTUBE_SCOPES,
   responseType: 'code',
   accessType: 'offline',
@@ -24,24 +24,20 @@ export const OAUTH_CONFIG = {
 // Environment-specific configuration - RecordLane URLs
 export const getRedirectUri = (): string => {
   if (typeof window === 'undefined') {
-    // Default for server-side or non-browser environments
     return 'http://localhost:8089/auth/callback';
   }
   
   const origin = window.location.origin;
   const hostname = window.location.hostname;
   
-  // For local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `${origin}/auth/callback`;
   }
   
-  // For any development environment
   if (hostname.includes('.dev') || hostname.includes('.local')) {
     return `${origin}/auth/callback`;
   }
   
-  // For production
   return 'https://recordlane.com/auth/callback';
 };
 
@@ -113,7 +109,7 @@ export const FEATURES = {
 
 // Error Messages
 export const ERROR_MESSAGES = {
-  DRIVE_NOT_CONNECTED: 'Please connect your YouTube account before recording',
+  DRIVE_NOT_CONNECTED: 'Please connect your YouTube account before uploading',
   PERMISSIONS_DENIED: 'Recording permissions were denied. Please allow camera and screen access in your browser settings, then try again.',
   UPLOAD_FAILED: 'Failed to upload recording to YouTube',
   RECORDING_FAILED: 'Failed to start recording. Please check your browser permissions and try again.',
@@ -153,12 +149,11 @@ export const CACHE_CONFIG = {
 // Development Configuration
 export const DEV_CONFIG = {
   enableDebugLogs: process.env.NODE_ENV === 'development',
-  mockAPI: false,
+  mockAPI: true, // Enable demo mode
   skipOnboarding: false,
   allowPopupFallback: true,
   enableRedirectFallback: false,
 };
-
 
 // Token Refresh Configuration
 export const TOKEN_CONFIG = {

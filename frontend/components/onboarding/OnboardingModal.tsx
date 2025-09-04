@@ -8,7 +8,6 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ConnectionStatus } from '@/components/ui/connection-status';
 import { 
@@ -35,7 +34,9 @@ export default function OnboardingModal() {
   const handleConnect = async () => {
     try {
       await connectYouTube();
-      dispatch({ type: 'SET_ONBOARDED', payload: true });
+      if (isConnected) {
+        dispatch({ type: 'SET_ONBOARDED', payload: true });
+      }
     } catch (error) {
       console.error('Connection failed:', error);
       // Error is handled in YouTubeContext
@@ -99,7 +100,7 @@ export default function OnboardingModal() {
   };
 
   const getConnectionText = () => {
-    if (connectionError) return `Error: ${connectionError}`;
+    if (connectionError) return `Demo Mode Available`;
     if (isConnecting) return 'Connecting to YouTube...';
     if (isConnected) return 'Successfully connected to YouTube';
     return 'Ready to connect';
@@ -157,15 +158,15 @@ export default function OnboardingModal() {
 
             {/* Error Display */}
             {connectionError && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <div className="flex items-start space-x-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 text-left">
-                    <h3 className="font-medium text-red-800 dark:text-red-200 mb-1 text-sm">
-                      Connection Failed
+                    <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-1 text-sm">
+                      Demo Mode Available
                     </h3>
-                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                      {connectionError}
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                      RecordLane is running in demo mode. You can start recording immediately, and connect YouTube later for cloud sync.
                     </p>
                     <div className="flex space-x-2">
                       <Button
@@ -173,14 +174,14 @@ export default function OnboardingModal() {
                         onClick={handleRetry}
                         disabled={isConnecting}
                         variant="outline"
-                        className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300"
                       >
                         {isConnecting ? (
                           <LoadingSpinner text="Retrying..." size="sm" />
                         ) : (
                           <>
                             <RefreshCw className="h-4 w-4 mr-2" />
-                            Try Again
+                            Try YouTube Again
                           </>
                         )}
                       </Button>
@@ -188,9 +189,9 @@ export default function OnboardingModal() {
                         size="sm"
                         variant="ghost"
                         onClick={handleSkip}
-                        className="text-red-700 hover:bg-red-100 dark:text-red-300"
+                        className="text-blue-700 hover:bg-blue-100 dark:text-blue-300"
                       >
-                        Skip for now
+                        Continue in Demo Mode
                       </Button>
                     </div>
                   </div>

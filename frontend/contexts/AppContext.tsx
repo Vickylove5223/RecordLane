@@ -50,7 +50,7 @@ type AppAction =
   | { type: 'RESET_SETTINGS' };
 
 const initialState: AppState = {
-  isOnboarded: true,
+  isOnboarded: false, // Start with onboarding
   settingsOpen: false,
   shareModalOpen: false,
   settings: {
