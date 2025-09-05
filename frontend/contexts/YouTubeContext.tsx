@@ -95,14 +95,28 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       }
       
       // Use real YouTube service
-      const result = await RealYouTubeService.connect();
-      setIsConnected(true);
-      setUserEmail(result.userEmail);
-      
-      toast({
-        title: "YouTube Connected",
-        description: `Successfully connected as ${result.userEmail}`,
-      });
+      try {
+        const result = await RealYouTubeService.connect();
+        setIsConnected(true);
+        setUserEmail(result.userEmail);
+        
+        toast({
+          title: "YouTube Connected",
+          description: `Successfully connected as ${result.userEmail}`,
+        });
+      } catch (error) {
+        // If backend is not available, show helpful error message
+        if (error.message?.includes('backend configuration')) {
+          setConnectionError('YouTube integration requires backend server. Please start the backend server first.');
+          toast({
+            title: "Backend Required",
+            description: "Please start the backend server to enable YouTube integration",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('Failed to connect to YouTube:', error);
       ErrorHandler.logError('youtube-connect', error);

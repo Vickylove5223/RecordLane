@@ -130,7 +130,7 @@ export class ErrorBoundary extends Component<Props, State> {
       // Test connection with multiple endpoints
       const testUrls = [
         'https://www.google.com/favicon.ico',
-        'https://googleapis.com',
+        'https://www.googleapis.com/oauth2/v1/tokeninfo',
         'https://accounts.google.com',
       ];
 

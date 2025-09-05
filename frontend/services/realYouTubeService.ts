@@ -61,8 +61,15 @@ export class RealYouTubeService {
       };
       console.log('OAuth config loaded from backend:', this.oauthConfig);
     } catch (error) {
-      console.error('Failed to load OAuth config:', error);
+      console.error('Failed to load OAuth config from backend:', error);
       ErrorHandler.logError('oauth-config-load', error);
+      
+      // Fallback to demo mode if backend is not available
+      this.oauthConfig = {
+        ...OAUTH_CONFIG,
+        clientId: 'demo-client-id',
+      };
+      console.log('Using demo OAuth config - backend not available');
     }
   }
 
@@ -278,6 +285,11 @@ export class RealYouTubeService {
       throw new Error('OAuth configuration not available');
     }
 
+    // Check if we're in demo mode
+    if (this.oauthConfig.clientId === 'demo-client-id') {
+      throw new Error('YouTube integration requires backend configuration. Please start the backend server.');
+    }
+
     const params = new URLSearchParams({
       client_id: this.oauthConfig.clientId,
       redirect_uri: getRedirectUri(),
@@ -362,47 +374,8 @@ export class RealYouTubeService {
             return reject(ErrorHandler.createError('POPUP_CLOSED', ERROR_MESSAGES.POPUP_CLOSED));
           }
 
-          // Try to access popup location, but handle COOP errors gracefully
-          let currentUrl;
-          try {
-            currentUrl = popup.location.href;
-          } catch (e) {
-            // COOP error - this is expected and normal
-            // The callback page will handle the OAuth flow via postMessage
-            return;
-          }
-
-          const url = new URL(currentUrl);
-          const redirectUri = getRedirectUri();
-          
-          if (url.origin === new URL(redirectUri).origin) {
-            clearInterval(pollTimer);
-            clearTimeout(timeout);
-            window.removeEventListener('message', messageHandler);
-            popup.close();
-            
-            const code = url.searchParams.get('code');
-            const state = url.searchParams.get('state');
-            const error = url.searchParams.get('error');
-            
-            if (error) {
-              if (error === 'access_denied') {
-                return reject(ErrorHandler.createError('USER_CANCELLED', 'User denied access'));
-              }
-              return reject(ErrorHandler.createError('OAUTH_ERROR', `OAuth error: ${error}`));
-            }
-            
-            if (state !== expectedState) {
-              return reject(ErrorHandler.createError('INVALID_STATE', ERROR_MESSAGES.INVALID_STATE));
-            }
-            
-            if (code) {
-              console.log('Authorization code received successfully');
-              resolve(code);
-            } else {
-              reject(ErrorHandler.createError('OAUTH_ERROR', 'No authorization code received'));
-            }
-          }
+          // Don't try to access popup.location.href to avoid COOP errors
+          // The OAuth flow will be handled entirely via postMessage from the callback page
         } catch (error) {
           if (error.name !== 'SecurityError') {
             console.warn('Unexpected error during popup polling:', error);
