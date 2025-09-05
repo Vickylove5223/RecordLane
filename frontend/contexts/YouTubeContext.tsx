@@ -2,8 +2,10 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { ErrorHandler } from '../utils/errorHandler';
 import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
+import { RealYouTubeService } from '../services/realYouTubeService';
+import { DEV_CONFIG } from '../config';
 
-// Simplified YouTube context without backend dependencies for now
+// Real YouTube context with backend integration
 interface YouTubeContextType {
   isConnected: boolean;
   userEmail: string | null;
@@ -37,14 +39,26 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     try {
       setConnectionError(null);
       
-      // For now, just check if we have stored tokens
-      const hasTokens = localStorage.getItem('recordlane-access-token');
-      const storedEmail = localStorage.getItem('recordlane-user-email');
+      if (DEV_CONFIG.mockAPI) {
+        // Fallback to demo mode if enabled
+        const hasTokens = localStorage.getItem('recordlane-access-token');
+        const storedEmail = localStorage.getItem('recordlane-user-email');
+        
+        setIsConnected(!!hasTokens);
+        setUserEmail(storedEmail);
+        
+        if (!hasTokens) {
+          setConnectionError('Not connected to YouTube');
+        }
+        return;
+      }
       
-      setIsConnected(!!hasTokens);
-      setUserEmail(storedEmail);
+      // Use real YouTube service
+      const connection = await RealYouTubeService.checkConnection();
+      setIsConnected(connection.isConnected);
+      setUserEmail(connection.userEmail);
       
-      if (!hasTokens) {
+      if (!connection.isConnected) {
         setConnectionError('Not connected to YouTube');
       }
     } catch (error) {
@@ -62,23 +76,32 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     setConnectionError(null);
     
     try {
-      // For now, simulate a connection without actual OAuth
-      // In a real implementation, this would handle the OAuth flow
+      if (DEV_CONFIG.mockAPI) {
+        // Demo mode fallback
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const mockEmail = 'demo@example.com';
+        localStorage.setItem('recordlane-access-token', 'demo-token');
+        localStorage.setItem('recordlane-user-email', mockEmail);
+        
+        setIsConnected(true);
+        setUserEmail(mockEmail);
+        
+        toast({
+          title: "Demo Mode",
+          description: "YouTube connection simulated for demo purposes",
+        });
+        return;
+      }
       
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, just set connected state
-      const mockEmail = 'demo@example.com';
-      localStorage.setItem('recordlane-access-token', 'demo-token');
-      localStorage.setItem('recordlane-user-email', mockEmail);
-      
+      // Use real YouTube service
+      const result = await RealYouTubeService.connect();
       setIsConnected(true);
-      setUserEmail(mockEmail);
+      setUserEmail(result.userEmail);
       
       toast({
-        title: "Demo Mode",
-        description: "YouTube connection simulated for demo purposes",
+        title: "YouTube Connected",
+        description: `Successfully connected as ${result.userEmail}`,
       });
     } catch (error) {
       console.error('Failed to connect to YouTube:', error);
@@ -88,7 +111,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to YouTube. Demo mode available.",
+        description: "Failed to connect to YouTube. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -98,8 +121,12 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
 
   const disconnectYouTube = useCallback(async () => {
     try {
-      localStorage.removeItem('recordlane-access-token');
-      localStorage.removeItem('recordlane-user-email');
+      if (!DEV_CONFIG.mockAPI) {
+        await RealYouTubeService.disconnect();
+      } else {
+        localStorage.removeItem('recordlane-access-token');
+        localStorage.removeItem('recordlane-user-email');
+      }
       
       setIsConnected(false);
       setUserEmail(null);
@@ -112,6 +139,13 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Failed to disconnect from YouTube:', error);
       ErrorHandler.logError('youtube-disconnect', error);
+      
+      // Clear local state even if disconnect fails
+      localStorage.removeItem('recordlane-access-token');
+      localStorage.removeItem('recordlane-user-email');
+      setIsConnected(false);
+      setUserEmail(null);
+      setConnectionError(null);
       
       toast({
         title: "Disconnect Error",
@@ -132,32 +166,66 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     }
     
     try {
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        onProgress?.({ loaded: i, total: 100, percentage: i });
+      if (DEV_CONFIG.mockAPI) {
+        // Demo mode fallback
+        for (let i = 0; i <= 100; i += 10) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          onProgress?.({ loaded: i, total: 100, percentage: i });
+        }
+        
+        const mockVideoId = 'demo_' + Date.now();
+        const mockVideoUrl = `https://www.youtube.com/watch?v=${mockVideoId}`;
+        
+        return { videoId: mockVideoId, videoUrl: mockVideoUrl };
       }
       
-      // Simulate successful upload
-      const mockVideoId = 'demo_' + Date.now();
-      const mockVideoUrl = `https://www.youtube.com/watch?v=${mockVideoId}`;
+      // Use real YouTube service
+      const result = await RealYouTubeService.uploadVideo(file, title, privacy, onProgress);
       
-      return { videoId: mockVideoId, videoUrl: mockVideoUrl };
+      toast({
+        title: "Upload Successful",
+        description: `Video uploaded successfully: ${result.videoUrl}`,
+      });
+      
+      return result;
     } catch (error) {
       console.error('Failed to upload video:', error);
+      ErrorHandler.logError('youtube-upload', error);
+      
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload video to YouTube",
+        variant: "destructive",
+      });
+      
       throw ErrorHandler.createError('UPLOAD_FAILED', 'Failed to upload video');
     }
-  }, [isConnected]);
+  }, [isConnected, toast]);
 
   const refreshToken = useCallback(async () => {
     try {
-      // Simulate token refresh
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (DEV_CONFIG.mockAPI) {
+        // Demo mode fallback
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        toast({
+          title: "Token Refreshed",
+          description: "Authentication token has been refreshed successfully",
+        });
+        return;
+      }
       
-      toast({
-        title: "Token Refreshed",
-        description: "Authentication token has been refreshed successfully",
-      });
+      // Use real YouTube service
+      const refreshed = await RealYouTubeService.refreshAccessToken();
+      
+      if (refreshed) {
+        toast({
+          title: "Token Refreshed",
+          description: "Authentication token has been refreshed successfully",
+        });
+      } else {
+        throw new Error('Token refresh failed');
+      }
     } catch (error) {
       console.error('Failed to refresh token:', error);
       ErrorHandler.logError('token-refresh-context', error);
@@ -182,9 +250,12 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     }
   }, [connectionError, connectYouTube, checkConnection]);
 
-  // Initialize connection check
+  // Initialize connection check - only in demo mode to avoid backend dependency
   React.useEffect(() => {
-    checkConnection();
+    if (DEV_CONFIG.mockAPI) {
+      checkConnection();
+    }
+    // For real mode, connection will be checked when user tries to connect
   }, [checkConnection]);
 
   return (

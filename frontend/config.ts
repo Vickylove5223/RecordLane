@@ -8,9 +8,9 @@ export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
-// OAuth Configuration with PKCE (simplified for demo)
+// OAuth Configuration with PKCE - will be populated from backend
 export const OAUTH_CONFIG = {
-  clientId: 'demo-client-id',
+  clientId: '', // Will be populated from backend
   scope: YOUTUBE_SCOPES,
   responseType: 'code',
   accessType: 'offline',
@@ -149,7 +149,7 @@ export const CACHE_CONFIG = {
 // Development Configuration
 export const DEV_CONFIG = {
   enableDebugLogs: process.env.NODE_ENV === 'development',
-  mockAPI: true, // Enable demo mode
+  mockAPI: false, // Disable demo mode - use real backend
   skipOnboarding: false,
   allowPopupFallback: true,
   enableRedirectFallback: false,

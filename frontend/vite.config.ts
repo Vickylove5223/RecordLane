@@ -17,5 +17,13 @@ export default defineConfig({
   mode: "development",
   build: {
     minify: false,
-  }
+  },
+  server: {
+    port: 8089,
+    host: true,
+  },
+  publicDir: 'public',
+  define: {
+    'import.meta.env.VITE_CLIENT_TARGET': JSON.stringify(process.env.VITE_CLIENT_TARGET || 'http://localhost:4000'),
+  },
 })
