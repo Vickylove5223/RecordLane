@@ -25,5 +25,7 @@ export default defineConfig({
   publicDir: 'public',
   define: {
     'import.meta.env.VITE_CLIENT_TARGET': JSON.stringify(process.env.VITE_CLIENT_TARGET || 'http://localhost:4000'),
+    'import.meta.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(process.env.VITE_GOOGLE_CLIENT_ID || ''),
+    'import.meta.env.VITE_GOOGLE_CLIENT_SECRET': JSON.stringify(process.env.VITE_GOOGLE_CLIENT_SECRET || ''),
   },
 })
