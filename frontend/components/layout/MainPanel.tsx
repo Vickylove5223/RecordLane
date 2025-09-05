@@ -79,22 +79,10 @@ function formatDuration(ms: number) {
 }
 
 function MainPanelComponent() {
-  const { isConnected, isConnecting, connectionError, retryConnection, connectYouTube } = useYouTube();
+  const { isConnected, isConnecting, connectionError, connectYouTube } = useYouTube();
   const { state } = useApp();
   const { state: recordingState } = useRecording();
   const [selectedRecording, setSelectedRecording] = useState(null);
-
-  useEffect(() => {
-    // Check for connection issues and auto-retry
-    if (connectionError && !isConnecting) {
-      const retryTimer = setTimeout(() => {
-        console.log('Auto-retrying connection...');
-        retryConnection();
-      }, 5000); // Retry after 5 seconds
-
-      return () => clearTimeout(retryTimer);
-    }
-  }, [connectionError, isConnecting, retryConnection]);
 
   const getConnectionStatus = () => {
     if (connectionError) return 'error';

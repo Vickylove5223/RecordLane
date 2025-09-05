@@ -288,12 +288,8 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     }
   }, [connectionError, connectYouTube, checkConnection]);
 
-  // Initialize connection check - only in demo mode to avoid backend dependency
   React.useEffect(() => {
-    if (DEV_CONFIG.mockAPI) {
-      checkConnection();
-    }
-    // For real mode, connection will be checked when user tries to connect
+    checkConnection();
   }, [checkConnection]);
 
   return (

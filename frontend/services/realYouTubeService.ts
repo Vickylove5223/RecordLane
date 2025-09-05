@@ -42,18 +42,24 @@ export class RealYouTubeService {
   private static connectionListeners: Array<(connected: boolean) => void> = [];
   private static client: Client;
   private static oauthConfig: typeof OAUTH_CONFIG | null = null;
+  private static initializationPromise: Promise<void> | null = null;
 
   static initialize() {
-    // Initialize Encore client
-    this.client = new Client(import.meta.env.VITE_CLIENT_TARGET || 'http://localhost:4000');
-    
-    // Load OAuth config from backend
-    this.loadOAuthConfig();
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+    this.initializationPromise = (async () => {
+      // Initialize Encore client
+      this.client = new Client(import.meta.env.VITE_CLIENT_TARGET || 'http://localhost:4000');
+      
+      // Load OAuth config from backend
+      await this.loadOAuthConfig();
+    })();
+    return this.initializationPromise;
   }
 
   private static async loadOAuthConfig() {
     try {
-      this.ensureInitialized();
       const config = await this.client.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
@@ -95,6 +101,7 @@ export class RealYouTubeService {
   }
 
   static async checkConnection(): Promise<YouTubeConnection> {
+    await this.initialize();
     try {
       const cached = await this.cache.get('connection-status');
       if (cached && Date.now() - cached.timestamp < 60 * 1000) {
@@ -146,14 +153,12 @@ export class RealYouTubeService {
   }
 
   static async connect(): Promise<{ userEmail: string }> {
+    await this.initialize();
     try {
       await this.cache.delete('connection-status');
       
       if (!this.oauthConfig?.clientId) {
-        await this.loadOAuthConfig();
-        if (!this.oauthConfig?.clientId) {
-          throw new Error('OAuth configuration not available');
-        }
+        throw new Error('OAuth configuration not available');
       }
 
       // Generate PKCE parameters
@@ -224,6 +229,7 @@ export class RealYouTubeService {
     privacyStatus: 'public' | 'private' | 'unlisted',
     onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadResult> {
+    await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.accessToken) {
@@ -387,7 +393,6 @@ export class RealYouTubeService {
 
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenData> {
     try {
-      this.ensureInitialized();
       const result = await this.client.auth.exchangeCode({
         code,
         codeVerifier,
@@ -402,13 +407,13 @@ export class RealYouTubeService {
   }
 
   static async refreshAccessToken(): Promise<boolean> {
+    await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.refreshToken) {
         return false;
       }
 
-      this.ensureInitialized();
       const result = await this.client.auth.refreshToken({
         refreshToken: tokenData.refreshToken,
       });
@@ -592,21 +597,6 @@ export class RealYouTubeService {
     }
   }
 
-  static async initializeService(): Promise<void> {
-    try {
-      this.initialize();
-      await this.checkConnection();
-    } catch (error) {
-      console.error('Failed to initialize YouTube service:', error);
-    }
-  }
-
-  private static ensureInitialized(): void {
-    if (!this.client) {
-      this.initialize();
-    }
-  }
-
   // Handle OAuth callback
   static handleOAuthCallback() {
     if (typeof window !== 'undefined') {
@@ -649,5 +639,4 @@ export class RealYouTubeService {
 // Initialize OAuth callback handling when module loads
 if (typeof window !== 'undefined') {
   RealYouTubeService.handleOAuthCallback();
-  // Don't initialize service immediately - wait for first use
 }
