@@ -1,3 +1,4 @@
+    <content>
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -42,8 +43,31 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
   const { isConnected } = useYouTube();
   const { toast } = useToast();
 
+  const getYouTubeEmbedUrl = (url: string): string | null => {
+    if (!url) return null;
+    try {
+      const urlObj = new URL(url);
+      let videoId: string | null = null;
+      if (urlObj.hostname === 'youtu.be') {
+        videoId = urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes('youtube.com')) {
+        videoId = urlObj.searchParams.get('v');
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      }
+    } catch (error) {
+      console.error('Invalid YouTube URL:', url, error);
+    }
+    return null;
+  };
+
+  const videoSource = recording.localBlob ? URL.createObjectURL(recording.localBlob) : null;
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
+
   useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && videoSource) {
       const video = videoRef.current;
       
       const handleLoadedMetadata = () => {
@@ -85,7 +109,7 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
         video.removeEventListener('ended', handleEnded);
       };
     }
-  }, [recording]);
+  }, [videoSource]);
 
   const togglePlayPause = () => {
     if (videoRef.current) {
@@ -195,15 +219,7 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
     }
   };
 
-  const getVideoSource = () => {
-    if (recording.localBlob) {
-      return URL.createObjectURL(recording.localBlob);
-    }
-    return null;
-  };
-
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const videoSource = getVideoSource();
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -247,7 +263,16 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
         <div className="flex-1 flex flex-col p-6">
           {/* Video Player */}
           <div className="relative bg-black rounded-lg overflow-hidden mb-4">
-            {videoSource ? (
+            {youtubeEmbedUrl ? (
+              <iframe
+                src={youtubeEmbedUrl}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full aspect-video"
+              ></iframe>
+            ) : videoSource ? (
               <>
                 <video
                   ref={videoRef}
@@ -283,8 +308,8 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
             )}
           </div>
 
-          {/* Timeline */}
-          {videoSource && (
+          {/* Timeline for local videos */}
+          {videoSource && !youtubeEmbedUrl && (
             <div className="space-y-2 mb-6">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
@@ -355,3 +380,4 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
     </Dialog>
   );
 }
+    </content>
