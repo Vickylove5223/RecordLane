@@ -8,9 +8,10 @@ export const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
 
-// OAuth Configuration with PKCE - will be populated from backend
+// OAuth Configuration with PKCE - supports both environment variables and backend
 export const OAUTH_CONFIG = {
-  clientId: '', // Will be populated from backend
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '', // From environment or backend
+  clientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || '', // From environment
   scope: YOUTUBE_SCOPES,
   responseType: 'code',
   accessType: 'offline',
@@ -19,6 +20,11 @@ export const OAUTH_CONFIG = {
   codeChallenge: '',
   codeChallengeMethod: 'S256',
   state: '',
+};
+
+// Check if YouTube is configured
+export const isYouTubeConfigured = (): boolean => {
+  return !!(import.meta.env.VITE_GOOGLE_CLIENT_ID || OAUTH_CONFIG.clientId);
 };
 
 // Environment-specific configuration - RecordLane URLs

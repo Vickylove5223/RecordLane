@@ -3,7 +3,8 @@ import { ErrorHandler } from '../utils/errorHandler';
 import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
 import { RealYouTubeService } from '../services/realYouTubeService';
-import { DEV_CONFIG } from '../config';
+import { FrontendYouTubeService } from '../services/frontendYouTubeService';
+import { DEV_CONFIG, isYouTubeConfigured } from '../config';
 
 // Real YouTube context with backend integration
 interface YouTubeContextType {
@@ -53,8 +54,22 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      // Use real YouTube service
-      const connection = await RealYouTubeService.checkConnection();
+      // Choose service based on configuration
+      let connection;
+      if (isYouTubeConfigured()) {
+        // Use frontend service if YouTube is configured
+        connection = await FrontendYouTubeService.checkConnection();
+      } else {
+        // Use backend service if available
+        try {
+          connection = await RealYouTubeService.checkConnection();
+        } catch (error) {
+          // If backend fails, show configuration message
+          setConnectionError('YouTube is not configured. Please set up your Google API credentials.');
+          return;
+        }
+      }
+      
       setIsConnected(connection.isConnected);
       setUserEmail(connection.userEmail);
       
@@ -94,8 +109,31 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      // Use real YouTube service
-      const result = await RealYouTubeService.connect();
+      // Choose service based on configuration
+      let result;
+      if (isYouTubeConfigured()) {
+        // Use frontend service if YouTube is configured
+        result = await FrontendYouTubeService.connect();
+      } else {
+        // Use backend service if available
+        try {
+          result = await RealYouTubeService.connect();
+        } catch (error) {
+          // If backend fails, show configuration message
+          if (error.message?.includes('backend configuration')) {
+            setConnectionError('YouTube integration requires backend server. Please start the backend server first.');
+            toast({
+              title: "Backend Required",
+              description: "Please start the backend server to enable YouTube integration",
+              variant: "destructive",
+            });
+            return;
+          } else {
+            throw error;
+          }
+        }
+      }
+      
       setIsConnected(true);
       setUserEmail(result.userEmail);
       
