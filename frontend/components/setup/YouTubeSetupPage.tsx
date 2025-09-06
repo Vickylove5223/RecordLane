@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Check, ExternalLink, AlertCircle, CheckCircle, Settings, Cloud, Wifi } from 'lucide-react';
+import { Copy, Check, ExternalLink, AlertCircle, CheckCircle, Settings, Cloud, Wifi, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useYouTube } from '../../contexts/YouTubeContext';
+import { useApp } from '../../contexts/AppContext';
 
-interface YouTubeSetupModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
+export function YouTubeSetupPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -21,6 +16,7 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
   const [credentialsSaved, setCredentialsSaved] = useState(false);
   const { toast } = useToast();
   const { connectYouTube, isConnected, isConnecting, userEmail, connectionError } = useYouTube();
+  const { dispatch } = useApp();
 
   const steps = [
     {
@@ -77,7 +73,28 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
       description: "Please restart the development server to apply changes",
     });
     
-    onClose();
+    setCredentialsSaved(true);
+    setCurrentStep(5);
+  };
+
+  const handleConnectYouTube = async () => {
+    try {
+      await connectYouTube();
+      if (isConnected) {
+        toast({
+          title: "YouTube Connected!",
+          description: "Your YouTube account has been successfully connected.",
+        });
+        // Navigate back to main app
+        dispatch({ type: 'SET_SETTINGS_OPEN', payload: false });
+      }
+    } catch (error) {
+      console.error('Connection failed:', error);
+    }
+  };
+
+  const handleBackToApp = () => {
+    dispatch({ type: 'SET_SETTINGS_OPEN', payload: false });
   };
 
   const renderStepContent = () => {
@@ -216,25 +233,127 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
           </div>
         );
 
+      case 5:
+        return (
+          <div className="space-y-6">
+            {isConnected ? (
+              <div className="text-center space-y-4">
+                <div className="flex justify-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-800">YouTube Connected Successfully!</h3>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Connected to: <span className="font-medium">{userEmail}</span>
+                  </p>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Your RecordLane is now ready to sync recordings to YouTube. You can start recording and your videos will be automatically uploaded to your YouTube channel.
+                </p>
+                <Button onClick={handleBackToApp} className="bg-black hover:bg-black/90 text-white">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to RecordLane
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Wifi className="h-5 w-5 text-black" />
+                  <span className="text-sm font-medium">Connect Your YouTube Account</span>
+                </div>
+                
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="flex items-start space-x-2">
+                    <Cloud className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-800">Ready to Connect</p>
+                      <p className="text-blue-700 mt-1">
+                        Click the button below to connect your YouTube account. You'll be redirected to Google to authorize RecordLane to access your YouTube channel.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {connectionError && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                    <div className="flex items-start space-x-2">
+                      <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-red-800">Connection Error</p>
+                        <p className="text-red-700 mt-1">{connectionError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleConnectYouTube}
+                    disabled={isConnecting}
+                    size="lg"
+                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-3"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Cloud className="h-5 w-5 mr-2" />
+                        Connect YouTube Account
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-gray-500 text-center">
+                  By connecting, you authorize RecordLane to upload videos to your YouTube channel and manage your recordings.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Settings className="h-5 w-5" />
-            <span>YouTube Integration Setup</span>
-          </DialogTitle>
-          <DialogDescription>
-            Follow these steps to set up YouTube integration for your RecordLane instance.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToApp}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to App
+              </Button>
+              <div className="h-6 w-px bg-gray-300" />
+              <div className="flex items-center space-x-2">
+                <Settings className="h-5 w-5 text-black" />
+                <h1 className="text-xl font-semibold">YouTube Integration Setup</h1>
+              </div>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              Step {currentStep} of {steps.length}
+            </Badge>
+          </div>
+        </div>
+      </div>
 
-        <div className="space-y-6">
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="space-y-8">
           {/* Progress Steps */}
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
@@ -267,27 +386,29 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
           </Card>
 
           {/* Navigation */}
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-              disabled={currentStep === 1}
-            >
-              Previous
-            </Button>
-            
-            <div className="flex space-x-2">
-              {currentStep === 4 ? (
-                <Button onClick={handleSaveCredentials} className="bg-black hover:bg-black/90 text-white">
-                  Save Credentials
-                </Button>
-              ) : (
-                <Button onClick={() => setCurrentStep(Math.min(4, currentStep + 1))} className="bg-black hover:bg-black/90 text-white">
-                  Next
-                </Button>
-              )}
+          {currentStep < 5 && (
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                disabled={currentStep === 1}
+              >
+                Previous
+              </Button>
+              
+              <div className="flex space-x-2">
+                {currentStep === 4 ? (
+                  <Button onClick={handleSaveCredentials} className="bg-black hover:bg-black/90 text-white">
+                    Save Credentials
+                  </Button>
+                ) : (
+                  <Button onClick={() => setCurrentStep(Math.min(5, currentStep + 1))} className="bg-black hover:bg-black/90 text-white">
+                    Next
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Help Section */}
           <div className="p-4 bg-gray-50 rounded-md">
@@ -303,7 +424,7 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
             </ul>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

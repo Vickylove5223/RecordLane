@@ -13,6 +13,7 @@ import './App.css';
 
 // Lazy load main components for better performance
 const AppShell = lazy(() => import('./components/AppShell'));
+const YouTubeSetupPage = lazy(() => import('./components/setup/YouTubeSetupPage'));
 
 function AppLoadingFallback() {
   return (
@@ -123,6 +124,7 @@ function AppInner() {
                   <Router>
                     <Suspense fallback={<AppLoadingFallback />}>
                       <Routes>
+                        <Route path="/youtube-setup" element={<YouTubeSetupPage />} />
                         <Route path="*" element={<AppShell />} />
                       </Routes>
                     </Suspense>

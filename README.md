@@ -2,6 +2,134 @@
 
 A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, and YouTube API integration.
 
+## 🏆 Open Source Alternative
+
+RecordLane is an open-source alternative to expensive proprietary screen recording tools. Break free from vendor lock-in and subscription fees with a privacy-first solution that puts you in control.
+
+### What Proprietary Tools This Replaces
+
+RecordLane replaces popular but expensive screen recording solutions:
+
+- **Loom** ($8-16/month) - Limited free tier, videos stored on their servers
+- **Screencastify** ($3-7/month) - Chrome extension limitations, Google Drive dependency
+- **Camtasia** ($299 one-time) - Desktop-only, complex setup, no cloud integration
+- **OBS Studio** (Free but complex) - Steep learning curve, no built-in sharing
+- **Bandicam** ($40-60) - Windows-only, limited cloud features
+- **ScreenFlow** ($149) - Mac-only, expensive for basic features
+
+### Why Choose RecordLane?
+
+- **💰 Free Forever**: No subscription fees or usage limits
+- **🔒 Privacy First**: Videos go directly to your YouTube channel
+- **🌐 Web-Based**: Works in any modern browser, no downloads
+- **📱 Cross-Platform**: Desktop, tablet, and mobile support
+- **🔧 Open Source**: Full transparency and community-driven development
+- **⚡ Modern Tech**: Built with latest web technologies
+
+## 📸 Demo & Screenshots
+
+> **Note**: Screenshots and demo video will be added here. This section will showcase:
+> - Main recording interface
+> - Recording modes (screen, camera, both)
+> - Drawing and annotation tools
+> - Video editing and trimming
+> - YouTube upload process
+> - Share modal and link generation
+
+*[Screenshots coming soon]*
+
+## 🚀 How to Run
+
+### Prerequisites
+
+- **Node.js** (v18 or higher)
+- **Bun** package manager
+- **Encore CLI** for backend services
+- **Google Cloud Console** account for OAuth setup
+
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/recordlane.git
+   cd recordlane
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Install root dependencies
+   bun install
+   
+   # Install frontend dependencies
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+3. **Set up Google OAuth** (see Configuration section below)
+
+4. **Start the backend**
+   ```bash
+   cd backend
+   encore run
+   ```
+   The backend will be available at `http://localhost:4000`
+
+5. **Start the frontend**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+   The frontend will be available at `http://localhost:5173`
+
+6. **Generate frontend client** (in backend directory)
+   ```bash
+   encore gen client --target leap
+   ```
+
+### Production Deployment
+
+#### Option 1: Encore Cloud (Recommended)
+```bash
+# Login to Encore Cloud
+encore auth login
+
+# Add Encore remote
+git remote add encore encore://recordlane-app
+
+# Deploy
+git add -A .
+git commit -m "Deploy to production"
+git push encore
+```
+
+#### Option 2: Self-Hosting
+```bash
+# Build Docker image
+encore build docker
+
+# Deploy using your preferred container orchestration
+```
+
+## 📊 Competitive Comparison
+
+| Feature | RecordLane | Loom | Screencastify | Camtasia | OBS Studio |
+|---------|------------|------|---------------|----------|------------|
+| **Price** | 💰 Free | $8-16/month | $3-7/month | $299 one-time | 💰 Free |
+| **Privacy** | ✅ Your YouTube | ❌ Their servers | ❌ Their servers | ✅ Local only | ✅ Local only |
+| **Open Source** | ✅ Yes | ❌ No | ❌ No | ❌ No | ✅ Yes |
+| **Cloud Integration** | ✅ YouTube | ✅ Loom cloud | ✅ Google Drive | ❌ None | ❌ None |
+| **Web-Based** | ✅ Yes | ✅ Yes | ✅ Chrome only | ❌ Desktop only | ❌ Desktop only |
+| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Camera Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Drawing Tools** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Click Highlights** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Video Editing** | ✅ Client-side | ✅ Cloud | ❌ Limited | ✅ Advanced | ❌ No |
+| **Auto Upload** | ✅ YouTube | ✅ Loom | ✅ Google Drive | ❌ Manual | ❌ Manual |
+| **Share Links** | ✅ Instant | ✅ Instant | ✅ Instant | ❌ Manual | ❌ Manual |
+| **Mobile Support** | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No |
+| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐ Medium | ⭐⭐ Easy | ⭐⭐⭐⭐ Hard | ⭐⭐⭐⭐⭐ Very Hard |
+
 ## Features
 
 ### 🎥 Recording Modes
@@ -37,6 +165,8 @@ A privacy-first, open-source screen recording application that stores all record
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
 
 ## Getting Started
+
+Once you have RecordLane running (see "How to Run" section above):
 
 1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
 2. **Choose Recording Mode**: Select screen, camera, or both

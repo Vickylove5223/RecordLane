@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Video, Wifi, Shield, Download, Zap, AlertTriangle, Play, ExternalLink, Clock } from 'lucide-react';
+import { Video, AlertTriangle, Play, ExternalLink, Clock } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
@@ -79,7 +79,7 @@ function formatDuration(ms: number) {
 }
 
 function MainPanelComponent() {
-  const { isConnected, isConnecting, connectionError, connectYouTube } = useYouTube();
+  const { isConnected, isConnecting, connectionError } = useYouTube();
   const { state } = useApp();
   const { state: recordingState } = useRecording();
   const [selectedRecording, setSelectedRecording] = useState(null);
@@ -126,7 +126,7 @@ function MainPanelComponent() {
           
           <h1 className="text-4xl font-bold mb-4">Welcome to RecordLane</h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Record your screen and camera with instant YouTube sync
+            Record your screen and camera with professional quality
           </p>
 
           {/* Connection Status */}
@@ -138,43 +138,6 @@ function MainPanelComponent() {
             />
           </div>
 
-          {/* Connect YouTube CTA */}
-          {!isConnected && (
-            <Card className="text-left mb-8 max-w-2xl mx-auto">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <Wifi className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-2">Connect YouTube for Cloud Sync</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      You can record immediately! Connect YouTube later to automatically sync and share your recordings online.
-                    </p>
-                    <div className="space-y-3 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center space-x-3">
-                        <Shield className="h-4 w-4 text-green-500" />
-                        <span>Your recordings are uploaded to your YouTube channel</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Zap className="h-4 w-4 text-blue-500" />
-                        <span>One-click recording with instant shareable links</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Download className="h-4 w-4 text-purple-500" />
-                        <span>Automatic sync and resumable uploads</span>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={connectYouTube}
-                      disabled={isConnecting}
-                      size="sm"
-                    >
-                      {isConnecting ? 'Connecting...' : 'Connect YouTube'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Recent Activity */}
@@ -213,10 +176,10 @@ function MainPanelComponent() {
               <h3 className="font-semibold mb-2">Ready to Record!</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Click the red record button in the top-right corner to start your first recording. 
-                You can record immediately without connecting YouTube.
+                You can record immediately and save locally.
               </p>
               <div className="text-xs text-muted-foreground">
-                <strong>Tip:</strong> Your recordings will be saved locally. Connect YouTube anytime to sync them online.
+                <strong>Tip:</strong> Your recordings will be saved locally and can be shared directly.
               </div>
             </CardContent>
           </Card>

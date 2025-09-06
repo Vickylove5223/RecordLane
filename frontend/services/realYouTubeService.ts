@@ -127,7 +127,7 @@ export class RealYouTubeService {
 
       const result = {
         isConnected: true,
-        userEmail: tokenData.userEmail || 'user@example.com',
+        userEmail: tokenData.userEmail || null,
       };
 
       await this.cache.set('connection-status', result, 5 * 60 * 1000);
