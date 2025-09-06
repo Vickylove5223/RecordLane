@@ -106,6 +106,11 @@ export class YouTubeCommentsService {
         throw new Error('Authentication required');
       }
 
+      // If parentId is provided, it's a reply
+      if (parentId) {
+        return await this.addReply(parentId, text);
+      }
+
       const response = await fetch('https://www.googleapis.com/youtube/v3/commentThreads', {
         method: 'POST',
         headers: {
@@ -147,6 +152,51 @@ export class YouTubeCommentsService {
     }
   }
 
+  static async addReply(parentId: string, text: string): Promise<YouTubeComment> {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!tokenData?.accessToken) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('https://www.googleapis.com/youtube/v3/comments', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenData.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          snippet: {
+            parentId: parentId,
+            textOriginal: text,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add reply: ${errorText}`);
+      }
+
+      const result = await response.json();
+      const comment = this.transformComment(result.snippet);
+      comment.id = result.id;
+      comment.parentId = parentId;
+      comment.totalReplyCount = 0;
+      comment.canReply = true;
+
+      // Clear cache for this video (we need to find the videoId from the parent comment)
+      // For now, clear all caches
+      await this.cache.clear();
+
+      return comment;
+    } catch (error) {
+      console.error('Failed to add reply:', error);
+      ErrorHandler.logError('youtube-comment-reply', error, { parentId, text });
+      throw error;
+    }
+  }
+
   static async likeComment(commentId: string): Promise<void> {
     try {
       const tokenData = this.getStoredTokenData();
@@ -173,6 +223,36 @@ export class YouTubeCommentsService {
     } catch (error) {
       console.error('Failed to like comment:', error);
       ErrorHandler.logError('youtube-comment-like', error, { commentId });
+      throw error;
+    }
+  }
+
+  static async unlikeComment(commentId: string): Promise<void> {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!tokenData?.accessToken) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('https://www.googleapis.com/youtube/v3/comments/rate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenData.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: commentId,
+          rating: 'none',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to unlike comment: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Failed to unlike comment:', error);
+      ErrorHandler.logError('youtube-comment-unlike', error, { commentId });
       throw error;
     }
   }

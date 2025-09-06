@@ -286,14 +286,32 @@ export class RealYouTubeService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Delete failed with response:', errorText);
-        throw new Error(`Failed to delete video: ${errorText}`);
+        
+        // Parse error response for better error messages
+        let errorMessage = 'Failed to delete video from YouTube';
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            if (errorData.error.code === 403) {
+              errorMessage = 'Permission denied. You may not have permission to delete this video.';
+            } else if (errorData.error.code === 404) {
+              errorMessage = 'Video not found. It may have already been deleted.';
+            } else if (errorData.error.message) {
+              errorMessage = errorData.error.message;
+            }
+          }
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+        }
+        
+        throw new Error(errorMessage);
       }
 
       console.log('Video deleted successfully from YouTube:', videoId);
     } catch (error) {
       console.error('Failed to delete video from YouTube:', error);
       ErrorHandler.logError('youtube-delete', error, { videoId });
-      throw ErrorHandler.createError('DELETE_FAILED', 'Failed to delete video from YouTube', error);
+      throw ErrorHandler.createError('DELETE_FAILED', error.message || 'Failed to delete video from YouTube', error);
     }
   }
 

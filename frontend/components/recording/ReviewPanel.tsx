@@ -89,6 +89,7 @@ export default function ReviewPanel() {
         console.log('Video metadata loaded:', video.duration);
         if (isFinite(video.duration) && video.duration > 0) {
           setDuration(video.duration);
+          setTrimStart(0);
           setTrimEnd(video.duration);
           setVideoLoading(false);
         }
@@ -395,19 +396,19 @@ export default function ReviewPanel() {
             <div className="p-6 space-y-4">
               {/* Header */}
               <div className="border-b border-border pb-4">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
-                    <span>Review Recording</span>
-                    {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
-                  </DialogTitle>
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
+                <span>Review Recording</span>
+                {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
+              </DialogTitle>
                   <DialogDescription className="text-base text-muted-foreground mt-1">
-                    {uploadSuccess 
-                      ? "Your recording has been successfully synced to YouTube"
-                      : "Review your recording and sync to YouTube"
-                    }
-                  </DialogDescription>
-                </DialogHeader>
-              </div>
+                {uploadSuccess 
+                  ? "Your recording has been successfully synced to YouTube"
+                  : "Review your recording and sync to YouTube"
+                }
+              </DialogDescription>
+            </DialogHeader>
+          </div>
                 {/* Video Preview */}
                 <div className="relative bg-black rounded-lg overflow-hidden">
                   <video
@@ -520,6 +521,35 @@ export default function ReviewPanel() {
                 {/* Trimming Interface */}
                 {showTrimming && (
                   <div className="space-y-6 p-6 bg-muted rounded-lg border">
+                    <style jsx>{`
+                      .slider {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        height: 8px;
+                        border-radius: 4px;
+                        outline: none;
+                      }
+                      .slider::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #3b82f6;
+                        cursor: pointer;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                      }
+                      .slider::-moz-range-thumb {
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #3b82f6;
+                        cursor: pointer;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                      }
+                    `}</style>
                     <div className="flex items-center space-x-2">
                       <Scissors className="h-5 w-5 text-primary" />
                       <h3 className="text-lg font-semibold">Trim Video</h3>
@@ -537,10 +567,28 @@ export default function ReviewPanel() {
                             value={trimStart}
                             onChange={(e) => setTrimStart(parseFloat(e.target.value))}
                             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                            style={{
+                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(trimStart / duration) * 100}%, #e5e7eb ${(trimStart / duration) * 100}%, #e5e7eb 100%)`
+                            }}
                           />
-                          <span className="text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border">
-                            {formatTime(trimStart)}
-                          </span>
+                          <Input
+                            type="text"
+                            value={formatTime(trimStart)}
+                            onChange={(e) => {
+                              const timeStr = e.target.value;
+                              const parts = timeStr.split(':');
+                              if (parts.length === 2) {
+                                const minutes = parseInt(parts[0]) || 0;
+                                const seconds = parseInt(parts[1]) || 0;
+                                const totalSeconds = minutes * 60 + seconds;
+                                if (totalSeconds >= 0 && totalSeconds <= duration) {
+                                  setTrimStart(totalSeconds);
+                                }
+                              }
+                            }}
+                            className="w-20 text-center font-mono"
+                            placeholder="0:00"
+                          />
                         </div>
                       </div>
                       
@@ -555,15 +603,36 @@ export default function ReviewPanel() {
                             value={trimEnd}
                             onChange={(e) => setTrimEnd(parseFloat(e.target.value))}
                             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                            style={{
+                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(trimEnd / duration) * 100}%, #e5e7eb ${(trimEnd / duration) * 100}%, #e5e7eb 100%)`
+                            }}
                           />
-                          <span className="text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border">
-                            {formatTime(trimEnd)}
-                          </span>
+                          <Input
+                            type="text"
+                            value={formatTime(trimEnd)}
+                            onChange={(e) => {
+                              const timeStr = e.target.value;
+                              const parts = timeStr.split(':');
+                              if (parts.length === 2) {
+                                const minutes = parseInt(parts[0]) || 0;
+                                const seconds = parseInt(parts[1]) || 0;
+                                const totalSeconds = minutes * 60 + seconds;
+                                if (totalSeconds >= 0 && totalSeconds <= duration) {
+                                  setTrimEnd(totalSeconds);
+                                }
+                              }
+                            }}
+                            className="w-20 text-center font-mono"
+                            placeholder="0:00"
+                          />
                         </div>
                       </div>
                       
                       <div className="text-sm text-muted-foreground">
-                        Duration: {formatTime(trimEnd - trimStart)}
+                        Duration: {formatTime(Math.max(0, trimEnd - trimStart))}
+                        {trimStart >= trimEnd && (
+                          <span className="text-red-500 ml-2">⚠️ Start time must be before end time</span>
+                        )}
                       </div>
                     </div>
                     
@@ -694,66 +763,66 @@ export default function ReviewPanel() {
 
                 {/* Buttons Section */}
                 <div className="pt-4 border-t border-border">
-                  {!uploadSuccess && (
-                    <div className="flex flex-col space-y-3">
-                      {/* First row of buttons */}
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowTrimming(!showTrimming)}
-                          disabled={isUploading}
-                          className="flex-1 sm:max-w-[180px] text-sm"
-                        >
-                          <Scissors className="h-4 w-4 mr-2" />
-                          {showTrimming ? 'Cancel Trim' : 'Trim'}
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          onClick={handleRestart}
-                          disabled={isUploading}
-                          className="flex-1 sm:max-w-[180px] text-sm"
-                        >
-                          <RotateCcw className="h-4 w-4 mr-2" />
-                          Restart
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          onClick={handleDeleteClick}
-                          disabled={isUploading}
-                          className="flex-1 sm:max-w-[180px] text-sm text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </Button>
-                      </div>
-
-                      {/* Sync to YouTube button - full width */}
-                      <Button
-                        onClick={handleSyncToYouTube}
-                        disabled={isUploading || !title.trim()}
-                        className="w-full"
-                      >
-                        {isUploading ? (
-                          <LoadingSpinner text="Syncing..." size="sm" />
-                        ) : (
-                          <>
-                            <Cloud className="h-4 w-4 mr-2" />
-                            Sync to YouTube
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
+            {!uploadSuccess && (
+              <div className="flex flex-col space-y-3">
+                {/* First row of buttons */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTrimming(!showTrimming)}
+                    disabled={isUploading}
+                    className="flex-1 sm:max-w-[180px] text-sm"
+                  >
+                    <Scissors className="h-4 w-4 mr-2" />
+                    {showTrimming ? 'Cancel Trim' : 'Trim'}
+                  </Button>
                   
-                  {uploadSuccess && (
-                    <Button onClick={deleteRecording} className="w-full">
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Done
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    onClick={handleRestart}
+                    disabled={isUploading}
+                    className="flex-1 sm:max-w-[180px] text-sm"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Restart
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={handleDeleteClick}
+                    disabled={isUploading}
+                    className="flex-1 sm:max-w-[180px] text-sm text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
                 </div>
+
+                {/* Sync to YouTube button - full width */}
+                <Button
+                  onClick={handleSyncToYouTube}
+                  disabled={isUploading || !title.trim()}
+                  className="w-full"
+                >
+                  {isUploading ? (
+                    <LoadingSpinner text="Syncing..." size="sm" />
+                  ) : (
+                    <>
+                      <Cloud className="h-4 w-4 mr-2" />
+                      Sync to YouTube
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            {uploadSuccess && (
+              <Button onClick={deleteRecording} className="w-full">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Done
+              </Button>
+            )}
+          </div>
               </div>
             </ScrollArea>
         </DialogContent>
@@ -786,3 +855,5 @@ export default function ReviewPanel() {
     </>
   );
 }
+
+

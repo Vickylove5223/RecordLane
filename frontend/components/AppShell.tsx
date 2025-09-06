@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import TopNav from './layout/TopNav';
 import MainPanel from './layout/MainPanel';
+import Footer from './layout/Footer';
 import OnboardingModal from './onboarding/OnboardingModal';
 import ReviewPanel from './recording/ReviewPanel';
 import ShareModal from './sharing/ShareModal';
@@ -21,13 +22,16 @@ export default function AppShell() {
       <TopNav />
       
       {/* Main Layout */}
-      <div className="flex flex-1 pt-16">
+      <div className="flex flex-1 pt-16 flex-col">
         {/* Main Content */}
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1">
           <Routes>
             <Route path="*" element={<MainPanel />} />
           </Routes>
         </main>
+        
+        {/* Footer */}
+        <Footer />
       </div>
 
       {/* Review Panel */}

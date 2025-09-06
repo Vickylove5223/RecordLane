@@ -16,6 +16,7 @@ export class RecordingService {
   private dataAvailableTimeout?: NodeJS.Timeout;
   private recordingStartPromise?: Promise<void>;
   private onScreenShareEnded: (() => void) | null = null;
+  private screenShareCheckInterval: NodeJS.Timeout | null = null;
 
   setScreenShareEndedCallback(callback: () => void): void {
     this.onScreenShareEnded = callback;
@@ -437,10 +438,46 @@ export class RecordingService {
       
       this.isRecording = false;
       this.onScreenShareEnded = null;
+      this.stopScreenShareMonitoring();
       console.log('Cleanup completed');
     } catch (error) {
       console.error('Error during cleanup:', error);
       ErrorHandler.logError('recording-cleanup', error);
+    }
+  }
+
+  private startScreenShareMonitoring(): void {
+    // Clear any existing interval
+    if (this.screenShareCheckInterval) {
+      clearInterval(this.screenShareCheckInterval);
+    }
+
+    // Check every 2 seconds if screen sharing is still active
+    this.screenShareCheckInterval = setInterval(() => {
+      if (this.screenStream && this.isRecording) {
+        const videoTracks = this.screenStream.getVideoTracks();
+        const audioTracks = this.screenStream.getAudioTracks();
+        
+        // Check if any tracks are still active
+        const hasActiveVideoTrack = videoTracks.some(track => track.readyState === 'live');
+        const hasActiveAudioTrack = audioTracks.some(track => track.readyState === 'live');
+        
+        // If we have video tracks but none are active, screen sharing ended
+        if (videoTracks.length > 0 && !hasActiveVideoTrack) {
+          console.log('Screen sharing detected as ended via monitoring (video track inactive)');
+          if (this.onScreenShareEnded) {
+            this.onScreenShareEnded();
+          }
+          this.stopScreenShareMonitoring();
+        }
+      }
+    }, 2000);
+  }
+
+  private stopScreenShareMonitoring(): void {
+    if (this.screenShareCheckInterval) {
+      clearInterval(this.screenShareCheckInterval);
+      this.screenShareCheckInterval = null;
     }
   }
 
@@ -490,13 +527,39 @@ export class RecordingService {
         resolution: `${this.screenStream.getVideoTracks()[0]?.getSettings().width}x${this.screenStream.getVideoTracks()[0]?.getSettings().height}`,
       });
 
-      this.screenStream.getVideoTracks()[0].onended = () => {
-        console.log('Screen sharing stopped by user');
+      // Set up event listeners for all video tracks
+      this.screenStream.getVideoTracks().forEach((track, index) => {
+        track.onended = () => {
+          console.log(`Screen sharing video track ${index} ended by user`);
+          if (this.onScreenShareEnded && this.isRecording) {
+            console.log('Calling screen share ended callback...');
+            this.onScreenShareEnded();
+          }
+        };
+      });
+
+      // Also listen for audio track endings
+      this.screenStream.getAudioTracks().forEach((track, index) => {
+        track.onended = () => {
+          console.log(`Screen sharing audio track ${index} ended by user`);
+          if (this.onScreenShareEnded && this.isRecording) {
+            console.log('Calling screen share ended callback...');
+            this.onScreenShareEnded();
+          }
+        };
+      });
+
+      // Listen for the entire stream to end
+      this.screenStream.onremovetrack = (event) => {
+        console.log('Track removed from screen stream:', event.track.kind);
         if (this.onScreenShareEnded && this.isRecording) {
-          console.log('Calling screen share ended callback...');
+          console.log('Calling screen share ended callback due to track removal...');
           this.onScreenShareEnded();
         }
       };
+
+      // Set up periodic check as fallback
+      this.startScreenShareMonitoring();
     } catch (error) {
       console.error('Failed to get screen stream:', error);
       

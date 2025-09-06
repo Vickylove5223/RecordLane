@@ -225,3 +225,50 @@ body {
   border: 2px solid #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* Browser sharing banner styles - attempt to minimize impact */
+body[data-recording="true"] {
+  /* Try to push content up to avoid the sharing banner */
+  padding-bottom: 60px;
+}
+
+/* Hide browser sharing banner if possible (limited effectiveness) */
+body[data-recording="true"]::after {
+  content: "";
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--background);
+  z-index: 999999;
+  pointer-events: none;
+}
+
+/* Recording notification to replace browser banner */
+.recording-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  z-index: 1000000;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}

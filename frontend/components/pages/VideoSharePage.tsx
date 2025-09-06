@@ -359,8 +359,8 @@ export default function VideoSharePage() {
           <div className="w-80 border-l bg-background flex flex-col">
             {/* Action Buttons */}
             <div className="p-4 border-b">
-              <div className="flex flex-col space-y-2">
-                <Button variant="outline" onClick={handleCopyLink} className="w-full justify-start">
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={handleCopyLink} className="flex-1 justify-center">
                   {copied ? (
                     <Check className="h-4 w-4 mr-2" />
                   ) : (
@@ -372,7 +372,7 @@ export default function VideoSharePage() {
                 <Button 
                   variant="outline" 
                   onClick={handleOpenYouTube}
-                  className="w-full justify-start"
+                  className="flex-1 justify-center"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open in YouTube
@@ -381,7 +381,7 @@ export default function VideoSharePage() {
                 <Button 
                   variant="destructive" 
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full justify-start"
+                  className="flex-1 justify-center"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
