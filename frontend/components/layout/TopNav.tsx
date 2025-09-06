@@ -3,18 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoadingSpinner } from '@/components/ui/spinner';
-import { Settings, Circle, Youtube, Wrench } from 'lucide-react';
+import { Settings, Circle } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { isYouTubeConfigured } from '../../config';
 import FloatingRecordButton from '../recording/FloatingRecordButton';
+import { YouTubeSetupModal } from '../setup/YouTubeSetupModal';
 
 export default function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
   const { state: recordingState } = useRecording();
   const navigate = useNavigate();
+  const [showYouTubeSetup, setShowYouTubeSetup] = useState(false);
 
   const handleSettingsClick = () => {
     dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
