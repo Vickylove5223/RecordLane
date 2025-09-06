@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-Gb7P5tAD.js","assets/DeleteConfirmationModal-CNAlB3Qu.js","assets/external-link-C0GgvLGE.js","assets/modern-card-SQoDlo1C.js","assets/YouTubeSetupPage-BwSSdlk3.js","assets/arrow-left-D6DBhzYW.js","assets/VideoSharePage-B1v4CKba.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-CuhKtEi2.js","assets/DeleteConfirmationModal-DiJRh7LC.js","assets/external-link-B-Bz-w0c.js","assets/modern-card-B86KsHwS.js","assets/YouTubeSetupPage-BjyzpDFZ.js","assets/arrow-left-BYgRD7iI.js","assets/VideoSharePage-CLOcVpY-.js"])))=>i.map(i=>d[i]);
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e = m[i];
@@ -19571,6 +19571,7 @@ class RetryService {
 const YOUTUBE_SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
   "https://www.googleapis.com/auth/youtube.force-ssl",
+  "https://www.googleapis.com/auth/youtube.readonly",
   "https://www.googleapis.com/auth/userinfo.email",
   "https://www.googleapis.com/auth/userinfo.profile"
 ].join(" ");
@@ -23303,9 +23304,9 @@ function LoadingSpinner({ text, size = "md", className }) {
     text && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-muted-foreground", children: text })
   ] });
 }
-const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-Gb7P5tAD.js"), true ? __vite__mapDeps([0,1,2,3]) : void 0));
-const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BwSSdlk3.js"), true ? __vite__mapDeps([4,3,5,2]) : void 0));
-const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-B1v4CKba.js"), true ? __vite__mapDeps([6,1,2,5]) : void 0));
+const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-CuhKtEi2.js"), true ? __vite__mapDeps([0,1,2,3]) : void 0));
+const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BjyzpDFZ.js"), true ? __vite__mapDeps([4,3,5,2]) : void 0));
+const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-CLOcVpY-.js"), true ? __vite__mapDeps([6,1,2,5]) : void 0));
 function AppLoadingFallback() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-primary rounded-full" }) }),

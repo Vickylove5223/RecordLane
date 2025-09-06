@@ -44,20 +44,26 @@ export class YouTubeCommentsService {
 
   static async getComments(videoId: string, pageToken?: string): Promise<CommentsResponse> {
     try {
+      console.log('YouTubeCommentsService.getComments called with videoId:', videoId);
+      
       const cacheKey = `comments-${videoId}-${pageToken || 'first'}`;
       const cached = await this.cache.get(cacheKey);
       
       if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        console.log('Returning cached comments:', cached.data);
         return cached.data;
       }
 
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.accessToken) {
+        console.error('No access token found');
         throw new Error('Authentication required');
       }
 
+      console.log('Fetching comment threads for videoId:', videoId);
       // Get comment threads
       const threadsResponse = await this.fetchCommentThreads(videoId, pageToken);
+      console.log('Comment threads response:', threadsResponse);
       
       // Get replies for each thread
       const comments: YouTubeComment[] = [];
@@ -83,6 +89,7 @@ export class YouTubeCommentsService {
         totalResults: threadsResponse.pageInfo.totalResults,
       };
 
+      console.log('Final comments result:', result);
       await this.cache.set(cacheKey, result, this.CACHE_DURATION);
       return result;
     } catch (error) {
@@ -185,21 +192,24 @@ export class YouTubeCommentsService {
       params.append('pageToken', pageToken);
     }
 
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${tokenData.accessToken}`,
-        },
-      }
-    );
+    const url = `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`;
+    console.log('Fetching comment threads from URL:', url);
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${tokenData.accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to fetch comment threads: ${errorText}`);
+      console.error('Comment threads fetch failed:', response.status, errorText);
+      throw new Error(`Failed to fetch comment threads: ${response.status} ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('Comment threads fetch successful:', result);
+    return result;
   }
 
   private static async fetchReplies(parentId: string): Promise<YouTubeComment[]> {

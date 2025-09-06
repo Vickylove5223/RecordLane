@@ -120,10 +120,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
         return updatedRecordingState;
         
       case 'REMOVE_RECORDING':
+        console.log('REMOVE_RECORDING action received with id:', action.payload);
+        console.log('Current recordings before removal:', state.recordings.map(r => ({ id: r.id, title: r.title })));
         const removedRecordingState = {
           ...state,
           recordings: state.recordings.filter(recording => recording.id !== action.payload),
         };
+        console.log('Recordings after removal:', removedRecordingState.recordings.map(r => ({ id: r.id, title: r.title })));
         saveStateToStorage(removedRecordingState);
         return removedRecordingState;
         

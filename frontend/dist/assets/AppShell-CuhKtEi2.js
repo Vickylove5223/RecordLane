@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-zIYQuoIJ.js","assets/index-DYyxTtMa.css"])))=>i.map(i=>d[i]);
-import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as CacheService, E as ErrorHandler, y as Clock, z as Badge, W as Wifi, A as WifiOff, _ as __vitePreload, X, F as withErrorBoundary, G as withPerformanceMonitoring, R as RefreshCw, H as Download, V as VISUALLY_HIDDEN_STYLES, I as backend, J as Card, K as CardHeader, N as CardTitle, O as CardContent, Q as Routes, S as Route } from "./index-zIYQuoIJ.js";
-import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-CNAlB3Qu.js";
-import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-SQoDlo1C.js";
-import { E as ExternalLink } from "./external-link-C0GgvLGE.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-C3SkEJPH.js","assets/index-ggzJXSi3.css"])))=>i.map(i=>d[i]);
+import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as CacheService, E as ErrorHandler, y as Clock, z as Badge, W as Wifi, A as WifiOff, _ as __vitePreload, X, F as withErrorBoundary, G as withPerformanceMonitoring, R as RefreshCw, H as Download, V as VISUALLY_HIDDEN_STYLES, I as backend, J as Card, K as CardHeader, N as CardTitle, O as CardContent, Q as Routes, S as Route } from "./index-C3SkEJPH.js";
+import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, C as Calendar, f as formatDistanceToNow, D as DeleteConfirmationModal, b as Dialog, c as DialogContent, d as Check, e as DialogHeader, g as DialogTitle, i as DialogDescription, T as Trash2, j as Copy } from "./DeleteConfirmationModal-DiJRh7LC.js";
+import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-B86KsHwS.js";
+import { E as ExternalLink } from "./external-link-B-Bz-w0c.js";
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -5423,16 +5423,21 @@ const _YouTubeCommentsService = class _YouTubeCommentsService {
   // 5 minutes
   static async getComments(videoId, pageToken) {
     try {
+      console.log("YouTubeCommentsService.getComments called with videoId:", videoId);
       const cacheKey = `comments-${videoId}-${pageToken || "first"}`;
       const cached = await this.cache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        console.log("Returning cached comments:", cached.data);
         return cached.data;
       }
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.accessToken) {
+        console.error("No access token found");
         throw new Error("Authentication required");
       }
+      console.log("Fetching comment threads for videoId:", videoId);
       const threadsResponse = await this.fetchCommentThreads(videoId, pageToken);
+      console.log("Comment threads response:", threadsResponse);
       const comments = [];
       for (const thread of threadsResponse.items) {
         const topComment = this.transformComment(thread.snippet.topLevelComment.snippet);
@@ -5451,6 +5456,7 @@ const _YouTubeCommentsService = class _YouTubeCommentsService {
         nextPageToken: threadsResponse.nextPageToken,
         totalResults: threadsResponse.pageInfo.totalResults
       };
+      console.log("Final comments result:", result);
       await this.cache.set(cacheKey, result, this.CACHE_DURATION);
       return result;
     } catch (error) {
@@ -5539,19 +5545,21 @@ const _YouTubeCommentsService = class _YouTubeCommentsService {
     if (pageToken) {
       params.append("pageToken", pageToken);
     }
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${tokenData.accessToken}`
-        }
+    const url = `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`;
+    console.log("Fetching comment threads from URL:", url);
+    const response = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${tokenData.accessToken}`
       }
-    );
+    });
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to fetch comment threads: ${errorText}`);
+      console.error("Comment threads fetch failed:", response.status, errorText);
+      throw new Error(`Failed to fetch comment threads: ${response.status} ${errorText}`);
     }
-    return await response.json();
+    const result = await response.json();
+    console.log("Comment threads fetch successful:", result);
+    return result;
   }
   static async fetchReplies(parentId) {
     const tokenData = this.getStoredTokenData();
@@ -5645,17 +5653,31 @@ function VideoPreviewPage({ recording, onClose }) {
     return null;
   };
   const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
-  const videoId = recording.youtubeVideoId;
-  reactExports.useEffect(() => {
-    if (videoId && isConnected) {
-      loadComments();
+  const videoId = recording.youtubeVideoId || (recording.youtubeLink ? getYouTubeVideoId(recording.youtubeLink) : null);
+  console.log("VideoPreviewPage - recording:", recording);
+  console.log("VideoPreviewPage - videoId:", videoId);
+  console.log("VideoPreviewPage - isConnected:", isConnected);
+  function getYouTubeVideoId(url) {
+    if (!url) return null;
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === "youtu.be") {
+        return urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes("youtube.com")) {
+        return urlObj.searchParams.get("v");
+      }
+    } catch (error) {
+      console.error("Invalid YouTube URL:", url, error);
     }
-  }, [videoId, isConnected]);
-  const loadComments = async () => {
+    return null;
+  }
+  const loadComments = reactExports.useCallback(async () => {
     if (!videoId) return;
     setLoadingComments(true);
     try {
+      console.log("Loading comments for videoId:", videoId);
       const response = await YouTubeCommentsService.getComments(videoId);
+      console.log("Comments response:", response);
       setComments(response.comments);
     } catch (error) {
       console.error("Failed to load comments:", error);
@@ -5667,7 +5689,12 @@ function VideoPreviewPage({ recording, onClose }) {
     } finally {
       setLoadingComments(false);
     }
-  };
+  }, [videoId]);
+  reactExports.useEffect(() => {
+    if (videoId && isConnected) {
+      loadComments();
+    }
+  }, [videoId, isConnected, loadComments]);
   const handleAddComment = async () => {
     if (!newComment.trim() || !videoId) return;
     try {
@@ -5734,7 +5761,7 @@ function VideoPreviewPage({ recording, onClose }) {
     try {
       if (recording.youtubeVideoId) {
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-zIYQuoIJ.js").then((n) => n.$);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-C3SkEJPH.js").then((n) => n.$);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
@@ -5757,90 +5784,34 @@ function VideoPreviewPage({ recording, onClose }) {
       setShowDeleteModal(false);
     }
   };
-  const handleShare = async () => {
-    if (recording.youtubeLink) {
-      try {
-        await navigator.clipboard.writeText(recording.youtubeLink);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2e3);
-        toast({
-          title: "Link Copied",
-          description: "YouTube link copied to clipboard"
-        });
-      } catch (error) {
-        console.error("Failed to copy:", error);
-        toast({
-          title: "Copy Failed",
-          description: "Failed to copy link to clipboard",
-          variant: "destructive"
-        });
-      }
-    } else {
-      toast({
-        title: "No Share Link",
-        description: "This recording hasn't been synced to YouTube yet",
-        variant: "destructive"
-      });
-    }
-  };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "h-full flex flex-col bg-background", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-6 py-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center space-x-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-lg font-semibold truncate max-w-md", children: recording.title }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-sm text-muted-foreground", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDuration2(recording.duration) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true }) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Badge,
-            {
-              variant: recording.uploadStatus === "completed" ? "default" : "destructive",
-              className: "flex items-center space-x-1",
-              children: recording.uploadStatus === "completed" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-3 w-3" }),
-                "Synced"
-              ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-3 w-3" }),
-                "Failed"
-              ] })
-            }
-          )
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-        recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "outline", onClick: handleShare, children: [
-          copied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-4 w-4 mr-2" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-4 w-4 mr-2" }),
-          copied ? "Copied!" : "Copy Link"
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center px-6 py-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-lg font-semibold truncate max-w-md", children: recording.title }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-sm text-muted-foreground", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDuration2(recording.duration) })
         ] }),
-        recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Button,
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Badge,
           {
-            variant: "outline",
-            onClick: () => window.open(recording.youtubeLink, "_blank"),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
-              "Open in YouTube"
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Button,
-          {
-            variant: "destructive",
-            onClick: () => setShowDeleteModal(true),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4 mr-2" }),
-              "Delete"
-            ]
+            variant: recording.uploadStatus === "completed" ? "default" : "destructive",
+            className: "flex items-center space-x-1",
+            children: recording.uploadStatus === "completed" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-3 w-3" }),
+              "Synced"
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-3 w-3" }),
+              "Failed"
+            ] })
           }
         )
       ] })
-    ] }) }),
+    ] }) }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",

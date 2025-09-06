@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Play, 
@@ -79,21 +79,36 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
-  const videoId = recording.youtubeVideoId;
-
-  // Load comments when component mounts
-  useEffect(() => {
-    if (videoId && isConnected) {
-      loadComments();
+  const videoId = recording.youtubeVideoId || (recording.youtubeLink ? getYouTubeVideoId(recording.youtubeLink) : null);
+  
+  console.log('VideoPreviewPage - recording:', recording);
+  console.log('VideoPreviewPage - videoId:', videoId);
+  console.log('VideoPreviewPage - isConnected:', isConnected);
+  
+  // Helper function to extract video ID from YouTube URL
+  function getYouTubeVideoId(url: string): string | null {
+    if (!url) return null;
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === 'youtu.be') {
+        return urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes('youtube.com')) {
+        return urlObj.searchParams.get('v');
+      }
+    } catch (error) {
+      console.error('Invalid YouTube URL:', url, error);
     }
-  }, [videoId, isConnected]);
+    return null;
+  }
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     if (!videoId) return;
     
     setLoadingComments(true);
     try {
+      console.log('Loading comments for videoId:', videoId);
       const response = await YouTubeCommentsService.getComments(videoId);
+      console.log('Comments response:', response);
       setComments(response.comments);
     } catch (error) {
       console.error('Failed to load comments:', error);
@@ -105,7 +120,14 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     } finally {
       setLoadingComments(false);
     }
-  };
+  }, [videoId]);
+
+  // Load comments when component mounts
+  useEffect(() => {
+    if (videoId && isConnected) {
+      loadComments();
+    }
+  }, [videoId, isConnected, loadComments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !videoId) return;
@@ -179,20 +201,28 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   const handleDelete = async () => {
+    console.log('handleDelete called with recording:', recording);
     setIsDeleting(true);
     try {
       if (recording.youtubeVideoId) {
+        console.log('Deleting from YouTube with videoId:', recording.youtubeVideoId);
         const { RealYouTubeService } = await import('../../services/realYouTubeService');
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
+        console.log('Successfully deleted from YouTube');
+      } else {
+        console.log('No YouTube video ID found, skipping YouTube deletion');
       }
       
+      console.log('Dispatching REMOVE_RECORDING with id:', recording.id);
       dispatch({ type: 'REMOVE_RECORDING', payload: recording.id });
+      console.log('REMOVE_RECORDING dispatched successfully');
       
       toast({
         title: "Recording Deleted",
         description: "The recording has been removed from your library",
       });
       
+      console.log('Closing modal');
       onClose();
     } catch (error) {
       console.error('Failed to delete recording:', error);
@@ -239,72 +269,39 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-4">
-            <div>
-              <h1 className="text-lg font-semibold truncate max-w-md">{recording.title}</h1>
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{formatDuration(recording.duration)}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
-                </div>
-                <Badge 
-                  variant={recording.uploadStatus === 'completed' ? 'default' : 'destructive'}
-                  className="flex items-center space-x-1"
-                >
-                  {recording.uploadStatus === 'completed' ? (
-                    <><Wifi className="h-3 w-3" />Synced</>
-                  ) : (
-                    <><WifiOff className="h-3 w-3" />Failed</>
-                  )}
-                </Badge>
+        <div className="flex items-center px-6 py-4">
+          <div>
+            <h1 className="text-lg font-semibold truncate max-w-md">{recording.title}</h1>
+            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span>{formatDuration(recording.duration)}</span>
               </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {recording.youtubeLink && (
-              <Button variant="outline" onClick={handleShare}>
-                {copied ? (
-                  <Check className="h-4 w-4 mr-2" />
-                ) : (
-                  <Copy className="h-4 w-4 mr-2" />
-                )}
-                {copied ? 'Copied!' : 'Copy Link'}
-              </Button>
-            )}
-            
-            {recording.youtubeLink && (
-              <Button 
-                variant="outline" 
-                onClick={() => window.open(recording.youtubeLink, '_blank')}
+              <div className="flex items-center space-x-1">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
+              </div>
+              <Badge 
+                variant={recording.uploadStatus === 'completed' ? 'default' : 'destructive'}
+                className="flex items-center space-x-1"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in YouTube
-              </Button>
-            )}
-            
-            <Button 
-              variant="destructive" 
-              onClick={() => setShowDeleteModal(true)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
+                {recording.uploadStatus === 'completed' ? (
+                  <><Wifi className="h-3 w-3" />Synced</>
+                ) : (
+                  <><WifiOff className="h-3 w-3" />Failed</>
+                )}
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 min-h-0">
         {/* Video Player */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col pl-6">
           <div 
             ref={containerRef}
-            className="relative bg-black flex-1 group"
+            className="relative bg-black flex-1 group mb-6"
           >
             {youtubeEmbedUrl && !youtubeError ? (
               <div className="relative w-full h-full">
@@ -344,6 +341,42 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
 
         {/* Comments Section */}
         <div className="w-80 border-l bg-background flex flex-col">
+          {/* Action Buttons */}
+          <div className="p-4 border-b">
+            <div className="flex flex-col space-y-2">
+              {recording.youtubeLink && (
+                <Button variant="outline" onClick={handleShare} className="w-full justify-start">
+                  {copied ? (
+                    <Check className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Copy className="h-4 w-4 mr-2" />
+                  )}
+                  {copied ? 'Copied!' : 'Copy Link'}
+                </Button>
+              )}
+              
+              {recording.youtubeLink && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.open(recording.youtubeLink, '_blank')}
+                  className="w-full justify-start"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in YouTube
+                </Button>
+              )}
+              
+              <Button 
+                variant="destructive" 
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full justify-start"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </div>
+
           <div className="p-4 border-b">
             <h3 className="font-semibold flex items-center">
               <MessageCircle className="h-5 w-5 mr-2" />

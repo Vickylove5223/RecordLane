@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-zIYQuoIJ.js","assets/index-DYyxTtMa.css"])))=>i.map(i=>d[i]);
-import { U as useParams, w as useNavigate, r as reactExports, s as useApp, v as useYouTube, t as useToast, j as jsxRuntimeExports, x as LoaderCircle, B as Button, y as Clock, z as Badge, W as Wifi, _ as __vitePreload } from "./index-zIYQuoIJ.js";
-import { C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, D as DeleteConfirmationModal } from "./DeleteConfirmationModal-CNAlB3Qu.js";
-import { A as ArrowLeft } from "./arrow-left-D6DBhzYW.js";
-import { E as ExternalLink } from "./external-link-C0GgvLGE.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-C3SkEJPH.js","assets/index-ggzJXSi3.css"])))=>i.map(i=>d[i]);
+import { U as useParams, w as useNavigate, r as reactExports, s as useApp, v as useYouTube, t as useToast, j as jsxRuntimeExports, x as LoaderCircle, B as Button, y as Clock, z as Badge, W as Wifi, _ as __vitePreload } from "./index-C3SkEJPH.js";
+import { C as Calendar, f as formatDistanceToNow, d as Check, j as Copy, T as Trash2, D as DeleteConfirmationModal } from "./DeleteConfirmationModal-DiJRh7LC.js";
+import { A as ArrowLeft } from "./arrow-left-BYgRD7iI.js";
+import { E as ExternalLink } from "./external-link-B-Bz-w0c.js";
 function VideoSharePage() {
   const { recordingId } = useParams();
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ function VideoSharePage() {
     try {
       if (recording.youtubeVideoId) {
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-zIYQuoIJ.js").then((n) => n.$);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-C3SkEJPH.js").then((n) => n.$);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
