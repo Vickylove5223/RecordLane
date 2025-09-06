@@ -38,7 +38,7 @@ export default function YouTubeSetupPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
               <Button
                 variant="ghost"
@@ -47,24 +47,25 @@ export default function YouTubeSetupPage() {
                 className="text-gray-600 hover:text-gray-900"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to App
+                <span className="hidden sm:inline">Back to App</span>
+                <span className="sm:hidden">Back</span>
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
+              <div className="h-6 w-px bg-gray-300 hidden sm:block" />
               <div className="flex items-center space-x-2">
                 <Settings className="h-5 w-5 text-gray-700" />
-                <h1 className="text-xl font-semibold text-gray-900">YouTube Integration Setup</h1>
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">YouTube Integration Setup</h1>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
         <div className="space-y-8">
-          <ModernCard variant="layered" className="p-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Setup Guide</h2>
-              <p className="text-lg text-gray-600">
+          <ModernCard variant="layered" className="p-4 sm:p-6 lg:p-8">
+            <div className="mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Setup Guide</h2>
+              <p className="text-base sm:text-lg text-gray-600">
                 Follow these steps to connect RecordLane to your YouTube account. This is a one-time setup.
               </p>
             </div>

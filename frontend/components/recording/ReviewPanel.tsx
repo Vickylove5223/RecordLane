@@ -390,7 +390,7 @@ export default function ReviewPanel() {
   return (
     <>
       <Dialog open={true} onOpenChange={() => !isUploading && handleClose()}>
-        <DialogContent className="max-w-5xl max-h-[95vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="max-w-5xl max-h-[95vh] w-[95vw] sm:w-full flex flex-col p-0 overflow-hidden">
           <div className="p-6 border-b border-border bg-background">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
@@ -414,7 +414,7 @@ export default function ReviewPanel() {
                   <video
                     ref={videoRef}
                     src={previewUrl}
-                    className="w-full h-auto max-h-96 min-h-64"
+                    className="w-full h-auto max-h-64 sm:max-h-80 lg:max-h-96 min-h-48 sm:min-h-56 lg:min-h-64"
                     controls={false}
                     preload="metadata"
                     playsInline
@@ -596,7 +596,7 @@ export default function ReviewPanel() {
 
                 {/* Recording Details */}
                 {!uploadSuccess && !showTrimming && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Title</label>
                       <Input
@@ -697,16 +697,16 @@ export default function ReviewPanel() {
           </div>
 
           {/* Actions Footer */}
-          <div className="p-6 border-t border-border">
+          <div className="p-4 sm:p-6 border-t border-border">
             {!uploadSuccess && (
               <div className="flex flex-col space-y-3">
                 {/* First row of buttons */}
-                <div className="flex items-center justify-center space-x-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
                   <Button
                     variant="outline"
                     onClick={() => setShowTrimming(!showTrimming)}
                     disabled={isUploading}
-                    className="flex-1 max-w-[180px]"
+                    className="flex-1 sm:max-w-[180px] text-sm"
                   >
                     <Scissors className="h-4 w-4 mr-2" />
                     {showTrimming ? 'Cancel Trim' : 'Trim'}
@@ -716,7 +716,7 @@ export default function ReviewPanel() {
                     variant="outline"
                     onClick={handleRestart}
                     disabled={isUploading}
-                    className="flex-1 max-w-[180px]"
+                    className="flex-1 sm:max-w-[180px] text-sm"
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Restart
@@ -726,7 +726,7 @@ export default function ReviewPanel() {
                     variant="outline"
                     onClick={handleDeleteClick}
                     disabled={isUploading}
-                    className="flex-1 max-w-[180px] text-destructive hover:text-destructive"
+                    className="flex-1 sm:max-w-[180px] text-sm text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete

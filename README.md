@@ -19,14 +19,35 @@ RecordLane replaces popular but expensive screen recording solutions:
 
 ### Why Choose RecordLane?
 
-- **💰 Free Forever**: No subscription fees or usage limits
-- **🔒 Privacy First**: Videos go directly to your YouTube channel
-- **🌐 Web-Based**: Works in any modern browser, no downloads
-- **📱 Cross-Platform**: Desktop, tablet, and mobile support
-- **🔧 Open Source**: Full transparency and community-driven development
-- **⚡ Modern Tech**: Built with latest web technologies
+- **Free Forever**: No subscription fees or usage limits
+- **Privacy First**: Videos go directly to your YouTube channel
+- **Web-Based**: Works in any modern browser, no downloads
+- **Cross-Platform**: Desktop, tablet, and mobile support
+- **Open Source**: Full transparency and community-driven development
+- **Modern Tech**: Built with latest web technologies
 
-## 📸 Demo & Screenshots
+## 📊 Open Source Loom Alternatives Comparison
+
+| Feature | RecordLane | ScreenRec | OpenReplay | ScreenStudio | Loom Clone | ScreenCapture |
+|---------|------------|-----------|------------|--------------|------------|---------------|
+| **Price** | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free |
+| **Privacy** | ✅ Your YouTube | ✅ Local only | ✅ Self-hosted | ✅ Local only | ✅ Local only | ✅ Local only |
+| **Open Source** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Cloud Integration** | ✅ YouTube | ❌ None | ✅ Self-hosted | ❌ None | ❌ None | ❌ None |
+| **Web-Based** | ✅ Yes | ❌ Desktop only | ✅ Web app | ❌ Desktop only | ✅ Yes | ❌ Desktop only |
+| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Camera Recording** | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Drawing Tools** | ✅ Yes | ❌ No | ❌ No | ✅ Yes | ✅ Yes | ❌ No |
+| **Click Highlights** | ✅ Yes | ❌ No | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
+| **Video Editing** | ✅ Client-side | ❌ No | ❌ No | ✅ Basic | ✅ Basic | ❌ No |
+| **Auto Upload** | ✅ YouTube | ❌ Manual | ✅ Self-hosted | ❌ Manual | ❌ Manual | ❌ Manual |
+| **Share Links** | ✅ Instant | ❌ Manual | ✅ Self-hosted | ❌ Manual | ✅ Basic | ❌ Manual |
+| **Mobile Support** | ✅ Yes | ❌ No | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
+| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐⭐ Hard | ⭐⭐⭐⭐⭐ Very Hard | ⭐⭐⭐ Medium | ⭐⭐⭐ Medium | ⭐⭐⭐⭐ Hard |
+| **Active Development** | ✅ Active | ⚠️ Limited | ✅ Active | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
+| **Community** | ✅ Growing | ⚠️ Small | ✅ Large | ⚠️ Small | ⚠️ Small | ⚠️ Small |
+
+## Demo
 
 > **Note**: Screenshots and demo video will be added here. This section will showcase:
 > - Main recording interface
@@ -111,52 +132,33 @@ encore build docker
 # Deploy using your preferred container orchestration
 ```
 
-## 📊 Competitive Comparison
-
-| Feature | RecordLane | Loom | Screencastify | Camtasia | OBS Studio |
-|---------|------------|------|---------------|----------|------------|
-| **Price** | 💰 Free | $8-16/month | $3-7/month | $299 one-time | 💰 Free |
-| **Privacy** | ✅ Your YouTube | ❌ Their servers | ❌ Their servers | ✅ Local only | ✅ Local only |
-| **Open Source** | ✅ Yes | ❌ No | ❌ No | ❌ No | ✅ Yes |
-| **Cloud Integration** | ✅ YouTube | ✅ Loom cloud | ✅ Google Drive | ❌ None | ❌ None |
-| **Web-Based** | ✅ Yes | ✅ Yes | ✅ Chrome only | ❌ Desktop only | ❌ Desktop only |
-| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Camera Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Drawing Tools** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
-| **Click Highlights** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| **Video Editing** | ✅ Client-side | ✅ Cloud | ❌ Limited | ✅ Advanced | ❌ No |
-| **Auto Upload** | ✅ YouTube | ✅ Loom | ✅ Google Drive | ❌ Manual | ❌ Manual |
-| **Share Links** | ✅ Instant | ✅ Instant | ✅ Instant | ❌ Manual | ❌ Manual |
-| **Mobile Support** | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No |
-| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐ Medium | ⭐⭐ Easy | ⭐⭐⭐⭐ Hard | ⭐⭐⭐⭐⭐ Very Hard |
-
 ## Features
 
-### 🎥 Recording Modes
+### Recording Modes
 - **Screen Only**: Capture your entire screen or specific windows
 - **Camera Only**: Record with your webcam for personal messages
 - **Screen + Camera**: Combine screen capture with picture-in-picture camera
 
-### 🎨 Enhanced Recording
+### Enhanced Recording
 - **Click Highlights**: Visual indicators when you click during recording
 - **Drawing Tools**: Draw annotations directly on screen during recording
 - **Pause/Resume**: Control your recording flow with pause and resume
 - **Real-time Preview**: See exactly what you're recording
 
-### ☁️ YouTube Integration
+### YouTube Integration
 - **Direct Storage**: All recordings saved directly to your YouTube channel
 - **Privacy First**: Videos never touch our servers
 - **Enhanced Token Management**: Automatic token refresh with robust error handling
 - **Persistent Auth**: Stay connected across browser sessions (device-specific)
 - **Automatic Upload**: Resume interrupted uploads seamlessly with retry logic
 
-### ✂️ Editing & Sharing
+### Editing & Sharing
 - **Client-side Trimming**: Cut your recordings before upload
 - **Instant Share Links**: Get shareable YouTube links
 - **Privacy Controls**: Set viewing permissions for each recording
 - **Reliable Uploads**: Enhanced retry mechanisms for upload reliability
 
-### 🚀 Performance & Reliability
+### Performance & Reliability
 - **Enhanced Error Recovery**: Comprehensive error handling with automatic retry logic
 - **Token Refresh**: Automatic authentication token refresh for uninterrupted sessions
 - **Connection Monitoring**: Real-time connection status with automatic reconnection
