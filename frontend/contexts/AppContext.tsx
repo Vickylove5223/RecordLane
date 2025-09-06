@@ -202,7 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      const { metadata } = await import('~encore/clients');
+      const { metadata } = await import('~backend/client');
       const recordingsResponse = await metadata.list({});
       
       if (recordingsResponse.recordings) {
@@ -236,7 +236,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         
         // Load recordings from backend metadata service
         try {
-          const { metadata } = await import('~encore/clients');
+          const { metadata } = await import('~backend/client');
           const recordingsResponse = await metadata.list({});
           
           if (recordingsResponse.recordings) {
