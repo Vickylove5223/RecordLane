@@ -5,7 +5,6 @@ import {
   Pause, 
   Play, 
   MousePointer, 
-  Pen, 
   Move
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
@@ -27,7 +26,7 @@ export default function RecordingPanel() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const { enableDrawing, highlightClicks } = options;
+  const { highlightClicks } = options;
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -42,10 +41,6 @@ export default function RecordingPanel() {
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     });
-  };
-
-  const toggleDrawingMode = () => {
-    updateOptions({ enableDrawing: !enableDrawing });
   };
 
   const toggleClickHighlights = () => {
@@ -131,28 +126,13 @@ export default function RecordingPanel() {
         <Square className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
       </Button>
 
-      {/* Annotation Mode Toggle */}
-      <Button
-        size="sm"
-        variant={enableDrawing ? "default" : "outline"}
-        onClick={toggleDrawingMode}
-        className="h-8 w-12 sm:h-10 sm:w-16 p-1 sm:p-2 rounded-full text-xs font-medium"
-        title={enableDrawing ? "Disable Annotation" : "Enable Annotation"}
-      >
-        {enableDrawing ? (
-          <span className="text-white text-xs sm:text-sm">Annotate</span>
-        ) : (
-          <span className="text-gray-600 text-xs sm:text-sm">Annotate</span>
-        )}
-      </Button>
-
-      {/* Click Highlights Toggle */}
+      {/* Cursor Highlighting Toggle */}
       <Button
         size="sm"
         variant={highlightClicks ? "default" : "outline"}
         onClick={toggleClickHighlights}
         className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full"
-        title={highlightClicks ? "Disable Click Highlights" : "Enable Click Highlights"}
+        title={highlightClicks ? "Stop Cursor Highlighting" : "Start Cursor Highlighting"}
       >
         <MousePointer className={`h-4 w-4 sm:h-5 sm:w-5 ${highlightClicks ? 'text-white' : 'text-gray-600'}`} />
       </Button>

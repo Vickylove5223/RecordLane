@@ -390,25 +390,24 @@ export default function ReviewPanel() {
   return (
     <>
       <Dialog open={true} onOpenChange={() => !isUploading && handleClose()}>
-        <DialogContent className="max-w-5xl max-h-[95vh] w-[95vw] sm:w-full flex flex-col p-0 overflow-hidden">
-          <div className="p-6 border-b border-border bg-background">
-            <DialogHeader>
-              <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
-                <span>Review Recording</span>
-                {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
-              </DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground mt-2">
-                {uploadSuccess 
-                  ? "Your recording has been successfully synced to YouTube"
-                  : "Review your recording and sync to YouTube"
-                }
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-6 space-y-4">
+        <DialogContent className="max-w-5xl max-h-[95vh] w-[95vw] sm:w-full p-0 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="p-6 space-y-4">
+              {/* Header */}
+              <div className="border-b border-border pb-4">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
+                    <span>Review Recording</span>
+                    {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
+                  </DialogTitle>
+                  <DialogDescription className="text-base text-muted-foreground mt-1">
+                    {uploadSuccess 
+                      ? "Your recording has been successfully synced to YouTube"
+                      : "Review your recording and sync to YouTube"
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
                 {/* Video Preview */}
                 <div className="relative bg-black rounded-lg overflow-hidden">
                   <video
@@ -692,72 +691,71 @@ export default function ReviewPanel() {
                     </div>
                   </div>
                 )}
+
+                {/* Buttons Section */}
+                <div className="pt-4 border-t border-border">
+                  {!uploadSuccess && (
+                    <div className="flex flex-col space-y-3">
+                      {/* First row of buttons */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowTrimming(!showTrimming)}
+                          disabled={isUploading}
+                          className="flex-1 sm:max-w-[180px] text-sm"
+                        >
+                          <Scissors className="h-4 w-4 mr-2" />
+                          {showTrimming ? 'Cancel Trim' : 'Trim'}
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          onClick={handleRestart}
+                          disabled={isUploading}
+                          className="flex-1 sm:max-w-[180px] text-sm"
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Restart
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          onClick={handleDeleteClick}
+                          disabled={isUploading}
+                          className="flex-1 sm:max-w-[180px] text-sm text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
+
+                      {/* Sync to YouTube button - full width */}
+                      <Button
+                        onClick={handleSyncToYouTube}
+                        disabled={isUploading || !title.trim()}
+                        className="w-full"
+                      >
+                        {isUploading ? (
+                          <LoadingSpinner text="Syncing..." size="sm" />
+                        ) : (
+                          <>
+                            <Cloud className="h-4 w-4 mr-2" />
+                            Sync to YouTube
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {uploadSuccess && (
+                    <Button onClick={deleteRecording} className="w-full">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Done
+                    </Button>
+                  )}
+                </div>
               </div>
             </ScrollArea>
-          </div>
-
-          {/* Actions Footer */}
-          <div className="p-4 sm:p-6 border-t border-border">
-            {!uploadSuccess && (
-              <div className="flex flex-col space-y-3">
-                {/* First row of buttons */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowTrimming(!showTrimming)}
-                    disabled={isUploading}
-                    className="flex-1 sm:max-w-[180px] text-sm"
-                  >
-                    <Scissors className="h-4 w-4 mr-2" />
-                    {showTrimming ? 'Cancel Trim' : 'Trim'}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={handleRestart}
-                    disabled={isUploading}
-                    className="flex-1 sm:max-w-[180px] text-sm"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Restart
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={handleDeleteClick}
-                    disabled={isUploading}
-                    className="flex-1 sm:max-w-[180px] text-sm text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-
-                {/* Sync to YouTube button - full width */}
-                <Button
-                  onClick={handleSyncToYouTube}
-                  disabled={isUploading || !title.trim()}
-                  className="w-full"
-                >
-                  {isUploading ? (
-                    <LoadingSpinner text="Syncing..." size="sm" />
-                  ) : (
-                    <>
-                      <Cloud className="h-4 w-4 mr-2" />
-                      Sync to YouTube
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-            
-            {uploadSuccess && (
-              <Button onClick={deleteRecording} className="w-full">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Done
-              </Button>
-            )}
-          </div>
         </DialogContent>
       </Dialog>
 

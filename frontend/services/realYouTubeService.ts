@@ -250,32 +250,42 @@ export class RealYouTubeService {
   }
 
   static async deleteVideo(videoId: string): Promise<void> {
+    console.log('RealYouTubeService.deleteVideo called with videoId:', videoId);
     await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
+      console.log('Token data available:', !!tokenData?.accessToken);
       if (!tokenData?.accessToken) {
         throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
       }
 
       // Validate token
+      console.log('Validating token...');
       const isValid = await this.validateToken(tokenData.accessToken);
+      console.log('Token is valid:', isValid);
       if (!isValid) {
+        console.log('Token invalid, attempting refresh...');
         const refreshed = await this.refreshAccessToken();
+        console.log('Token refresh successful:', refreshed);
         if (!refreshed) {
           throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
         }
       }
 
       // Delete from YouTube
-      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}`, {
+      const deleteUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}`;
+      console.log('Making DELETE request to:', deleteUrl);
+      const response = await fetch(deleteUrl, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${tokenData.accessToken}`,
         },
       });
 
+      console.log('Delete response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Delete failed with response:', errorText);
         throw new Error(`Failed to delete video: ${errorText}`);
       }
 

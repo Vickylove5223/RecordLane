@@ -126,10 +126,10 @@ function MainPanelComponent() {
         {/* Hero Section */}
         <div className="text-center mb-8 sm:mb-12 mt-16 sm:mt-20">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4">
-            Welcome to Recordlance.
+            Welcome to RecordLane.
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-            Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks. An open-source Loom alternative that gives you unlimited screen recording for free.
+            Record, share, and store videos without paying forever. An open-source Loom alternative that's totally free. Forget storage limits, hidden costs, and privacy risks.
           </p>
 
           {/* Connection Status */}
@@ -187,6 +187,26 @@ function MainPanelComponent() {
             </div>
           );
         })()}
+
+        {/* Footer Section */}
+        <div className="mt-16 sm:mt-20 mb-8 sm:mb-12">
+          <div className="text-center">
+            <div className="max-w-2xl mx-auto px-4">
+              <p className="text-sm text-gray-500 mb-4">
+                Built with ❤️ for creators who value privacy and freedom
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-4 text-xs text-gray-400">
+                <span>Open Source</span>
+                <span>•</span>
+                <span>Privacy First</span>
+                <span>•</span>
+                <span>Free Forever</span>
+                <span>•</span>
+                <span>No Data Collection</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Getting Started Tips */}
         {(() => {

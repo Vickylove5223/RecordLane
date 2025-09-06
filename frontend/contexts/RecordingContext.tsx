@@ -9,7 +9,6 @@ export type RecordingState = 'idle' | 'starting' | 'recording' | 'paused' | 'sto
 export interface RecordingOptions {
   mode: RecordingMode;
   highlightClicks: boolean;
-  enableDrawing: boolean;
   systemAudio: boolean;
   microphone: boolean;
   resolution: '480p' | '720p' | '1080p';
@@ -57,7 +56,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
   const [options, setOptions] = useState<RecordingOptions>({
     mode: 'screen',
     highlightClicks: appState.settings.highlightClicksDefault,
-    enableDrawing: false,
     systemAudio: true,
     microphone: false,
     resolution: appState.settings.defaultResolution,
@@ -247,6 +245,12 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       // No need to pre-request it here as it causes double modal
 
       recordingServiceRef.current = new RecordingService();
+      
+      // Set callback for when screen sharing is stopped by user
+      recordingServiceRef.current.setScreenShareEndedCallback(() => {
+        console.log('Screen sharing ended by user, stopping recording...');
+        stopRecording();
+      });
       
       await recordingServiceRef.current.startRecording(recordingOptions);
       

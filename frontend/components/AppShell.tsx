@@ -7,7 +7,6 @@ import ReviewPanel from './recording/ReviewPanel';
 import ShareModal from './sharing/ShareModal';
 import SettingsModal from './settings/SettingsModal';
 import ClickHighlighter from './recording/ClickHighlighter';
-import DrawingOverlay from './recording/DrawingOverlay';
 import ScreenshotFlash from './recording/ScreenshotFlash';
 import { useApp } from '../contexts/AppContext';
 import { useRecording } from '../contexts/RecordingContext';
@@ -36,13 +35,7 @@ export default function AppShell() {
 
       {/* Visual Effects - Only active during recording */}
       {(recordingState === 'recording' || recordingState === 'paused') && (
-        <>
-          <ClickHighlighter enabled={options.highlightClicks} />
-          <DrawingOverlay 
-            enabled={options.enableDrawing} 
-            onDisable={() => updateOptions({ enableDrawing: false })}
-          />
-        </>
+        <ClickHighlighter enabled={options.highlightClicks} />
       )}
 
       {/* Screenshot Flash Effect */}

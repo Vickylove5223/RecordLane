@@ -15,6 +15,11 @@ export class RecordingService {
   private startTime = 0;
   private dataAvailableTimeout?: NodeJS.Timeout;
   private recordingStartPromise?: Promise<void>;
+  private onScreenShareEnded: (() => void) | null = null;
+
+  setScreenShareEndedCallback(callback: () => void): void {
+    this.onScreenShareEnded = callback;
+  }
 
   async startRecording(options: RecordingOptions): Promise<void> {
     try {
@@ -431,6 +436,7 @@ export class RecordingService {
       }
       
       this.isRecording = false;
+      this.onScreenShareEnded = null;
       console.log('Cleanup completed');
     } catch (error) {
       console.error('Error during cleanup:', error);
@@ -486,6 +492,10 @@ export class RecordingService {
 
       this.screenStream.getVideoTracks()[0].onended = () => {
         console.log('Screen sharing stopped by user');
+        if (this.onScreenShareEnded && this.isRecording) {
+          console.log('Calling screen share ended callback...');
+          this.onScreenShareEnded();
+        }
       };
     } catch (error) {
       console.error('Failed to get screen stream:', error);
