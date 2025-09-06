@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ModernCard, DocumentCard, GridCard } from '@/components/ui/modern-card';
 import { 
   Download, 
   ExternalLink,
@@ -275,19 +276,19 @@ export default function VideoSharePage() {
 
   // For local videos, show a simple modal-style page
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <FileVideo className="h-8 w-8 text-primary" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
+      <ModernCard variant="layered" className="w-full max-w-2xl p-8">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+              <FileVideo className="h-10 w-10 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">{recording.title}</CardTitle>
-          <CardDescription>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{recording.title}</h1>
+          <p className="text-lg text-gray-600">
             This recording is saved locally on your device
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
         
         <CardContent className="space-y-6">
           {/* Recording Details */}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ModernCard, DocumentCard, GridCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, ExternalLink, AlertCircle, CheckCircle, Settings, Cloud, Wifi, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -323,9 +324,9 @@ export function YouTubeSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -340,11 +341,11 @@ export function YouTubeSetupPage() {
               </Button>
               <div className="h-6 w-px bg-gray-300" />
               <div className="flex items-center space-x-2">
-                <Settings className="h-5 w-5 text-black" />
-                <h1 className="text-xl font-semibold">YouTube Integration Setup</h1>
+                <Settings className="h-5 w-5 text-gray-700" />
+                <h1 className="text-xl font-semibold text-gray-900">YouTube Integration Setup</h1>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs bg-white">
               Step {currentStep} of {steps.length}
             </Badge>
           </div>
@@ -375,15 +376,15 @@ export function YouTubeSetupPage() {
           </div>
 
           {/* Step Content */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{steps[currentStep - 1].title}</CardTitle>
-              <CardDescription>{steps[currentStep - 1].description}</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <ModernCard variant="layered" className="p-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{steps[currentStep - 1].title}</h2>
+              <p className="text-lg text-gray-600">{steps[currentStep - 1].description}</p>
+            </div>
+            <div>
               {renderStepContent()}
-            </CardContent>
-          </Card>
+            </div>
+          </ModernCard>
 
           {/* Navigation */}
           {currentStep < 5 && (
@@ -411,18 +412,37 @@ export function YouTubeSetupPage() {
           )}
 
           {/* Help Section */}
-          <div className="p-4 bg-gray-50 rounded-md">
-            <h4 className="font-medium text-sm mb-2">Need Help?</h4>
-            <p className="text-sm text-gray-600 mb-2">
-              If you encounter any issues during setup, check the following:
-            </p>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Make sure your Google Cloud project has billing enabled</li>
-              <li>• Verify that the YouTube Data API v3 is enabled</li>
-              <li>• Ensure your redirect URI matches exactly: <code className="bg-gray-200 px-1 rounded">http://localhost:8089/auth/callback</code></li>
-              <li>• Check that your OAuth consent screen is properly configured</li>
-            </ul>
-          </div>
+          <GridCard className="p-6">
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">Need Help?</h4>
+                <p className="text-gray-600 mb-4">
+                  If you encounter any issues during setup, check the following:
+                </p>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  <li className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Make sure your Google Cloud project has billing enabled</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Verify that the YouTube Data API v3 is enabled</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Ensure your redirect URI matches exactly: <code className="bg-gray-100 px-2 py-1 rounded text-xs">http://localhost:8089/auth/callback</code></span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Check that your OAuth consent screen is properly configured</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </GridCard>
         </div>
       </div>
     </div>

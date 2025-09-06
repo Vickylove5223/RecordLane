@@ -1,9 +1,10 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ModernCard, DocumentCard, LayeredCardStack, GridCard } from '@/components/ui/modern-card';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { Video, AlertTriangle, Play, ExternalLink, Clock } from 'lucide-react';
+import { Video, AlertTriangle, Play, ExternalLink, Clock, FileVideo, Upload, Share2 } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
@@ -14,39 +15,51 @@ import VideoModal from './VideoModal';
 import RecordingPanel from '../recording/RecordingPanel';
 
 const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: () => void }) => (
-  <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
-    <CardContent className="p-4">
-      <div className="aspect-video bg-muted rounded mb-3 flex items-center justify-center">
-        {recording.thumbnail ? (
-          <img
-            src={recording.thumbnail}
-            alt={recording.title}
-            className="w-full h-full object-cover rounded"
-            loading="lazy"
-          />
-        ) : (
-          <Video className="h-8 w-8 text-muted-foreground" />
-        )}
+  <ModernCard variant="layered" className="p-6" onClick={onClick}>
+    <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
+      {recording.thumbnail ? (
+        <img
+          src={recording.thumbnail}
+          alt={recording.title}
+          className="w-full h-full object-cover rounded-lg"
+          loading="lazy"
+        />
+      ) : (
+        <div className="flex flex-col items-center space-y-2">
+          <Video className="h-8 w-8 text-gray-400" />
+          <span className="text-xs text-gray-500">No Preview</span>
+        </div>
+      )}
+      {/* Play overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+        <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
+          <Play className="h-6 w-6 text-gray-800 ml-1" />
+        </div>
       </div>
-      <h3 className="font-medium truncate mb-1">{recording.title}</h3>
-      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+    </div>
+    
+    <div className="space-y-3">
+      <h3 className="font-semibold text-gray-900 truncate text-lg">{recording.title}</h3>
+      
+      <div className="flex items-center justify-between text-sm text-gray-600">
         <div className="flex items-center space-x-2">
-          <Clock className="h-3 w-3" />
+          <Clock className="h-4 w-4" />
           <span>{formatDuration(recording.duration)}</span>
         </div>
-        <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
+        <span className="text-xs">{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1">
+      
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex items-center space-x-2">
           {recording.uploadStatus === 'local' && (
-            <div className="flex items-center text-xs text-blue-600">
-              <Download className="h-3 w-3 mr-1" />
+            <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+              <FileVideo className="h-3 w-3 mr-1" />
               <span>Local</span>
             </div>
           )}
           {recording.uploadStatus === 'completed' && recording.youtubeLink && (
-            <div className="flex items-center text-xs text-green-600">
-              <Wifi className="h-3 w-3 mr-1" />
+            <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+              <Upload className="h-3 w-3 mr-1" />
               <span>Synced</span>
             </div>
           )}
@@ -55,18 +68,18 @@ const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: (
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="h-8 w-8 p-0 hover:bg-gray-100"
             onClick={(e) => {
               e.stopPropagation();
               window.open(recording.youtubeLink, '_blank');
             }}
           >
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink className="h-4 w-4" />
           </Button>
         )}
       </div>
-    </CardContent>
-  </Card>
+    </div>
+  </ModernCard>
 ));
 
 RecordingCard.displayName = 'RecordingCard';
@@ -107,7 +120,7 @@ function MainPanelComponent() {
   };
 
   return (
-    <div className="flex-1 p-8">
+    <div className="flex-1 p-8 bg-gradient-to-br from-gray-50 to-white min-h-screen">
       {/* Recording Panel - Always at the top when recording */}
       {(recordingState === 'recording' || recordingState === 'paused') && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
@@ -115,22 +128,43 @@ function MainPanelComponent() {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto">
-        {/* Hero Section */}
-        <div className="text-center mb-8 mt-20">
-          <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
-              <div className="w-8 h-8 bg-white rounded-full"></div>
-            </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Hero Section with Layered Cards */}
+        <div className="text-center mb-12 mt-20">
+          <div className="mb-8">
+            <LayeredCardStack
+              cards={[
+                {
+                  title: "Screen Recording",
+                  subtitle: "Capture your screen with professional quality",
+                  icon: <Video className="h-4 w-4 text-gray-600" />,
+                  highlight: true
+                },
+                {
+                  title: "YouTube Sync",
+                  subtitle: "Automatic upload to your channel",
+                  icon: <Upload className="h-4 w-4 text-gray-600" />
+                },
+                {
+                  title: "Share Instantly",
+                  subtitle: "Get shareable links immediately",
+                  icon: <Share2 className="h-4 w-4 text-gray-600" />
+                }
+              ]}
+              className="max-w-md mx-auto mb-8"
+            />
           </div>
           
-          <h1 className="text-4xl font-bold mb-4">Welcome to RecordLane</h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Record your screen and camera with professional quality
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Welcome to RecordLane
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Record your screen and camera with professional quality. 
+            Your recordings go directly to YouTube - no server storage, complete privacy.
           </p>
 
           {/* Connection Status */}
-          <div className="mb-6">
+          <div className="mb-8">
             <ConnectionStatus 
               status={getConnectionStatus()}
               text={getConnectionText()}
@@ -170,19 +204,24 @@ function MainPanelComponent() {
 
         {/* Getting Started Tips */}
         {state.recordings.length === 0 && (
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-6 text-center">
-              <Play className="h-12 w-12 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Ready to Record!</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+          <div className="max-w-4xl mx-auto">
+            <GridCard className="text-center p-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Play className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Record!</h3>
+              <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
                 Click the red record button in the top-right corner to start your first recording. 
                 You can record immediately and save locally.
               </p>
-              <div className="text-xs text-muted-foreground">
-                <strong>Tip:</strong> Your recordings will be saved locally and can be shared directly.
+              <div className="inline-flex items-center space-x-2 bg-yellow-50 border border-yellow-200 rounded-full px-4 py-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span className="text-sm text-yellow-800 font-medium">
+                  <strong>Tip:</strong> Your recordings will be saved locally and can be shared directly.
+                </span>
               </div>
-            </CardContent>
-          </Card>
+            </GridCard>
+          </div>
         )}
       </div>
 
