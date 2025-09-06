@@ -67,6 +67,14 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   // Helper functions for recording notification
+  const hideRecordingNotification = useCallback(() => {
+    const notification = document.getElementById('recording-notification');
+    if (notification) {
+      notification.remove();
+    }
+    delete (window as any).stopRecordingFromNotification;
+  }, []);
+
   const showRecordingNotification = useCallback(() => {
     // Remove any existing notification
     hideRecordingNotification();
@@ -88,14 +96,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       stopRecording();
     };
   }, [hideRecordingNotification, stopRecording]);
-
-  const hideRecordingNotification = useCallback(() => {
-    const notification = document.getElementById('recording-notification');
-    if (notification) {
-      notification.remove();
-    }
-    delete (window as any).stopRecordingFromNotification;
-  }, []);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
