@@ -58,10 +58,17 @@ export default function DrawingOverlay({ enabled, onDisable }: DrawingOverlayPro
   }, []);
 
   useEffect(() => {
-    if (!enabled) return;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    if (!enabled) {
+      // Cleanup if disabled
+      canvas.removeEventListener('mousedown', startDrawing);
+      document.removeEventListener('mousemove', draw);
+      document.removeEventListener('mouseup', stopDrawing);
+      clearCanvas();
+      return;
+    }
 
     // Set up canvas
     canvas.width = window.innerWidth;

@@ -28,7 +28,11 @@ export default function ClickHighlighter({ enabled }: ClickHighlighterProps) {
   }, [enabled, createClickEffect]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      // Cleanup if disabled while active
+      document.removeEventListener('click', handleClick, true);
+      return;
+    }
 
     // Add click listener to document
     document.addEventListener('click', handleClick, true);

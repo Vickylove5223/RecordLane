@@ -9,14 +9,12 @@ import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { isYouTubeConfigured } from '../../config';
 import FloatingRecordButton from '../recording/FloatingRecordButton';
-import { YouTubeSetupModal } from '../setup/YouTubeSetupModal';
 
 export default function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
   const { state: recordingState } = useRecording();
   const navigate = useNavigate();
-  const [showYouTubeSetup, setShowYouTubeSetup] = useState(false);
 
   const handleSettingsClick = () => {
     dispatch({ type: 'SET_SETTINGS_OPEN', payload: true });
@@ -43,7 +41,7 @@ export default function TopNav() {
           {/* YouTube Setup Link - Show when not configured */}
           {!isYouTubeConfigured() && (
             <button
-              onClick={() => setShowYouTubeSetup(true)}
+              onClick={() => navigate('/youtube-setup')}
               className="text-black hover:text-black/80 text-sm font-medium transition-colors"
             >
               Setup Guide
@@ -80,12 +78,6 @@ export default function TopNav() {
           <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
         )}
       </div>
-
-      {/* YouTube Setup Modal */}
-      <YouTubeSetupModal
-        isOpen={showYouTubeSetup}
-        onClose={() => setShowYouTubeSetup(false)}
-      />
     </header>
   );
 }

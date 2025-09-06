@@ -1,9 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ProgressIndicator, CircularProgress } from '@/components/ui/progress-indicator';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { 
   Select,
   SelectContent,
@@ -51,6 +59,7 @@ export default function ReviewPanel() {
   const { uploadVideo, isConnected, connectYouTube } = useYouTube();
   const { dispatch } = useApp();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState(`Recording ${new Date().toLocaleDateString()}`);
   const [privacy, setPrivacy] = useState<'private' | 'unlisted' | 'public'>('unlisted');
@@ -257,13 +266,7 @@ export default function ReviewPanel() {
         description: "Your recording has been synced to YouTube",
       });
 
-      dispatch({ 
-        type: 'SET_SHARE_MODAL_DATA', 
-        payload: { 
-          shareLink: result.videoUrl, 
-          title 
-        } 
-      });
+      navigate(`/recording/${recording.id}`);
       
     } catch (error) {
       console.error('Sync failed:', error);

@@ -123,38 +123,14 @@ function MainPanelComponent() {
     <div className="flex-1 p-8 bg-gradient-to-br from-gray-50 to-white min-h-screen">
       {/* Recording Panel - Always at the top when recording */}
       {(recordingState === 'recording' || recordingState === 'paused') && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="fixed top-20 left-8 z-50">
           <RecordingPanel />
         </div>
       )}
 
       <div className="max-w-7xl mx-auto">
-        {/* Hero Section with Layered Cards */}
+        {/* Hero Section */}
         <div className="text-center mb-12 mt-20">
-          <div className="mb-8">
-            <LayeredCardStack
-              cards={[
-                {
-                  title: "Screen Recording",
-                  subtitle: "Capture your screen with professional quality",
-                  icon: <Video className="h-4 w-4 text-gray-600" />,
-                  highlight: true
-                },
-                {
-                  title: "YouTube Sync",
-                  subtitle: "Automatic upload to your channel",
-                  icon: <Upload className="h-4 w-4 text-gray-600" />
-                },
-                {
-                  title: "Share Instantly",
-                  subtitle: "Get shareable links immediately",
-                  icon: <Share2 className="h-4 w-4 text-gray-600" />
-                }
-              ]}
-              className="max-w-md mx-auto mb-8"
-            />
-          </div>
-          
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
             Welcome to RecordLane
           </h1>

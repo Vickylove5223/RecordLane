@@ -23,11 +23,11 @@ export default function RecordingPanel() {
     updateOptions
   } = useRecording();
   
-  const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [position, setPosition] = useState({ x: 20, y: 80 }); // Adjusted initial y position
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
-  const [highlightClicks, setHighlightClicks] = useState(options.highlightClicks);
+
+  const { enableDrawing, highlightClicks } = options;
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -37,33 +37,27 @@ export default function RecordingPanel() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
-      });
-    }
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
   };
 
-
   const toggleDrawingMode = () => {
-    setIsDrawingMode(!isDrawingMode);
-    updateOptions({ enableDrawing: !isDrawingMode });
+    updateOptions({ enableDrawing: !enableDrawing });
   };
 
   const toggleClickHighlights = () => {
-    const newValue = !highlightClicks;
-    setHighlightClicks(newValue);
-    updateOptions({ highlightClicks: newValue });
+    updateOptions({ highlightClicks: !highlightClicks });
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         setPosition({
-          x: Math.max(0, Math.min(window.innerWidth - 400, e.clientX - dragStart.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 120, e.clientY - dragStart.y)),
+          x: Math.max(0, Math.min(window.innerWidth - 60, e.clientX - dragStart.x)), // 60 is approx width of panel
+          y: Math.max(0, Math.min(window.innerHeight - 280, e.clientY - dragStart.y)), // 280 is approx height
         });
       }
     };
@@ -73,13 +67,13 @@ export default function RecordingPanel() {
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragStart]);
 
@@ -90,16 +84,17 @@ export default function RecordingPanel() {
 
   return (
     <div
-      className="fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center space-y-2 p-2"
+      className="fixed z-50 bg-white rounded-full shadow-lg border border-gray-200 flex flex-col items-center space-y-2 p-2"
       style={{ 
         left: position.x, 
         top: position.y,
-        cursor: isDragging ? 'grabbing' : 'grab'
       }}
-      onMouseDown={handleMouseDown}
     >
       {/* Drag Handle */}
-      <div className="text-gray-400 cursor-grab">
+      <div 
+        className="text-gray-400 cursor-grab p-2"
+        onMouseDown={handleMouseDown}
+      >
         <Move className="h-4 w-4" />
       </div>
 
@@ -139,12 +134,12 @@ export default function RecordingPanel() {
       {/* Drawing Mode Toggle */}
       <Button
         size="sm"
-        variant={isDrawingMode ? "default" : "outline"}
+        variant={enableDrawing ? "default" : "outline"}
         onClick={toggleDrawingMode}
         className="h-10 w-10 p-0 rounded-full"
-        title={isDrawingMode ? "Disable Drawing" : "Enable Drawing"}
+        title={enableDrawing ? "Disable Drawing" : "Enable Drawing"}
       >
-        <Pen className={`h-5 w-5 ${isDrawingMode ? 'text-white' : 'text-gray-600'}`} />
+        <Pen className={`h-5 w-5 ${enableDrawing ? 'text-white' : 'text-gray-600'}`} />
       </Button>
 
       {/* Click Highlights Toggle */}
