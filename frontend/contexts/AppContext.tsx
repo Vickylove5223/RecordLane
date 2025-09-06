@@ -29,10 +29,8 @@ export interface Recording {
   duration: number;
   createdAt: Date;
   privacy: 'private' | 'unlisted' | 'public';
-  localBlob?: Blob;
-  uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed' | 'local';
+  uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed';
   uploadProgress?: number;
-  localPath?: string;
 }
 
 type AppAction =
@@ -159,7 +157,6 @@ function saveStateToStorage(state: AppState): void {
       error: null,
       recordings: state.recordings.map(recording => ({
         ...recording,
-        localBlob: undefined, // Don't save blobs to localStorage
       })),
     };
     
@@ -174,7 +171,6 @@ function saveStateToStorage(state: AppState): void {
         ...state,
         recordings: state.recordings.slice(0, 10).map(recording => ({
           ...recording,
-          localBlob: undefined,
         })),
         settingsOpen: false,
         shareModalOpen: false,

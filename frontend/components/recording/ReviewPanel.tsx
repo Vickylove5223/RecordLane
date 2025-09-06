@@ -73,7 +73,6 @@ export default function ReviewPanel() {
   const [trimEnd, setTrimEnd] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ videoId: string; videoUrl: string } | null>(null);
-  const [savedLocally, setSavedLocally] = useState(false);
   const [showConnectPrompt, setShowConnectPrompt] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [trimmedBlob, setTrimmedBlob] = useState<Blob | null>(null);
@@ -184,48 +183,6 @@ export default function ReviewPanel() {
     }
   };
 
-
-  const handleSaveLocally = async () => {
-    const blobToSave = trimmedBlob || recordedBlob;
-    if (!blobToSave) return;
-
-    try {
-      const url = URL.createObjectURL(blobToSave);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.webm`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      const recording = {
-        id: Date.now().toString(),
-        title,
-        duration: duration * 1000,
-        createdAt: new Date(),
-        privacy: privacy,
-        uploadStatus: 'local' as const,
-        localBlob: blobToSave,
-      };
-
-      dispatch({ type: 'ADD_RECORDING', payload: recording });
-      setSavedLocally(true);
-
-      toast({
-        title: "Recording Saved",
-        description: "Your recording has been saved locally",
-      });
-    } catch (error) {
-      console.error('Save failed:', error);
-      toast({
-        title: "Save Failed",
-        description: "Failed to save recording locally",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSyncToYouTube = async () => {
     if (!isConnected) {
       setShowConnectPrompt(true);
@@ -302,12 +259,7 @@ export default function ReviewPanel() {
   };
 
   const handleClose = () => {
-    if (uploadSuccess || savedLocally) {
-      deleteRecording();
-    } else {
-      // Simple confirmation without permission modal
-      deleteRecording();
-    }
+    deleteRecording();
   };
 
   const handleDeleteClick = () => {
@@ -324,7 +276,6 @@ export default function ReviewPanel() {
   };
 
   const handleRestart = () => {
-    // Simple restart without permission modal
     restartRecording();
   };
 
@@ -343,14 +294,11 @@ export default function ReviewPanel() {
               <DialogTitle className="flex items-center space-x-2">
                 <span>Review Recording</span>
                 {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
-                {savedLocally && !uploadSuccess && <Save className="h-5 w-5 text-blue-500" />}
               </DialogTitle>
               <DialogDescription>
                 {uploadSuccess 
                   ? "Your recording has been successfully synced to YouTube"
-                  : savedLocally
-                  ? "Your recording has been saved locally"
-                  : "Review your recording and save locally or sync to YouTube"
+                  : "Review your recording and sync to YouTube"
                 }
               </DialogDescription>
             </DialogHeader>
@@ -375,7 +323,7 @@ export default function ReviewPanel() {
                   />
                   
                   {/* Play/Pause Overlay */}
-                  {!uploadSuccess && !savedLocally && (
+                  {!uploadSuccess && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
                       <Button
                         size="lg"
@@ -411,7 +359,7 @@ export default function ReviewPanel() {
                 </div>
 
                 {/* Timeline */}
-                {!uploadSuccess && !savedLocally && !showTrimming && (
+                {!uploadSuccess && !showTrimming && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>{formatTime(currentTime)}</span>
@@ -482,7 +430,7 @@ export default function ReviewPanel() {
                 )}
 
                 {/* Recording Details */}
-                {!uploadSuccess && !savedLocally && !showTrimming && (
+                {!uploadSuccess && !showTrimming && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Title</label>
@@ -546,28 +494,6 @@ export default function ReviewPanel() {
                   </div>
                 )}
 
-                {/* Local Save Success */}
-                {savedLocally && !uploadSuccess && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <Save className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-blue-800 dark:text-blue-200">
-                          Recording saved locally!
-                        </h3>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                          Your recording has been downloaded to your device
-                        </p>
-                        {!isConnected && (
-                          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            Connect YouTube to also sync your recordings online
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Connect YouTube Prompt */}
                 {showConnectPrompt && (
                   <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -607,7 +533,7 @@ export default function ReviewPanel() {
 
           {/* Actions Footer */}
           <div className="p-6 border-t border-border">
-            {!uploadSuccess && !savedLocally && (
+            {!uploadSuccess && (
               <div className="flex flex-col space-y-3">
                 {/* First row of buttons */}
                 <div className="flex items-center justify-center space-x-3">
@@ -629,19 +555,6 @@ export default function ReviewPanel() {
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Restart
-                  </Button>
-                </div>
-
-                {/* Second row of buttons */}
-                <div className="flex items-center justify-center space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleSaveLocally}
-                    disabled={isUploading || !title.trim()}
-                    className="flex-1 max-w-[180px]"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Locally
                   </Button>
                   
                   <Button
@@ -673,7 +586,7 @@ export default function ReviewPanel() {
               </div>
             )}
             
-            {(uploadSuccess || savedLocally) && (
+            {uploadSuccess && (
               <Button onClick={deleteRecording} className="w-full">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Done

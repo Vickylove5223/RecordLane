@@ -39,15 +39,7 @@ interface VideoPreviewPageProps {
 }
 
 export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPageProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
   const [youtubeError, setYoutubeError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -59,7 +51,6 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   
-  const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
   const { dispatch } = useApp();
@@ -87,20 +78,7 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     return null;
   };
 
-  const getLocalVideoSource = () => {
-    if (recording.localBlob) {
-      return URL.createObjectURL(recording.localBlob);
-    }
-    if (recording.localPath) {
-      return recording.localPath;
-    }
-    return null;
-  };
-
-  const videoSource = getLocalVideoSource();
   const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
-  const hasLocalVideo = !!videoSource;
-  const hasYouTubeVideo = !!youtubeEmbedUrl;
   const videoId = recording.youtubeVideoId;
 
   // Load comments when component mounts
@@ -193,157 +171,6 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     }
   };
 
-  // Video event handlers (same as before)
-  useEffect(() => {
-    if (videoRef.current && videoSource) {
-      const video = videoRef.current;
-      setIsLoading(true);
-      setVideoError(null);
-      
-      const handleLoadedMetadata = () => {
-        if (isFinite(video.duration)) {
-          setDuration(video.duration);
-        }
-        setIsLoading(false);
-      };
-
-      const handleTimeUpdate = () => {
-        setCurrentTime(video.currentTime);
-      };
-
-      const handlePlay = () => {
-        setIsPlaying(true);
-        setIsLoading(false);
-      };
-
-      const handlePause = () => {
-        setIsPlaying(false);
-      };
-
-      const handleEnded = () => {
-        setIsPlaying(false);
-        video.currentTime = 0;
-        setCurrentTime(0);
-      };
-
-      const handleError = () => {
-        setVideoError('Failed to load video');
-        setIsLoading(false);
-        console.error('Video load error:', video.error);
-      };
-
-      const handleLoadStart = () => {
-        setIsLoading(true);
-      };
-
-      const handleCanPlay = () => {
-        setIsLoading(false);
-      };
-
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('play', handlePlay);
-      video.addEventListener('pause', handlePause);
-      video.addEventListener('ended', handleEnded);
-      video.addEventListener('error', handleError);
-      video.addEventListener('loadstart', handleLoadStart);
-      video.addEventListener('canplay', handleCanPlay);
-
-      return () => {
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('play', handlePlay);
-        video.removeEventListener('pause', handlePause);
-        video.removeEventListener('ended', handleEnded);
-        video.removeEventListener('error', handleError);
-        video.removeEventListener('loadstart', handleLoadStart);
-        video.removeEventListener('canplay', handleCanPlay);
-      };
-    }
-  }, [videoSource]);
-
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        if (videoRef.current.ended || videoRef.current.currentTime >= videoRef.current.duration) {
-          videoRef.current.currentTime = 0;
-        }
-        videoRef.current.play().catch(error => {
-          console.error('Failed to play video:', error);
-          toast({
-            title: "Playback Error",
-            description: "Failed to play the video preview",
-            variant: "destructive",
-          });
-        });
-      }
-    }
-  };
-
-  const handleSeek = (time: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
-
-  const handleVolumeChange = (newVolume: number) => {
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-      setVolume(newVolume);
-      setIsMuted(newVolume === 0);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      if (isMuted) {
-        videoRef.current.volume = volume;
-        setIsMuted(false);
-      } else {
-        videoRef.current.volume = 0;
-        setIsMuted(true);
-      }
-    }
-  };
-
-  const toggleFullscreen = () => {
-    if (containerRef.current) {
-      if (!isFullscreen) {
-        if (containerRef.current.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
-    }
-  };
-
-  const restartVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      setCurrentTime(0);
-      if (!isPlaying) {
-        videoRef.current.play().catch(error => {
-          console.error('Failed to play video:', error);
-        });
-      }
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) {
-      return '0:00';
-    }
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -354,13 +181,11 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      // Delete from YouTube if synced
-      if (hasYouTubeVideo && recording.youtubeVideoId) {
+      if (recording.youtubeVideoId) {
         const { RealYouTubeService } = await import('../../services/realYouTubeService');
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
       }
       
-      // Remove from local state
       dispatch({ type: 'REMOVE_RECORDING', payload: recording.id });
       
       toast({
@@ -410,27 +235,6 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     }
   };
 
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  // Handle fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  // Cleanup video source URL when component unmounts
-  useEffect(() => {
-    return () => {
-      if (videoSource && videoSource.startsWith('blob:')) {
-        URL.revokeObjectURL(videoSource);
-      }
-    };
-  }, [videoSource]);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -453,19 +257,11 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
                   <span>{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
                 </div>
                 <Badge 
-                  variant={
-                    recording.uploadStatus === 'completed' 
-                      ? 'default' 
-                      : recording.uploadStatus === 'local' 
-                      ? 'secondary' 
-                      : 'destructive'
-                  }
+                  variant={recording.uploadStatus === 'completed' ? 'default' : 'destructive'}
                   className="flex items-center space-x-1"
                 >
                   {recording.uploadStatus === 'completed' ? (
                     <><Wifi className="h-3 w-3" />Synced</>
-                  ) : recording.uploadStatus === 'local' ? (
-                    <><Download className="h-3 w-3" />Local</>
                   ) : (
                     <><WifiOff className="h-3 w-3" />Failed</>
                   )}
@@ -526,95 +322,14 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
                   onError={() => setYoutubeError('Failed to load YouTube video')}
                 />
               </div>
-            ) : hasLocalVideo && !videoError ? (
-              <>
-                <video
-                  ref={videoRef}
-                  src={videoSource!}
-                  className="w-full h-full object-contain"
-                  controls={false}
-                  poster={recording.thumbnail}
-                  preload="metadata"
-                />
-                
-                {/* Loading Overlay */}
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <Loader2 className="h-8 w-8 animate-spin text-white" />
-                  </div>
-                )}
-                
-                {/* Play/Pause Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                  <div className="flex space-x-2">
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      onClick={togglePlayPause}
-                      className="rounded-full h-16 w-16"
-                    >
-                      {isPlaying ? (
-                        <Pause className="h-6 w-6" />
-                      ) : (
-                        <Play className="h-6 w-6 ml-1" />
-                      )}
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      onClick={restartVideo}
-                      className="rounded-full h-16 w-16"
-                    >
-                      <RotateCcw className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Video Controls Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="flex items-center space-x-2 text-white">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={toggleMute}
-                      className="text-white hover:bg-white/20"
-                    >
-                      {isMuted ? (
-                        <VolumeX className="h-4 w-4" />
-                      ) : (
-                        <Volume2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                    
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={isMuted ? 0 : volume}
-                      onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                      className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer"
-                    />
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={toggleFullscreen}
-                      className="text-white hover:bg-white/20 ml-auto"
-                    >
-                      <Maximize className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <div className="text-center">
                   <Play className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground">
-                    {videoError || youtubeError || 'Video not available for preview'}
+                    {youtubeError || 'Video not available for preview'}
                   </p>
-                  {hasYouTubeVideo && youtubeError && (
+                  {recording.youtubeLink && youtubeError && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -629,33 +344,6 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
               </div>
             )}
           </div>
-
-          {/* Timeline for local videos */}
-          {hasLocalVideo && !youtubeEmbedUrl && (
-            <div className="bg-background border-t p-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-                <div
-                  className="h-2 bg-muted rounded-full cursor-pointer"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const percent = (e.clientX - rect.left) / rect.width;
-                    handleSeek(percent * duration);
-                  }}
-                >
-                  <div
-                    className="h-full bg-primary rounded-full relative"
-                    style={{ width: `${progressPercentage}%` }}
-                  >
-                    <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Comments Section */}

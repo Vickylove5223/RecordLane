@@ -51,12 +51,6 @@ const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: (
       
       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
         <div className="flex items-center space-x-2">
-          {recording.uploadStatus === 'local' && (
-            <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-              <FileVideo className="h-3 w-3 mr-1" />
-              <span>Local</span>
-            </div>
-          )}
           {recording.uploadStatus === 'completed' && recording.youtubeLink && (
             <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
               <Upload className="h-3 w-3 mr-1" />
@@ -132,11 +126,10 @@ function MainPanelComponent() {
         {/* Hero Section */}
         <div className="text-center mb-12 mt-20">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-            Welcome to RecordLane
+            Record, share, and store videos without paying forever.
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Record your screen and camera with professional quality. 
-            Your recordings go directly to YouTube - no server storage, complete privacy.
+            Forget storage limits, hidden costs, and privacy risks. An open-source Loom alternative that gives you unlimited screen recording for free.
           </p>
 
           {/* Connection Status */}
@@ -156,8 +149,7 @@ function MainPanelComponent() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Your Recordings</h2>
               <div className="text-sm text-muted-foreground">
-                {state.recordings.filter(r => r.uploadStatus === 'local').length} local, {' '}
-                {state.recordings.filter(r => r.uploadStatus === 'completed').length} synced
+                {state.recordings.length} recording{state.recordings.length !== 1 ? 's' : ''}
               </div>
             </div>
             {isConnecting ? (
