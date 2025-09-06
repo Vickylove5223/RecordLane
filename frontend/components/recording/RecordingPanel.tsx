@@ -131,15 +131,19 @@ export default function RecordingPanel() {
         <Square className="h-5 w-5 text-white" />
       </Button>
 
-      {/* Drawing Mode Toggle */}
+      {/* Annotation Mode Toggle */}
       <Button
         size="sm"
         variant={enableDrawing ? "default" : "outline"}
         onClick={toggleDrawingMode}
-        className="h-10 w-10 p-0 rounded-full"
-        title={enableDrawing ? "Disable Drawing" : "Enable Drawing"}
+        className="h-10 w-16 p-2 rounded-full text-xs font-medium"
+        title={enableDrawing ? "Disable Annotation" : "Enable Annotation"}
       >
-        <Pen className={`h-5 w-5 ${enableDrawing ? 'text-white' : 'text-gray-600'}`} />
+        {enableDrawing ? (
+          <span className="text-white">Annotate</span>
+        ) : (
+          <span className="text-gray-600">Annotate</span>
+        )}
       </Button>
 
       {/* Click Highlights Toggle */}

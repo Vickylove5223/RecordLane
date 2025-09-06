@@ -190,6 +190,7 @@ function saveStateToStorage(state: AppState): void {
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
+  refreshRecordings: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -197,28 +198,88 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  const refreshRecordings = React.useCallback(async () => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      const { metadata } = await import('~encore/clients');
+      const recordingsResponse = await metadata.list({});
+      
+      if (recordingsResponse.recordings) {
+        const recordings = recordingsResponse.recordings.map((rec: any) => ({
+          id: rec.id,
+          title: rec.title,
+          youtubeVideoId: rec.youtube_video_id,
+          youtubeLink: rec.youtube_link,
+          thumbnail: rec.thumbnail_url,
+          duration: rec.duration * 1000, // Convert seconds to milliseconds
+          createdAt: new Date(rec.created_at),
+          privacy: rec.privacy,
+          uploadStatus: 'completed' as const, // All recordings from backend are synced
+        }));
+        
+        dispatch({ type: 'LOAD_STATE', payload: { recordings } });
+      }
+    } catch (error) {
+      console.error('Failed to refresh recordings:', error);
+      ErrorHandler.logError('RECORDINGS_REFRESH_ERROR', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to refresh recordings' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+
   React.useEffect(() => {
     const loadState = async () => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        const savedState = localStorage.getItem('recordlane-app-state');
-        if (savedState) {
-          try {
-            const parsed = JSON.parse(savedState);
-            if (parsed.recordings) {
-              parsed.recordings = parsed.recordings.map((rec: any) => ({
-                ...rec,
-                createdAt: new Date(rec.createdAt),
-              }));
+        // Load recordings from backend metadata service
+        try {
+          const { metadata } = await import('~encore/clients');
+          const recordingsResponse = await metadata.list({});
+          
+          if (recordingsResponse.recordings) {
+            const recordings = recordingsResponse.recordings.map((rec: any) => ({
+              id: rec.id,
+              title: rec.title,
+              youtubeVideoId: rec.youtube_video_id,
+              youtubeLink: rec.youtube_link,
+              thumbnail: rec.thumbnail_url,
+              duration: rec.duration * 1000, // Convert seconds to milliseconds
+              createdAt: new Date(rec.created_at),
+              privacy: rec.privacy,
+              uploadStatus: 'completed' as const, // All recordings from backend are synced
+            }));
+            
+            dispatch({ type: 'LOAD_STATE', payload: { recordings } });
+          }
+        } catch (backendError) {
+          console.warn('Failed to load recordings from backend, falling back to local storage:', backendError);
+          
+          // Fallback to local storage
+          const savedState = localStorage.getItem('recordlane-app-state');
+          if (savedState) {
+            try {
+              const parsed = JSON.parse(savedState);
+              if (parsed.recordings) {
+                // Filter to only show synced recordings from local storage
+                const syncedRecordings = parsed.recordings.filter((rec: any) => 
+                  rec.uploadStatus === 'completed' && rec.youtubeLink
+                );
+                parsed.recordings = syncedRecordings.map((rec: any) => ({
+                  ...rec,
+                  createdAt: new Date(rec.createdAt),
+                }));
+              }
+              // Ensure onboarded state is maintained to avoid requiring data saving
+              parsed.isOnboarded = true;
+              dispatch({ type: 'LOAD_STATE', payload: parsed });
+            } catch (error) {
+              console.error('Failed to parse saved state:', error);
+              ErrorHandler.logError('STATE_PARSE_ERROR', error);
+              localStorage.removeItem('recordlane-app-state');
             }
-            // Ensure onboarded state is maintained to avoid requiring data saving
-            parsed.isOnboarded = true;
-            dispatch({ type: 'LOAD_STATE', payload: parsed });
-          } catch (error) {
-            console.error('Failed to parse saved state:', error);
-            ErrorHandler.logError('STATE_PARSE_ERROR', error);
-            localStorage.removeItem('recordlane-app-state');
           }
         }
       } catch (error) {
@@ -246,7 +307,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.error]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch, refreshRecordings }}>
       {children}
     </AppContext.Provider>
   );

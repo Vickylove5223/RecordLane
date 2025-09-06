@@ -12,9 +12,16 @@ export class VideoTrimmingService {
         // Create a video element to load the blob
         const video = document.createElement('video');
         video.preload = 'metadata';
+        video.crossOrigin = 'anonymous';
         
         video.onloadedmetadata = () => {
           try {
+            // Validate trim times
+            if (startTime < 0 || endTime > video.duration || startTime >= endTime) {
+              reject(new Error('Invalid trim times'));
+              return;
+            }
+
             // Create a canvas to capture frames
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -35,6 +42,7 @@ export class VideoTrimmingService {
             });
 
             const chunks: Blob[] = [];
+            let isRecording = false;
             
             mediaRecorder.ondataavailable = (event) => {
               if (event.data.size > 0) {
@@ -44,49 +52,61 @@ export class VideoTrimmingService {
 
             mediaRecorder.onstop = () => {
               const trimmedBlob = new Blob(chunks, { type: 'video/webm' });
+              URL.revokeObjectURL(video.src);
               resolve(trimmedBlob);
             };
 
             mediaRecorder.onerror = (error) => {
+              URL.revokeObjectURL(video.src);
               reject(error);
             };
 
-            // Start recording
-            mediaRecorder.start();
-
-            // Play video from start time
-            video.currentTime = startTime;
-            video.play();
-
             // Function to draw video frames to canvas
             const drawFrame = () => {
+              if (!isRecording || video.paused || video.ended) {
+                return;
+              }
+
               if (video.currentTime >= endTime) {
                 // Stop recording when we reach the end time
                 mediaRecorder.stop();
                 video.pause();
+                isRecording = false;
                 return;
               }
 
-              if (!video.paused && video.currentTime < endTime) {
+              if (video.currentTime >= startTime && video.currentTime < endTime) {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                requestAnimationFrame(drawFrame);
               }
+              
+              requestAnimationFrame(drawFrame);
             };
 
             video.onplay = () => {
+              if (!isRecording) {
+                isRecording = true;
+                mediaRecorder.start();
+              }
               drawFrame();
             };
 
             video.onerror = (error) => {
+              URL.revokeObjectURL(video.src);
               reject(new Error('Video playback error: ' + error));
             };
 
+            // Set video to start time and play
+            video.currentTime = startTime;
+            video.play();
+
           } catch (error) {
+            URL.revokeObjectURL(video.src);
             reject(error);
           }
         };
 
         video.onerror = (error) => {
+          URL.revokeObjectURL(video.src);
           reject(new Error('Video loading error: ' + error));
         };
 

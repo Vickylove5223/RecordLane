@@ -76,6 +76,7 @@ export default function ReviewPanel() {
   const [showConnectPrompt, setShowConnectPrompt] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [trimmedBlob, setTrimmedBlob] = useState<Blob | null>(null);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewUrl = getPreviewUrl();
@@ -85,9 +86,11 @@ export default function ReviewPanel() {
       const video = videoRef.current;
       
       const handleLoadedMetadata = () => {
-        if (isFinite(video.duration)) {
+        console.log('Video metadata loaded:', video.duration);
+        if (isFinite(video.duration) && video.duration > 0) {
           setDuration(video.duration);
           setTrimEnd(video.duration);
+          setVideoLoading(false);
         }
       };
 
@@ -96,18 +99,34 @@ export default function ReviewPanel() {
       };
 
       const handlePlay = () => {
+        console.log('Video playing');
         setIsPlaying(true);
       };
 
       const handlePause = () => {
+        console.log('Video paused');
         setIsPlaying(false);
       };
 
       const handleEnded = () => {
+        console.log('Video ended');
         setIsPlaying(false);
         // Reset to beginning when video ends
         video.currentTime = 0;
         setCurrentTime(0);
+      };
+
+      const handleError = (e: any) => {
+        console.error('Video error:', e);
+        toast({
+          title: "Video Error",
+          description: "Failed to load video preview",
+          variant: "destructive",
+        });
+      };
+
+      const handleCanPlay = () => {
+        console.log('Video can play');
       };
 
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -115,6 +134,14 @@ export default function ReviewPanel() {
       video.addEventListener('play', handlePlay);
       video.addEventListener('pause', handlePause);
       video.addEventListener('ended', handleEnded);
+      video.addEventListener('error', handleError);
+      video.addEventListener('canplay', handleCanPlay);
+
+      // Set video source if not already set
+      if (video.src !== previewUrl) {
+        video.src = previewUrl;
+        video.load();
+      }
 
       return () => {
         video.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -122,27 +149,48 @@ export default function ReviewPanel() {
         video.removeEventListener('play', handlePlay);
         video.removeEventListener('pause', handlePause);
         video.removeEventListener('ended', handleEnded);
+        video.removeEventListener('error', handleError);
+        video.removeEventListener('canplay', handleCanPlay);
       };
     }
-  }, [previewUrl]);
+  }, [previewUrl, toast]);
 
   const togglePlayPause = () => {
     if (videoRef.current) {
+      const video = videoRef.current;
+      
       if (isPlaying) {
-        videoRef.current.pause();
+        video.pause();
       } else {
         // If video has ended, restart from beginning
-        if (videoRef.current.ended || videoRef.current.currentTime >= videoRef.current.duration) {
-          videoRef.current.currentTime = 0;
+        if (video.ended || video.currentTime >= video.duration) {
+          video.currentTime = 0;
+          setCurrentTime(0);
         }
-        videoRef.current.play().catch(error => {
-          console.error('Failed to play video:', error);
-          toast({
-            title: "Playback Error",
-            description: "Failed to play the video preview",
-            variant: "destructive",
+        
+        // Ensure video is ready to play
+        if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+          video.play().catch(error => {
+            console.error('Failed to play video:', error);
+            toast({
+              title: "Playback Error",
+              description: "Failed to play the video preview. Please try again.",
+              variant: "destructive",
+            });
           });
-        });
+        } else {
+          // Wait for video to be ready
+          video.addEventListener('canplay', () => {
+            video.play().catch(error => {
+              console.error('Failed to play video after canplay:', error);
+              toast({
+                title: "Playback Error",
+                description: "Failed to play the video preview. Please try again.",
+                variant: "destructive",
+              });
+            });
+          }, { once: true });
+        }
       }
     }
   };
@@ -165,13 +213,27 @@ export default function ReviewPanel() {
     }
 
     try {
+      toast({
+        title: "Trimming Video",
+        description: "Please wait while we trim your video...",
+      });
+      
       const trimmedVideo = await VideoTrimmingService.trimVideo(recordedBlob, trimStart, trimEnd);
       setTrimmedBlob(trimmedVideo);
       setShowTrimming(false);
       
+      // Update the video source to show trimmed version
+      const newPreviewUrl = URL.createObjectURL(trimmedVideo);
+      if (videoRef.current) {
+        videoRef.current.src = newPreviewUrl;
+        videoRef.current.load();
+        // Reset current time to 0 for the trimmed video
+        setCurrentTime(0);
+      }
+      
       toast({
-        title: "Video Trimmed",
-        description: "Your video has been trimmed successfully",
+        title: "Video Trimmed Successfully",
+        description: `Video trimmed from ${formatTime(trimStart)} to ${formatTime(trimEnd)}`,
       });
     } catch (error) {
       console.error('Trim failed:', error);
@@ -183,8 +245,48 @@ export default function ReviewPanel() {
     }
   };
 
+  const handleDownload = () => {
+    const blobToDownload = trimmedBlob || recordedBlob;
+    if (!blobToDownload) {
+      toast({
+        title: "Download Error",
+        description: "No video available to download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const url = URL.createObjectURL(blobToDownload);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title || 'recording'}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download Started",
+        description: "Your video is being downloaded",
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the video. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSyncToYouTube = async () => {
     if (!isConnected) {
+      toast({
+        title: "YouTube Not Connected",
+        description: "Please connect your YouTube account to sync recordings",
+        variant: "destructive",
+      });
       setShowConnectPrompt(true);
       return;
     }
@@ -288,14 +390,14 @@ export default function ReviewPanel() {
   return (
     <>
       <Dialog open={true} onOpenChange={() => !isUploading && handleClose()}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <div className="p-6 border-b border-border">
+        <DialogContent className="max-w-5xl max-h-[95vh] flex flex-col p-0 overflow-hidden">
+          <div className="p-6 border-b border-border bg-background">
             <DialogHeader>
-              <DialogTitle className="flex items-center space-x-2">
+              <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
                 <span>Review Recording</span>
                 {uploadSuccess && <CheckCircle className="h-5 w-5 text-green-500" />}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-base text-muted-foreground mt-2">
                 {uploadSuccess 
                   ? "Your recording has been successfully synced to YouTube"
                   : "Review your recording and sync to YouTube"
@@ -306,24 +408,47 @@ export default function ReviewPanel() {
 
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full">
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-4">
                 {/* Video Preview */}
                 <div className="relative bg-black rounded-lg overflow-hidden">
                   <video
                     ref={videoRef}
                     src={previewUrl}
-                    className="w-full h-auto max-h-80"
+                    className="w-full h-auto max-h-96 min-h-64"
                     controls={false}
+                    preload="metadata"
+                    playsInline
                     onLoadedMetadata={(e) => {
-                      if (isFinite(e.currentTarget.duration)) {
+                      console.log('Video metadata loaded in JSX:', e.currentTarget.duration);
+                      if (isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
                         setDuration(e.currentTarget.duration);
                         setTrimEnd(e.currentTarget.duration);
+                        setVideoLoading(false);
                       }
+                    }}
+                    onError={(e) => {
+                      console.error('Video error in JSX:', e);
+                      setVideoLoading(false);
+                      toast({
+                        title: "Video Error",
+                        description: "Failed to load video preview",
+                        variant: "destructive",
+                      });
                     }}
                   />
                   
+                  {/* Loading Overlay */}
+                  {videoLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="text-center">
+                        <LoadingSpinner size="lg" />
+                        <p className="text-white text-sm mt-2">Loading video preview...</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Play/Pause Overlay */}
-                  {!uploadSuccess && (
+                  {!uploadSuccess && !videoLoading && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
                       <Button
                         size="lg"
@@ -359,28 +484,35 @@ export default function ReviewPanel() {
                 </div>
 
                 {/* Timeline */}
-                {!uploadSuccess && !showTrimming && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>{formatTime(duration)}</span>
+                {!uploadSuccess && !showTrimming && !videoLoading && duration > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm font-medium">
+                      <span className="text-foreground">{formatTime(currentTime)}</span>
+                      <span className="text-muted-foreground">/ {formatTime(duration)}</span>
                     </div>
                     <div
-                      className="h-2 bg-muted rounded-full cursor-pointer trim-timeline"
+                      className="h-3 bg-muted rounded-full cursor-pointer trim-timeline relative group"
                       style={{ '--progress': `${progressPercentage}%` } as any}
                       onClick={(e) => {
-                        if (!isUploading) {
+                        if (!isUploading && duration > 0) {
                           const rect = e.currentTarget.getBoundingClientRect();
-                          const percent = (e.clientX - rect.left) / rect.width;
-                          handleSeek(percent * duration);
+                          const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                          const newTime = percent * duration;
+                          handleSeek(newTime);
                         }
                       }}
                     >
                       <div
-                        className="h-full bg-primary rounded-full relative"
+                        className="h-full bg-primary rounded-full relative transition-all duration-200"
                         style={{ width: `${progressPercentage}%` }}
                       >
-                        <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background" />
+                        <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-primary rounded-full border-2 border-background shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                      <div className="absolute inset-0 flex items-center">
+                        <div 
+                          className="h-full bg-primary/30 rounded-full"
+                          style={{ width: `${progressPercentage}%` }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -388,43 +520,76 @@ export default function ReviewPanel() {
 
                 {/* Trimming Interface */}
                 {showTrimming && (
-                  <div className="space-y-4 p-4 bg-muted rounded-lg">
-                    <h3 className="text-lg font-medium">Trim Video</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-4">
-                        <label className="text-sm font-medium">Start:</label>
-                        <input
-                          type="range"
-                          min={0}
-                          max={duration}
-                          step={0.1}
-                          value={trimStart}
-                          onChange={(e) => setTrimStart(parseFloat(e.target.value))}
-                          className="flex-1"
-                        />
-                        <span className="text-sm w-16">{formatTime(trimStart)}</span>
+                  <div className="space-y-6 p-6 bg-muted rounded-lg border">
+                    <div className="flex items-center space-x-2">
+                      <Scissors className="h-5 w-5 text-primary" />
+                      <h3 className="text-lg font-semibold">Trim Video</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">Start Time</label>
+                        <div className="flex items-center space-x-4">
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration}
+                            step={0.1}
+                            value={trimStart}
+                            onChange={(e) => setTrimStart(parseFloat(e.target.value))}
+                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                          />
+                          <span className="text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border">
+                            {formatTime(trimStart)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <label className="text-sm font-medium">End:</label>
-                        <input
-                          type="range"
-                          min={0}
-                          max={duration}
-                          step={0.1}
-                          value={trimEnd}
-                          onChange={(e) => setTrimEnd(parseFloat(e.target.value))}
-                          className="flex-1"
-                        />
-                        <span className="text-sm w-16">{formatTime(trimEnd)}</span>
+                      
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">End Time</label>
+                        <div className="flex items-center space-x-4">
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration}
+                            step={0.1}
+                            value={trimEnd}
+                            onChange={(e) => setTrimEnd(parseFloat(e.target.value))}
+                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                          />
+                          <span className="text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border">
+                            {formatTime(trimEnd)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm text-muted-foreground">
+                        Duration: {formatTime(trimEnd - trimStart)}
                       </div>
                     </div>
-                    <div className="flex justify-end space-x-2">
+                    
+                    <div className="flex justify-between items-center">
                       <Button variant="outline" onClick={() => setShowTrimming(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleTrim} disabled={trimStart >= trimEnd}>
-                        Apply Trim
-                      </Button>
+                      <div className="flex space-x-3">
+                        <Button 
+                          onClick={handleTrim} 
+                          disabled={trimStart >= trimEnd || (trimEnd - trimStart) < 1}
+                          className="min-w-[120px]"
+                        >
+                          <Scissors className="h-4 w-4 mr-2" />
+                          Apply Trim
+                        </Button>
+                        <Button 
+                          onClick={handleDownload}
+                          variant="outline"
+                          className="min-w-[140px]"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Locally
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

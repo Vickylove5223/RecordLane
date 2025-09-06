@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernCard } from '@/components/ui/modern-card';
-import { ArrowLeft, CheckCircle, Cloud, ExternalLink, Settings } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Cloud, ExternalLink, Settings, AlertTriangle, HelpCircle, CreditCard, RefreshCw } from 'lucide-react';
 import { useYouTube } from '../../contexts/YouTubeContext';
 
 export default function YouTubeSetupPage() {
@@ -93,44 +93,97 @@ export default function YouTubeSetupPage() {
             </div>
           </ModernCard>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Connect Account</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              {isConnected ? (
-                <div className="space-y-3">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
-                  <h3 className="text-lg font-semibold">Successfully Connected!</h3>
-                  <p className="text-muted-foreground">Connected as {userEmail}</p>
-                  <Button onClick={() => navigate('/')}>
-                    Go to Dashboard
-                  </Button>
+          {/* Troubleshooting Section */}
+          <ModernCard variant="layered" className="p-8">
+            <div className="mb-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <AlertTriangle className="h-6 w-6 text-amber-500" />
+                <h2 className="text-2xl font-bold text-gray-900">Troubleshooting</h2>
+              </div>
+              <p className="text-lg text-gray-600">
+                Having issues with the setup? Here are common problems and solutions.
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Google Console Billing Issue */}
+              <div className="border-l-4 border-amber-200 bg-amber-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3">
+                  <CreditCard className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-amber-800">Google Cloud Console Billing Issue</h3>
+                    <p className="text-sm text-amber-700 mt-1">
+                      If you're getting billing errors or API quota issues:
+                    </p>
+                    <ul className="text-sm text-amber-700 mt-2 space-y-1 ml-4 list-disc">
+                      <li>Make sure billing is enabled for your Google Cloud project</li>
+                      <li>Check if you have exceeded the free tier quota for YouTube Data API</li>
+                      <li>Verify your payment method is valid and up to date</li>
+                      <li>Wait 24 hours if you just enabled billing (it can take time to activate)</li>
+                    </ul>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-muted-foreground">
-                    After completing the setup steps, click below to connect your account.
-                  </p>
-                  <Button
-                    size="lg"
-                    onClick={connectYouTube}
-                    disabled={isConnecting}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    {isConnecting ? (
-                      'Connecting...'
-                    ) : (
-                      <>
-                        <Cloud className="h-5 w-5 mr-2" />
-                        Connect to YouTube
-                      </>
-                    )}
-                  </Button>
+              </div>
+
+              {/* OAuth Credentials Issue */}
+              <div className="border-l-4 border-blue-200 bg-blue-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3">
+                  <Settings className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-blue-800">OAuth Credentials Not Working</h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      If you're having trouble with OAuth setup:
+                    </p>
+                    <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4 list-disc">
+                      <li>Double-check the redirect URIs match exactly (including https://)</li>
+                      <li>Ensure the OAuth consent screen is configured properly</li>
+                      <li>Make sure the client ID and secret are copied correctly (no extra spaces)</li>
+                      <li>Verify the YouTube Data API v3 is enabled in your project</li>
+                    </ul>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+
+              {/* Encore Secrets Issue */}
+              <div className="border-l-4 border-purple-200 bg-purple-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3">
+                  <Cloud className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-purple-800">Encore Secrets Not Working</h3>
+                    <p className="text-sm text-purple-700 mt-1">
+                      If your secrets aren't being recognized:
+                    </p>
+                    <ul className="text-sm text-purple-700 mt-2 space-y-1 ml-4 list-disc">
+                      <li>Check that secrets are set for the correct environment (dev/prod)</li>
+                      <li>Ensure secret names match exactly: <code className="bg-purple-100 px-1 rounded">GoogleClientID</code> and <code className="bg-purple-100 px-1 rounded">GoogleClientSecret</code></li>
+                      <li>Try redeploying your Encore app after setting secrets</li>
+                      <li>Verify the backend server is running and accessible</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* General Connection Issues */}
+              <div className="border-l-4 border-red-200 bg-red-50 p-4 rounded-r-lg">
+                <div className="flex items-start space-x-3">
+                  <RefreshCw className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-red-800">Still Having Issues?</h3>
+                    <p className="text-sm text-red-700 mt-1">
+                      If nothing above helps:
+                    </p>
+                    <ul className="text-sm text-red-700 mt-2 space-y-1 ml-4 list-disc">
+                      <li>Clear your browser cache and cookies</li>
+                      <li>Try using an incognito/private browsing window</li>
+                      <li>Check your internet connection and firewall settings</li>
+                      <li>Make sure you're using a supported browser (Chrome, Firefox, Safari, Edge)</li>
+                      <li>Contact support if the problem persists</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ModernCard>
         </div>
       </div>
     </div>

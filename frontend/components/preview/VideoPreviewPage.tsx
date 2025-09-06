@@ -236,15 +236,11 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
             <div>
               <h1 className="text-lg font-semibold truncate max-w-md">{recording.title}</h1>
               <div className="flex items-center space-x-4 text-sm text-muted-foreground">
@@ -303,7 +299,7 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex flex-1 min-h-0">
         {/* Video Player */}
         <div className="flex-1 flex flex-col">
           <div 
@@ -347,7 +343,7 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
         </div>
 
         {/* Comments Section */}
-        <div className="w-96 border-l bg-background flex flex-col">
+        <div className="w-80 border-l bg-background flex flex-col">
           <div className="p-4 border-b">
             <h3 className="font-semibold flex items-center">
               <MessageCircle className="h-5 w-5 mr-2" />

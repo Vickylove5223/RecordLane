@@ -62,7 +62,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       setUserEmail(connection.userEmail);
       
       if (!connection.isConnected) {
-        setConnectionError('Not connected to YouTube');
+        setConnectionError('Not Connected to YouTube');
       }
     } catch (error) {
       console.error('Failed to check YouTube connection:', error);
