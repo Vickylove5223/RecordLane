@@ -1,4 +1,3 @@
-    <content>
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -380,4 +379,3 @@ export default function VideoModal({ recording, onClose }: VideoModalProps) {
     </Dialog>
   );
 }
-    </content>

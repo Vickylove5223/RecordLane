@@ -37,24 +37,24 @@ export default function TopNav() {
 
       {/* Right Actions */}
       <div className="flex items-center space-x-4">
+        {/* YouTube Setup Button - Show when not configured */}
+        {!isYouTubeConfigured() && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowYouTubeSetup(true)}
+            className="text-orange-600 hover:bg-orange-50"
+          >
+            <Wrench className="h-4 w-4 mr-2" />
+            Setup Guide
+          </Button>
+        )}
+
         {/* Record Button - Only show when not recording */}
         {showRecordButton && (
           <div className="relative">
             <FloatingRecordButton />
           </div>
-        )}
-
-        {/* YouTube Setup Button - Show when not configured */}
-        {!isYouTubeConfigured() && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowYouTubeSetup(true)}
-            className="text-orange-600 border-orange-200 hover:bg-orange-50"
-          >
-            <Wrench className="h-4 w-4 mr-2" />
-            Setup YouTube
-          </Button>
         )}
 
         <Button
