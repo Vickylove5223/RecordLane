@@ -380,15 +380,14 @@ export default function VideoSharePage() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </ModernCard>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDelete}
-        title="Delete Recording"
-        description="Are you sure you want to delete this recording? This action cannot be undone."
+        recording={recording}
         isLoading={isDeleting}
       />
     </div>
