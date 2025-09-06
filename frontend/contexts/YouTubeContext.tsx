@@ -40,32 +40,20 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     try {
       setConnectionError(null);
       
-      if (DEV_CONFIG.mockAPI) {
-        // Fallback to demo mode if enabled
-        const hasTokens = localStorage.getItem('recordlane-access-token');
-        const storedEmail = localStorage.getItem('recordlane-user-email');
-        
-        setIsConnected(!!hasTokens);
-        setUserEmail(storedEmail);
-        
-        if (!hasTokens) {
-          setConnectionError('Not connected to YouTube');
-        }
-        return;
-      }
-      
       // Choose service based on configuration
       let connection;
       if (isYouTubeConfigured()) {
-        // Use frontend service if YouTube is configured
+        // Use frontend service if YouTube is configured with environment variables
         connection = await FrontendYouTubeService.checkConnection();
       } else {
-        // Use backend service if available
+        // Use backend service by default
         try {
           connection = await RealYouTubeService.checkConnection();
         } catch (error) {
           // If backend fails, show configuration message
-          setConnectionError('YouTube is not configured. Please set up your Google API credentials.');
+          setConnectionError('Backend server is not running. Please start the backend server to enable YouTube integration.');
+          setIsConnected(false);
+          setUserEmail(null);
           return;
         }
       }
@@ -91,37 +79,19 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     setConnectionError(null);
     
     try {
-      if (DEV_CONFIG.mockAPI) {
-        // Demo mode fallback
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const mockEmail = 'demo@example.com';
-        localStorage.setItem('recordlane-access-token', 'demo-token');
-        localStorage.setItem('recordlane-user-email', mockEmail);
-        
-        setIsConnected(true);
-        setUserEmail(mockEmail);
-        
-        toast({
-          title: "Demo Mode",
-          description: "YouTube connection simulated for demo purposes",
-        });
-        return;
-      }
-      
       // Choose service based on configuration
       let result;
       if (isYouTubeConfigured()) {
-        // Use frontend service if YouTube is configured
+        // Use frontend service if YouTube is configured with environment variables
         result = await FrontendYouTubeService.connect();
       } else {
-        // Use backend service if available
+        // Use backend service by default
         try {
           result = await RealYouTubeService.connect();
         } catch (error) {
           // If backend fails, show configuration message
-          if (error.message?.includes('backend configuration')) {
-            setConnectionError('YouTube integration requires backend server. Please start the backend server first.');
+          if (error.message?.includes('backend configuration') || error.message?.includes('OAuth configuration')) {
+            setConnectionError('Backend server is not running. Please start the backend server to enable YouTube integration.');
             toast({
               title: "Backend Required",
               description: "Please start the backend server to enable YouTube integration",
@@ -149,7 +119,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to YouTube. Please try again.",
+        description: "Failed to connect to YouTube. Please make sure the backend server is running and try again.",
         variant: "destructive",
       });
     } finally {
@@ -159,11 +129,10 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
 
   const disconnectYouTube = useCallback(async () => {
     try {
-      if (!DEV_CONFIG.mockAPI) {
-        await RealYouTubeService.disconnect();
+      if (isYouTubeConfigured()) {
+        await FrontendYouTubeService.disconnect();
       } else {
-        localStorage.removeItem('recordlane-access-token');
-        localStorage.removeItem('recordlane-user-email');
+        await RealYouTubeService.disconnect();
       }
       
       setIsConnected(false);
@@ -179,8 +148,6 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       ErrorHandler.logError('youtube-disconnect', error);
       
       // Clear local state even if disconnect fails
-      localStorage.removeItem('recordlane-access-token');
-      localStorage.removeItem('recordlane-user-email');
       setIsConnected(false);
       setUserEmail(null);
       setConnectionError(null);
@@ -204,21 +171,13 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     }
     
     try {
-      if (DEV_CONFIG.mockAPI) {
-        // Demo mode fallback
-        for (let i = 0; i <= 100; i += 10) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          onProgress?.({ loaded: i, total: 100, percentage: i });
-        }
-        
-        const mockVideoId = 'demo_' + Date.now();
-        const mockVideoUrl = `https://www.youtube.com/watch?v=${mockVideoId}`;
-        
-        return { videoId: mockVideoId, videoUrl: mockVideoUrl };
+      // Use the appropriate service
+      let result;
+      if (isYouTubeConfigured()) {
+        result = await FrontendYouTubeService.uploadVideo(file, title, privacy, onProgress);
+      } else {
+        result = await RealYouTubeService.uploadVideo(file, title, privacy, onProgress);
       }
-      
-      // Use real YouTube service
-      const result = await RealYouTubeService.uploadVideo(file, title, privacy, onProgress);
       
       toast({
         title: "Upload Successful",
@@ -242,19 +201,13 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
 
   const refreshToken = useCallback(async () => {
     try {
-      if (DEV_CONFIG.mockAPI) {
-        // Demo mode fallback
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        toast({
-          title: "Token Refreshed",
-          description: "Authentication token has been refreshed successfully",
-        });
-        return;
+      // Use the appropriate service
+      let refreshed;
+      if (isYouTubeConfigured()) {
+        refreshed = await FrontendYouTubeService.refreshAccessToken();
+      } else {
+        refreshed = await RealYouTubeService.refreshAccessToken();
       }
-      
-      // Use real YouTube service
-      const refreshed = await RealYouTubeService.refreshAccessToken();
       
       if (refreshed) {
         toast({

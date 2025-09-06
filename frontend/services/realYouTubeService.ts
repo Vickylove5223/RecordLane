@@ -9,7 +9,7 @@ import {
   POPUP_CONFIG,
   DEV_CONFIG
 } from '../config';
-import { Client } from '../client';
+import backend from '~backend/client';
 
 export interface YouTubeConnection {
   isConnected: boolean;
@@ -40,7 +40,6 @@ export class RealYouTubeService {
   private static cache = new CacheService('youtube-service');
   private static retryService = new RetryService();
   private static connectionListeners: Array<(connected: boolean) => void> = [];
-  private static client: Client;
   private static oauthConfig: typeof OAUTH_CONFIG | null = null;
   private static initializationPromise: Promise<void> | null = null;
 
@@ -49,9 +48,6 @@ export class RealYouTubeService {
       return this.initializationPromise;
     }
     this.initializationPromise = (async () => {
-      // Initialize Encore client
-      this.client = new Client(import.meta.env.VITE_CLIENT_TARGET || 'http://localhost:4000');
-      
       // Load OAuth config from backend
       await this.loadOAuthConfig();
     })();
@@ -60,22 +56,18 @@ export class RealYouTubeService {
 
   private static async loadOAuthConfig() {
     try {
-      const config = await this.client.auth.getConfig();
+      const config = await backend.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
         clientId: config.clientID,
       };
-      console.log('OAuth config loaded from backend:', this.oauthConfig);
+      console.log('OAuth config loaded from backend successfully');
     } catch (error) {
       console.error('Failed to load OAuth config from backend:', error);
       ErrorHandler.logError('oauth-config-load', error);
       
-      // Fallback to demo mode if backend is not available
-      this.oauthConfig = {
-        ...OAUTH_CONFIG,
-        clientId: 'demo-client-id',
-      };
-      console.log('Using demo OAuth config - backend not available');
+      // Throw error to indicate backend is not available
+      throw new Error('Backend server is not running. Please start the backend server to enable YouTube integration.');
     }
   }
 
@@ -158,7 +150,7 @@ export class RealYouTubeService {
       await this.cache.delete('connection-status');
       
       if (!this.oauthConfig?.clientId) {
-        throw new Error('OAuth configuration not available');
+        throw new Error('OAuth configuration not available from backend');
       }
 
       // Generate PKCE parameters
@@ -291,11 +283,6 @@ export class RealYouTubeService {
       throw new Error('OAuth configuration not available');
     }
 
-    // Check if we're in demo mode
-    if (this.oauthConfig.clientId === 'demo-client-id') {
-      throw new Error('YouTube integration requires backend configuration. Please start the backend server.');
-    }
-
     const params = new URLSearchParams({
       client_id: this.oauthConfig.clientId,
       redirect_uri: getRedirectUri(),
@@ -393,7 +380,7 @@ export class RealYouTubeService {
 
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenData> {
     try {
-      const result = await this.client.auth.exchangeCode({
+      const result = await backend.auth.exchangeCode({
         code,
         codeVerifier,
         redirectUri: getRedirectUri(),
@@ -414,7 +401,7 @@ export class RealYouTubeService {
         return false;
       }
 
-      const result = await this.client.auth.refreshToken({
+      const result = await backend.auth.refreshToken({
         refreshToken: tokenData.refreshToken,
       });
 

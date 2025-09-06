@@ -119,7 +119,9 @@ function MainPanelComponent() {
         {/* Hero Section */}
         <div className="text-center mb-8 mt-20">
           <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Video className="h-16 w-16 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-600" />
+            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full"></div>
+            </div>
           </div>
           
           <h1 className="text-4xl font-bold mb-4">Welcome to RecordLane</h1>

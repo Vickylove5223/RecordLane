@@ -50,7 +50,7 @@ type AppAction =
   | { type: 'RESET_SETTINGS' };
 
 const initialState: AppState = {
-  isOnboarded: false, // Start with onboarding
+  isOnboarded: true, // Skip onboarding to avoid requiring users to save data repeatedly
   settingsOpen: false,
   shareModalOpen: false,
   settings: {
@@ -159,7 +159,7 @@ function saveStateToStorage(state: AppState): void {
       error: null,
       recordings: state.recordings.map(recording => ({
         ...recording,
-        localBlob: undefined,
+        localBlob: undefined, // Don't save blobs to localStorage
       })),
     };
     
@@ -169,6 +169,7 @@ function saveStateToStorage(state: AppState): void {
     ErrorHandler.logError('STATE_SAVE_ERROR', error);
     
     if (error.name === 'QuotaExceededError') {
+      // If storage is full, keep only the most recent recordings
       const reducedState = {
         ...state,
         recordings: state.recordings.slice(0, 10).map(recording => ({
@@ -215,6 +216,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 createdAt: new Date(rec.createdAt),
               }));
             }
+            // Ensure onboarded state is maintained to avoid requiring data saving
+            parsed.isOnboarded = true;
             dispatch({ type: 'LOAD_STATE', payload: parsed });
           } catch (error) {
             console.error('Failed to parse saved state:', error);

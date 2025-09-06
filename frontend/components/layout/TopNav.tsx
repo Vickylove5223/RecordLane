@@ -29,7 +29,7 @@ export default function TopNav() {
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 bg-primary-foreground rounded-full"></div>
+            <div className="w-4 h-4 bg-white rounded-full"></div>
           </div>
           <span className="font-semibold text-lg">RecordLane</span>
         </div>
