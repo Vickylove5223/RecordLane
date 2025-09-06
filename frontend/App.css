@@ -162,3 +162,23 @@ body {
     opacity: 0;
   }
 }
+
+/* Recording Panel Styles */
+.recording-panel {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.recording-panel button {
+  transition: all 0.2s ease;
+}
+
+.recording-panel button:hover {
+  transform: scale(1.05);
+}
+
+.recording-panel button:active {
+  transform: scale(0.95);
+}

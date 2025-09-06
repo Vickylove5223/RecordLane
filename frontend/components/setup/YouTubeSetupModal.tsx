@@ -78,11 +78,11 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
         return (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <AlertCircle className="h-5 w-5 text-black" />
               <span className="text-sm font-medium">Create a new Google Cloud Project</span>
             </div>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
-              <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center">
+              <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-black hover:underline inline-flex items-center">
                 Google Cloud Console <ExternalLink className="h-3 w-3 ml-1" />
               </a></li>
               <li>Click on the project dropdown at the top</li>
@@ -97,7 +97,7 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
         return (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <AlertCircle className="h-5 w-5 text-black" />
               <span className="text-sm font-medium">Enable YouTube Data API v3</span>
             </div>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
@@ -113,7 +113,7 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
         return (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <AlertCircle className="h-5 w-5 text-black" />
               <span className="text-sm font-medium">Create OAuth 2.0 Credentials</span>
             </div>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
@@ -151,7 +151,7 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
         return (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <AlertCircle className="h-5 w-5 text-black" />
               <span className="text-sm font-medium">Configure Environment Variables</span>
             </div>
             
@@ -190,15 +190,15 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
               <div className="flex items-start space-x-2">
-                <Settings className="h-4 w-4 text-blue-600 mt-0.5" />
+                <Settings className="h-4 w-4 text-black mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-blue-800">Alternative Setup:</p>
-                  <p className="text-blue-700 mt-1">
-                    You can also create a <code className="bg-blue-100 px-1 rounded">.env</code> file in the frontend directory with:
+                  <p className="font-medium text-black">Alternative Setup:</p>
+                  <p className="text-gray-700 mt-1">
+                    You can also create a <code className="bg-gray-100 px-1 rounded">.env</code> file in the frontend directory with:
                   </p>
-                  <div className="mt-2 p-2 bg-blue-100 rounded text-xs font-mono">
+                  <div className="mt-2 p-2 bg-gray-100 rounded text-xs font-mono">
                     VITE_GOOGLE_CLIENT_ID=your_client_id_here<br/>
                     VITE_GOOGLE_CLIENT_SECRET=your_client_secret_here
                   </div>
@@ -233,14 +233,14 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
                   currentStep >= step.id 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-black text-white' 
                     : 'bg-gray-200 text-gray-600'
                 }`}>
                   {currentStep > step.id ? <CheckCircle className="h-4 w-4" /> : step.id}
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`w-16 h-0.5 mx-2 ${
-                    currentStep > step.id ? 'bg-blue-600' : 'bg-gray-200'
+                    currentStep > step.id ? 'bg-black' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -270,11 +270,11 @@ export function YouTubeSetupModal({ isOpen, onClose }: YouTubeSetupModalProps) {
             
             <div className="flex space-x-2">
               {currentStep === 4 ? (
-                <Button onClick={handleSaveCredentials}>
+                <Button onClick={handleSaveCredentials} className="bg-black hover:bg-black/90 text-white">
                   Save Credentials
                 </Button>
               ) : (
-                <Button onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}>
+                <Button onClick={() => setCurrentStep(Math.min(4, currentStep + 1))} className="bg-black hover:bg-black/90 text-white">
                   Next
                 </Button>
               )}

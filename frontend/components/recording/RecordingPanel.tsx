@@ -1,19 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
-  Camera, 
   Square, 
   Pause, 
   Play, 
   MousePointer, 
   Pen, 
-  Move,
-  RotateCcw,
-  Trash2,
-  Clock,
-  Download
+  Move
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
 
@@ -53,50 +46,6 @@ export default function RecordingPanel() {
     }
   };
 
-  const handleScreenshot = async () => {
-    try {
-      // Use the browser's built-in screenshot API if available
-      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ 
-          video: { mediaSource: 'screen' } 
-        });
-        
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.play();
-        
-        video.addEventListener('loadedmetadata', () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(video, 0, 0);
-            
-            // Convert to blob and download
-            canvas.toBlob((blob) => {
-              if (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `screenshot-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }
-            }, 'image/png');
-          }
-          
-          // Stop the stream
-          stream.getTracks().forEach(track => track.stop());
-        });
-      }
-    } catch (error) {
-      console.error('Failed to take screenshot:', error);
-    }
-  };
 
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
@@ -140,8 +89,8 @@ export default function RecordingPanel() {
   }
 
   return (
-    <Card
-      className="fixed z-50 shadow-lg min-w-96 draggable border-2 border-red-500/50"
+    <div
+      className="fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col items-center space-y-2 p-2"
       style={{ 
         left: position.x, 
         top: position.y,
@@ -149,123 +98,65 @@ export default function RecordingPanel() {
       }}
       onMouseDown={handleMouseDown}
     >
-      <CardContent className="p-4">
-        {/* Status and Timer Row */}
-        <div className="flex items-center justify-between space-x-4 mb-3">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${state === 'recording' ? 'bg-red-500 recording-pulse' : 'bg-yellow-500'}`} />
-              <Badge variant={state === 'recording' ? 'destructive' : 'secondary'}>
-                {state === 'recording' ? 'REC' : 'PAUSED'}
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="font-mono text-sm font-medium">
-                {formatTime(duration)}
-              </span>
-            </div>
-          </div>
+      {/* Drag Handle */}
+      <div className="text-gray-400 cursor-grab">
+        <Move className="h-4 w-4" />
+      </div>
 
-          {/* Drag Handle */}
-          <div className="text-muted-foreground">
-            <Move className="h-4 w-4" />
-          </div>
-        </div>
+      {/* Pause/Resume Button */}
+      {state === 'recording' ? (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={pauseRecording}
+          className="h-10 w-10 p-0 rounded-full"
+          title="Pause Recording"
+        >
+          <Pause className="h-5 w-5" />
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={resumeRecording}
+          className="h-10 w-10 p-0 rounded-full"
+          title="Resume Recording"
+        >
+          <Play className="h-5 w-5" />
+        </Button>
+      )}
 
-        {/* Main Controls Row */}
-        <div className="flex items-center justify-between space-x-2 mb-3">
-          {/* Pause/Resume */}
-          {state === 'recording' ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={pauseRecording}
-              className="h-8 px-3"
-            >
-              <Pause className="h-4 w-4 mr-1" />
-              Pause
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={resumeRecording}
-              className="h-8 px-3"
-            >
-              <Play className="h-4 w-4 mr-1" />
-              Resume
-            </Button>
-          )}
+      {/* Stop Button */}
+      <Button
+        size="sm"
+        onClick={stopRecording}
+        className="h-10 w-10 p-0 rounded-full bg-red-500 hover:bg-red-600"
+        title="Stop Recording"
+      >
+        <Square className="h-5 w-5 text-white" />
+      </Button>
 
-          {/* Stop */}
-          <Button
-            size="sm"
-            onClick={stopRecording}
-            className="h-8 px-3 bg-red-500 hover:bg-red-600"
-          >
-            <Square className="h-4 w-4 mr-1" />
-            Stop
-          </Button>
+      {/* Drawing Mode Toggle */}
+      <Button
+        size="sm"
+        variant={isDrawingMode ? "default" : "outline"}
+        onClick={toggleDrawingMode}
+        className="h-10 w-10 p-0 rounded-full"
+        title={isDrawingMode ? "Disable Drawing" : "Enable Drawing"}
+      >
+        <Pen className={`h-5 w-5 ${isDrawingMode ? 'text-white' : 'text-gray-600'}`} />
+      </Button>
 
-          {/* Restart */}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={restartRecording}
-            className="h-8 w-8 p-0"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-
-          {/* Delete */}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={deleteRecording}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Visual Effects and Screenshot Row */}
-        <div className="flex items-center justify-between space-x-2">
-          {/* Screenshot */}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleScreenshot}
-            className="h-8 px-3"
-            title="Take Screenshot"
-          >
-            <Camera className="h-4 w-4 mr-1" />
-            Screenshot
-          </Button>
-
-          {/* Drawing Mode Toggle */}
-          <Button
-            size="sm"
-            variant={isDrawingMode ? "default" : "outline"}
-            onClick={toggleDrawingMode}
-            className="h-8 w-8 p-0"
-            title={isDrawingMode ? "Disable Drawing" : "Enable Drawing"}
-          >
-            <Pen className={`h-4 w-4 ${isDrawingMode ? 'text-white' : 'text-primary'}`} />
-          </Button>
-
-          {/* Click Highlights Toggle */}
-          <Button
-            size="sm"
-            variant={highlightClicks ? "default" : "outline"}
-            onClick={toggleClickHighlights}
-            className="h-8 w-8 p-0"
-            title={highlightClicks ? "Disable Click Highlights" : "Enable Click Highlights"}
-          >
-            <MousePointer className={`h-4 w-4 ${highlightClicks ? 'text-white' : 'text-primary'}`} />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      {/* Click Highlights Toggle */}
+      <Button
+        size="sm"
+        variant={highlightClicks ? "default" : "outline"}
+        onClick={toggleClickHighlights}
+        className="h-10 w-10 p-0 rounded-full"
+        title={highlightClicks ? "Disable Click Highlights" : "Enable Click Highlights"}
+      >
+        <MousePointer className={`h-5 w-5 ${highlightClicks ? 'text-white' : 'text-gray-600'}`} />
+      </Button>
+    </div>
   );
 }

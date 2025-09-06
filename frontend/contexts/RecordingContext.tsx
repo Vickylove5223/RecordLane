@@ -243,13 +243,8 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (needsScreen && permissionStatus.screen !== 'granted') {
-        const granted = await requestPermissions('screen');
-        if (!granted) {
-          setState('idle');
-          return;
-        }
-      }
+      // Screen sharing permission is requested directly in RecordingService
+      // No need to pre-request it here as it causes double modal
 
       recordingServiceRef.current = new RecordingService();
       

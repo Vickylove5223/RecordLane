@@ -249,6 +249,44 @@ export class RealYouTubeService {
     }
   }
 
+  static async deleteVideo(videoId: string): Promise<void> {
+    await this.initialize();
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!tokenData?.accessToken) {
+        throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
+      }
+
+      // Validate token
+      const isValid = await this.validateToken(tokenData.accessToken);
+      if (!isValid) {
+        const refreshed = await this.refreshAccessToken();
+        if (!refreshed) {
+          throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
+        }
+      }
+
+      // Delete from YouTube
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${tokenData.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete video: ${errorText}`);
+      }
+
+      console.log('Video deleted successfully from YouTube:', videoId);
+    } catch (error) {
+      console.error('Failed to delete video from YouTube:', error);
+      ErrorHandler.logError('youtube-delete', error, { videoId });
+      throw ErrorHandler.createError('DELETE_FAILED', 'Failed to delete video from YouTube', error);
+    }
+  }
+
   // PKCE Helper Methods
   private static generateCodeVerifier(): string {
     const array = new Uint8Array(32);

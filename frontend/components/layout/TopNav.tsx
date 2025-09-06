@@ -36,19 +36,28 @@ export default function TopNav() {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center space-x-4">
-        {/* YouTube Setup Button - Show when not configured */}
-        {!isYouTubeConfigured() && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowYouTubeSetup(true)}
-            className="text-orange-600 hover:bg-orange-50"
+      <div className="flex items-center space-x-6">
+        {/* Setup and Settings Menu - Before Record Button */}
+        <div className="flex items-center space-x-4">
+          {/* YouTube Setup Link - Show when not configured */}
+          {!isYouTubeConfigured() && (
+            <button
+              onClick={() => setShowYouTubeSetup(true)}
+              className="text-black hover:text-black/80 text-sm font-medium transition-colors"
+            >
+              Setup Guide
+            </button>
+          )}
+
+          {/* Settings Link */}
+          <button
+            onClick={handleSettingsClick}
+            disabled={isConnecting}
+            className="text-black hover:text-black/80 text-sm font-medium transition-colors disabled:opacity-50"
           >
-            <Wrench className="h-4 w-4 mr-2" />
-            Setup Guide
-          </Button>
-        )}
+            Settings
+          </button>
+        </div>
 
         {/* Record Button - Only show when not recording */}
         {showRecordButton && (
@@ -56,15 +65,6 @@ export default function TopNav() {
             <FloatingRecordButton />
           </div>
         )}
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSettingsClick}
-          disabled={isConnecting}
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
         
         {isConnecting ? (
           <LoadingSpinner size="sm" />

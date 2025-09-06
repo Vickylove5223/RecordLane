@@ -16,8 +16,6 @@ import {
   Monitor, 
   Camera, 
   MonitorSpeaker,
-  MousePointer,
-  Pen,
   Volume2,
   Mic,
   VolumeX,
@@ -239,36 +237,6 @@ export default function FloatingRecordButton() {
                 <Switch
                   checked={localOptions.microphone}
                   onCheckedChange={(checked) => handleOptionChange('microphone', checked)}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DropdownMenuSeparator />
-
-          {/* Visual Effects */}
-          <div>
-            <p className="text-sm font-medium text-foreground mb-3">Visual Effects</p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <MousePointer className="h-4 w-4" />
-                  <span className="text-sm">Highlight Clicks</span>
-                </div>
-                <Switch
-                  checked={localOptions.highlightClicks}
-                  onCheckedChange={(checked) => handleOptionChange('highlightClicks', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Pen className="h-4 w-4" />
-                  <span className="text-sm">Drawing Tools</span>
-                </div>
-                <Switch
-                  checked={localOptions.enableDrawing}
-                  onCheckedChange={(checked) => handleOptionChange('enableDrawing', checked)}
                 />
               </div>
             </div>

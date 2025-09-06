@@ -5,13 +5,6 @@ import { Progress } from '@/components/ui/progress';
 import { LoadingSpinner } from '@/components/ui/spinner';
 import { ProgressIndicator, CircularProgress } from '@/components/ui/progress-indicator';
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
-import { 
   Select,
   SelectContent,
   SelectItem,
@@ -19,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Play, 
   Pause, 
@@ -33,12 +27,24 @@ import {
   Upload,
   Wifi,
   WifiOff,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Send,
+  Clock,
+  Calendar,
+  Download,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
 import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDistanceToNow, format } from 'date-fns';
+import { YouTubeCommentsService, YouTubeComment } from '../../services/youtubeCommentsService';
+import { VideoTrimmingService } from '../../services/videoTrimmingService';
 
 export default function ReviewPanel() {
   const { recordedBlob, deleteRecording, restartRecording, getPreviewUrl } = useRecording();
@@ -151,7 +157,7 @@ export default function ReviewPanel() {
     }
 
     try {
-      const trimmedVideo = await trimVideo(recordedBlob, trimStart, trimEnd);
+      const trimmedVideo = await VideoTrimmingService.trimVideo(recordedBlob, trimStart, trimEnd);
       setTrimmedBlob(trimmedVideo);
       setShowTrimming(false);
       
@@ -169,62 +175,6 @@ export default function ReviewPanel() {
     }
   };
 
-  const trimVideo = async (blob: Blob, startTime: number, endTime: number): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        reject(new Error('Failed to get canvas context'));
-        return;
-      }
-
-      video.src = URL.createObjectURL(blob);
-      
-      video.onloadedmetadata = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        const stream = canvas.captureStream();
-        const mediaRecorder = new MediaRecorder(stream);
-        const chunks: Blob[] = [];
-        
-        mediaRecorder.ondataavailable = (event) => {
-          chunks.push(event.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          const trimmedBlob = new Blob(chunks, { type: 'video/webm' });
-          URL.revokeObjectURL(video.src);
-          resolve(trimmedBlob);
-        };
-        
-        video.currentTime = startTime;
-        
-        video.onseeked = () => {
-          mediaRecorder.start();
-          video.play();
-          
-          const drawFrame = () => {
-            if (video.currentTime < endTime && !video.paused && !video.ended) {
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              requestAnimationFrame(drawFrame);
-            } else {
-              mediaRecorder.stop();
-              video.pause();
-            }
-          };
-          
-          drawFrame();
-        };
-      };
-      
-      video.onerror = () => {
-        reject(new Error('Failed to load video for trimming'));
-      };
-    });
-  };
 
   const handleSaveLocally = async () => {
     const blobToSave = trimmedBlob || recordedBlob;
