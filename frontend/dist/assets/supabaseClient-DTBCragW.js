@@ -1,6 +1,5 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/supabase-aC0e6cYW.js","assets/index-Bw6xhQI4.js","assets/index-OnCZvb9u.css"])))=>i.map(i=>d[i]);
-import { _ as __vitePreload } from "./index-Bw6xhQI4.js";
-import { supabase } from "./supabase-aC0e6cYW.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-BmZfPPjO.js","assets/index-OnCZvb9u.css"])))=>i.map(i=>d[i]);
+import { s as supabase, _ as __vitePreload } from "./index-BmZfPPjO.js";
 function generateId$1() {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
@@ -316,9 +315,9 @@ class HealthServiceClient {
   async check() {
     try {
       const { data, error } = await __vitePreload(async () => {
-        const { data: data2, error: error2 } = await import("./supabase-aC0e6cYW.js");
+        const { data: data2, error: error2 } = await import("./index-BmZfPPjO.js").then((n) => n.a);
         return { data: data2, error: error2 };
-      }, true ? __vite__mapDeps([0,1,2]) : void 0).then(
+      }, true ? __vite__mapDeps([0,1]) : void 0).then(
         (m) => m.supabase.from("recordings").select("count", { count: "exact", head: true })
       );
       if (error) {

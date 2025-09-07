@@ -2,8 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:5173',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 interface GetStatsRequest {
@@ -31,7 +33,17 @@ serve(async (req) => {
     )
 
     const url = new URL(req.url)
-    const days = parseInt(url.searchParams.get('days') || '30')
+    const daysParam = url.searchParams.get('days') || '30'
+    const days = parseInt(daysParam)
+    
+    // Input validation
+    if (isNaN(days) || days < 1 || days > 365) {
+      return new Response(JSON.stringify({ error: 'Invalid days parameter: must be a number between 1 and 365' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - days)
 

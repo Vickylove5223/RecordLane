@@ -26,7 +26,7 @@ export default function YouTubeSetupPage() {
     },
     {
       title: 'Configure Supabase Auth',
-      description: 'In your Supabase dashboard, go to Authentication > Providers and enable Google OAuth with your credentials.',
+      description: 'In your Supabase dashboard, go to Authentication &gt; Providers and enable Google OAuth with your credentials.',
     },
     {
       title: 'Connect Your Account',
@@ -155,7 +155,7 @@ export default function YouTubeSetupPage() {
                       If your Google OAuth isn't working:
                     </p>
                     <ul className="text-sm text-purple-700 mt-2 space-y-1 ml-4 list-disc">
-                      <li>Check that Google OAuth is enabled in Supabase Authentication > Providers</li>
+                      <li>Check that Google OAuth is enabled in Supabase Authentication &gt; Providers</li>
                       <li>Ensure your OAuth credentials are correctly configured in Supabase</li>
                       <li>Verify the redirect URIs match your domain exactly</li>
                       <li>Check that your Supabase project is active and accessible</li>
