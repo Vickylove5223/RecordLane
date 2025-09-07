@@ -91,11 +91,9 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     notification.id = 'recording-notification';
     document.body.appendChild(notification);
     
-    // Add global function for the stop button - will be set when stopRecording is defined
-    (window as any).stopRecordingFromNotification = () => {
-      // This will be updated when stopRecording is available
-    };
-  }, [hideRecordingNotification]);
+    // Set up the global stop function
+    (window as any).stopRecordingFromNotification = stopRecording;
+  }, [hideRecordingNotification, stopRecording]);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
@@ -245,6 +243,49 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
+  const stopRecording = useCallback(async () => {
+    if (recordingServiceRef.current && (state === 'recording' || state === 'paused')) {
+      try {
+        const blob = await recordingServiceRef.current.stopRecording();
+        
+        if (!blob || blob.size === 0) {
+          throw new Error('Recording failed: No data recorded');
+        }
+        
+        setRecordedBlob(blob);
+        setState('stopped');
+        stopTimer();
+        
+        // Remove data attribute and hide notification
+        document.body.removeAttribute('data-recording');
+        hideRecordingNotification();
+        
+        toast({
+          title: "Recording Stopped",
+          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`,
+        });
+      } catch (error) {
+        console.error('Failed to stop recording:', error);
+        setState('idle');
+        
+        // Clean up even on error
+        document.body.removeAttribute('data-recording');
+        hideRecordingNotification();
+        
+        toast({
+          title: "Stop Failed",
+          description: "Failed to save recording. Please try recording again.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [state, stopTimer, hideRecordingNotification, toast]);
+
+  // Update the global stop function when stopRecording is available
+  React.useEffect(() => {
+    (window as any).stopRecordingFromNotification = stopRecording;
+  }, [stopRecording]);
+
   const startRecording = useCallback(async (recordingOptions: RecordingOptions) => {
     try {
       setState('starting');
@@ -370,48 +411,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
   }, [state, startTimer, toast]);
 
-  const stopRecording = useCallback(async () => {
-    if (recordingServiceRef.current && (state === 'recording' || state === 'paused')) {
-      try {
-        const blob = await recordingServiceRef.current.stopRecording();
-        
-        if (!blob || blob.size === 0) {
-          throw new Error('Recording failed: No data recorded');
-        }
-        
-        setRecordedBlob(blob);
-        setState('stopped');
-        stopTimer();
-        
-        // Remove data attribute and hide notification
-        document.body.removeAttribute('data-recording');
-        hideRecordingNotification();
-        
-        toast({
-          title: "Recording Stopped",
-          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`,
-        });
-      } catch (error) {
-        console.error('Failed to stop recording:', error);
-        setState('idle');
-        
-        // Clean up even on error
-        document.body.removeAttribute('data-recording');
-        hideRecordingNotification();
-        
-        toast({
-          title: "Stop Failed",
-          description: "Failed to save recording. Please try recording again.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [state, stopTimer, hideRecordingNotification, toast]);
-
-  // Update the global stop function when stopRecording is available
-  React.useEffect(() => {
-    (window as any).stopRecordingFromNotification = stopRecording;
-  }, [stopRecording]);
 
   const deleteRecording = useCallback(() => {
     if (recordingServiceRef.current) {
