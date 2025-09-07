@@ -6,14 +6,6 @@ A privacy-first, open-source screen recording application that stores all record
 
 RecordLane is an open-source alternative to expensive proprietary screen recording tools. Break free from vendor lock-in and subscription fees with a privacy-first solution that puts you in control.
 
-### Recent Updates
-
-**🚀 Migrated to Supabase Backend** (January 2025)
-- Switched from Encore.ts to Supabase for better scalability and ease of deployment
-- Simplified setup process - no more complex backend configuration
-- Enhanced real-time capabilities and better database management
-- Improved developer experience with auto-generated APIs
-
 ### What Proprietary Tools This Replaces
 
 RecordLane replaces popular but expensive screen recording solutions:
