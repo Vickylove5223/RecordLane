@@ -1,24 +1,10 @@
 {
-  "name": "recordlane-supabase",
+  "name": "leap-app",
   "version": "1.0.0",
-  "description": "RecordLane application with Supabase backend",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:supabase\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:supabase": "supabase start",
-    "build": "cd frontend && npm run build",
-    "start": "supabase start",
-    "stop": "supabase stop",
-    "reset": "supabase db reset",
-    "migrate": "supabase db push",
-    "deploy": "supabase functions deploy",
-    "setup": "npm install && cd frontend && npm install && supabase start"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "supabase": "^1.200.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "type": "module",
+  "packageManager": "bun",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
 }
