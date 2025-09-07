@@ -1,10 +1,18 @@
 # RecordLane
 
-A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, and YouTube API integration.
+A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, Supabase backend, and YouTube API integration.
 
 ## 🏆 Open Source Alternative
 
 RecordLane is an open-source alternative to expensive proprietary screen recording tools. Break free from vendor lock-in and subscription fees with a privacy-first solution that puts you in control.
+
+### Recent Updates
+
+**🚀 Migrated to Supabase Backend** (January 2025)
+- Switched from Encore.ts to Supabase for better scalability and ease of deployment
+- Simplified setup process - no more complex backend configuration
+- Enhanced real-time capabilities and better database management
+- Improved developer experience with auto-generated APIs
 
 ### What Proprietary Tools This Replaces
 
@@ -64,8 +72,8 @@ RecordLane replaces popular but expensive screen recording solutions:
 ### Prerequisites
 
 - **Node.js** (v18 or higher)
-- **Bun** package manager
-- **Encore CLI** for backend services
+- **npm** package manager
+- **Supabase** account for backend services
 - **Google Cloud Console** account for OAuth setup
 
 ### Quick Start
@@ -78,23 +86,14 @@ RecordLane replaces popular but expensive screen recording solutions:
 
 2. **Install dependencies**
    ```bash
-   # Install root dependencies
-   bun install
-   
    # Install frontend dependencies
    cd frontend
    npm install
-   cd ..
    ```
 
-3. **Set up Google OAuth** (see Configuration section below)
+3. **Set up Supabase** (see Configuration section below)
 
-4. **Start the backend**
-   ```bash
-   cd backend
-   encore run
-   ```
-   The backend will be available at `http://localhost:4000`
+4. **Set up Google OAuth** (see Configuration section below)
 
 5. **Start the frontend**
    ```bash
@@ -103,33 +102,26 @@ RecordLane replaces popular but expensive screen recording solutions:
    ```
    The frontend will be available at `http://localhost:5173`
 
-6. **Generate frontend client** (in backend directory)
-   ```bash
-   encore gen client --target leap
-   ```
-
 ### Production Deployment
 
-#### Option 1: Encore Cloud (Recommended)
+#### Option 1: Vercel/Netlify (Recommended)
 ```bash
-# Login to Encore Cloud
-encore auth login
+# Build the frontend
+cd frontend
+npm run build
 
-# Add Encore remote
-git remote add encore encore://recordlane-app
-
-# Deploy
-git add -A .
-git commit -m "Deploy to production"
-git push encore
+# Deploy to Vercel or Netlify
+# The app will connect to your Supabase backend
 ```
 
 #### Option 2: Self-Hosting
 ```bash
-# Build Docker image
-encore build docker
+# Build the frontend
+cd frontend
+npm run build
 
-# Deploy using your preferred container orchestration
+# Serve the built files using any static file server
+# Configure environment variables for Supabase
 ```
 
 ## Features
@@ -193,45 +185,65 @@ Once you have RecordLane running (see "How to Run" section above):
 
 RecordLane is built with:
 - React 18 with TypeScript
+- Supabase for backend services and database
 - YouTube API v3 with enhanced authentication
 - Web Media APIs (MediaRecorder, Screen Capture)
 - Tailwind CSS for styling
 - Vite for development and building
-- Encore.ts for backend services
 
 ## Configuration
 
-### OAuth Setup
+### Supabase Setup
 
-RecordLane uses a backend-proxied Google OAuth 2.0 flow for secure authentication.
+1. **Create a Supabase Project**
+   - Go to [Supabase](https://supabase.com/) and create a new project
+   - Note your project URL and anon key
 
-### Google Cloud Console Configuration
+2. **Set up Database Tables**
+   - Run the SQL migrations in `supabase-migrations/` directory
+   - Or use the Supabase SQL Editor to create the tables
 
-1.  **Create OAuth Credentials**
-    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
-    - Navigate to "APIs & Services" > "Credentials".
-    - Click "Create Credentials" > "OAuth client ID".
-    - Select **"Web application"** as the application type.
-    - Give it a name (e.g., "RecordLane Web Client").
+3. **Configure Environment Variables**
+   - Create `.env.local` in the frontend directory:
+   ```bash
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-2.  **Configure Authorized Redirect URIs**
-    - Under "Authorized redirect URIs", add the following URIs. You will need to add the URI for your Leap development environment and any production URLs.
-    - `https://<your-app-url>.lp.dev/auth/callback`
-    - `http://localhost:8089/auth/callback` (for local development)
-    - `http://localhost:5173/auth/callback` (for Vite default port)
+### Google OAuth Setup
 
-3.  **Get Client ID and Secret**
-    - After creating the credential, you will be given a **Client ID** and a **Client Secret**.
+RecordLane uses Google OAuth 2.0 for YouTube integration.
 
-4.  **Set Encore Secrets**
-    - Go to the Infrastructure tab in your Leap application.
-    - Create two secrets:
-        - `GoogleClientID`: Paste your Client ID here.
-        - `GoogleClientSecret`: Paste your Client Secret here.
+1. **Create OAuth Credentials**
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
+   - Navigate to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "OAuth client ID"
+   - Select **"Web application"** as the application type
+   - Give it a name (e.g., "RecordLane Web Client")
 
-5.  **Enable APIs**
-    - Go to "APIs & Services" > "Library".
-    - Search for and enable the **"YouTube Data API v3"**.
+2. **Configure Authorized Redirect URIs**
+   - Add the following URIs:
+   - `http://localhost:5173/auth/callback` (for local development)
+   - `https://yourdomain.com/auth/callback` (for production)
+
+3. **Enable APIs**
+   - Go to "APIs & Services" > "Library"
+   - Search for and enable the **"YouTube Data API v3"**
+
+4. **Configure Supabase Auth**
+   - In your Supabase project, go to Authentication > Providers
+   - Enable Google provider and add your OAuth credentials
+
+## Migration from Encore
+
+If you're upgrading from the previous Encore-based version:
+
+1. **Backup your data** (if you have any existing recordings)
+2. **Set up Supabase** following the configuration steps above
+3. **Update your environment variables** to use Supabase instead of Encore
+4. **Run the database migrations** in the `supabase-migrations/` directory
+
+See `SUPABASE_MIGRATION_GUIDE.md` for detailed migration instructions.
 
 ## Enhanced Features
 
@@ -253,14 +265,15 @@ RecordLane uses a backend-proxied Google OAuth 2.0 flow for secure authenticatio
 - Performance monitoring and optimization suggestions
 - Memory usage optimization
 
-## API Endpoints
+## Backend Services
 
-RecordLane includes a backend service built with Encore.ts:
+RecordLane uses Supabase for backend services:
 
-- **Auth Service**: Manages secure OAuth 2.0 flow with Google.
-- **Metadata Service**: Manages recording metadata and listings
-- **Analytics Service**: Tracks usage statistics and performance metrics
-- **Health Service**: Monitors application health and service status
+- **Database**: PostgreSQL database for storing recording metadata
+- **Authentication**: Supabase Auth for user management and OAuth integration
+- **Real-time**: Real-time subscriptions for live updates
+- **Storage**: Optional file storage for temporary files
+- **API**: Auto-generated REST and GraphQL APIs
 
 ## License
 
