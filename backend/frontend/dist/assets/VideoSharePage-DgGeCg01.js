@@ -1,0 +1,422 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-RfuAlLGG.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
+import { Q as useParams, w as useNavigate, r as reactExports, s as useApp, v as useYouTube, t as useToast, j as jsxRuntimeExports, x as LoaderCircle, B as Button, C as Clock, y as Badge, W as Wifi, _ as __vitePreload } from "./index-RfuAlLGG.js";
+import { Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal } from "./DeleteConfirmationModal-DM62Dz3G.js";
+import { A as ArrowLeft } from "./arrow-left-G0o8JZYr.js";
+import { E as ExternalLink } from "./external-link-CvUBn76S.js";
+function VideoSharePage() {
+  const { recordingId } = useParams();
+  const navigate = useNavigate();
+  const [recording, setRecording] = reactExports.useState(null);
+  const [isLoading, setIsLoading] = reactExports.useState(true);
+  const [copied, setCopied] = reactExports.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = reactExports.useState(false);
+  const [isDeleting, setIsDeleting] = reactExports.useState(false);
+  const [comments, setComments] = reactExports.useState([]);
+  const [loadingComments, setLoadingComments] = reactExports.useState(false);
+  const [newComment, setNewComment] = reactExports.useState("");
+  const [replyingTo, setReplyingTo] = reactExports.useState(null);
+  const [replyText, setReplyText] = reactExports.useState("");
+  const { state } = useApp();
+  const { isConnected } = useYouTube();
+  const { toast } = useToast();
+  reactExports.useEffect(() => {
+    const loadRecording = () => {
+      if (!recordingId) {
+        navigate("/");
+        return;
+      }
+      const foundRecording = state.recordings.find((r) => r.id === recordingId);
+      if (foundRecording) {
+        setRecording(foundRecording);
+        setIsLoading(false);
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get("title");
+        const youtubeId = urlParams.get("youtubeId");
+        const youtubeLink = urlParams.get("youtubeLink");
+        const duration = urlParams.get("duration");
+        const createdAt = urlParams.get("createdAt");
+        if (title && (youtubeId || youtubeLink)) {
+          setRecording({
+            id: recordingId,
+            title,
+            youtubeVideoId: youtubeId,
+            youtubeLink,
+            duration: duration ? parseInt(duration) : 0,
+            createdAt: createdAt ? new Date(createdAt) : /* @__PURE__ */ new Date(),
+            uploadStatus: "completed"
+          });
+          setIsLoading(false);
+        } else {
+          navigate("/");
+        }
+      }
+    };
+    loadRecording();
+  }, [recordingId, state.recordings, navigate]);
+  const handleCopyLink = async () => {
+    const shareUrl = window.location.href;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast({
+        title: "Link copied!",
+        description: "Share link has been copied to clipboard"
+      });
+      setTimeout(() => setCopied(false), 2e3);
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+    }
+  };
+  const handleOpenYouTube = () => {
+    if (recording == null ? void 0 : recording.youtubeLink) {
+      window.open(recording.youtubeLink, "_blank");
+    }
+  };
+  const handleDelete = async () => {
+    if (!recording) return;
+    setIsDeleting(true);
+    try {
+      if (recording.youtubeVideoId) {
+        const { RealYouTubeService } = await __vitePreload(async () => {
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-RfuAlLGG.js").then((n) => n.Z);
+          return { RealYouTubeService: RealYouTubeService2 };
+        }, true ? __vite__mapDeps([0,1]) : void 0);
+        await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
+      }
+      toast({
+        title: "Recording deleted",
+        description: "The recording has been successfully deleted"
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to delete recording:", error);
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete the recording",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+  const hasYouTubeVideo = (recording == null ? void 0 : recording.youtubeVideoId) && (recording == null ? void 0 : recording.youtubeLink);
+  const videoId = recording == null ? void 0 : recording.youtubeVideoId;
+  const loadComments = reactExports.useCallback(async () => {
+    if (!videoId) return;
+    setLoadingComments(true);
+    try {
+      console.log("Loading comments for videoId:", videoId);
+      const response = await YouTubeCommentsService.getComments(videoId);
+      console.log("Comments response:", response);
+      setComments(response.comments);
+    } catch (error) {
+      console.error("Failed to load comments:", error);
+      toast({
+        title: "Comments Unavailable",
+        description: "Could not load comments from YouTube",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingComments(false);
+    }
+  }, [videoId, toast]);
+  reactExports.useEffect(() => {
+    if (videoId && isConnected) {
+      loadComments();
+    }
+  }, [videoId, isConnected, loadComments]);
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !videoId) return;
+    try {
+      const comment = await YouTubeCommentsService.addComment(videoId, newComment.trim());
+      setComments((prev) => [comment, ...prev]);
+      setNewComment("");
+      toast({
+        title: "Comment Added",
+        description: "Your comment has been posted"
+      });
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      toast({
+        title: "Comment Failed",
+        description: "Could not post your comment",
+        variant: "destructive"
+      });
+    }
+  };
+  const handleReply = async (parentId) => {
+    if (!replyText.trim() || !videoId) return;
+    try {
+      const reply = await YouTubeCommentsService.addComment(videoId, replyText.trim(), parentId);
+      setComments((prev) => prev.map(
+        (comment) => comment.id === parentId ? { ...comment, replies: [...comment.replies || [], reply] } : comment
+      ));
+      setReplyText("");
+      setReplyingTo(null);
+      toast({
+        title: "Reply Added",
+        description: "Your reply has been posted"
+      });
+    } catch (error) {
+      console.error("Failed to add reply:", error);
+      toast({
+        title: "Reply Failed",
+        description: "Could not post your reply",
+        variant: "destructive"
+      });
+    }
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-8 w-8 animate-spin mx-auto mb-4" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "Loading recording..." })
+    ] }) });
+  }
+  if (!recording || !hasYouTubeVideo) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold mb-4", children: "Recording not found" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-muted-foreground mb-4", children: "The recording you're looking for doesn't exist or is not available on YouTube." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { onClick: () => navigate("/"), children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 mr-2" }),
+        "Back to Home"
+      ] })
+    ] }) });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-background", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "sticky top-0 z-10 bg-background border-b border-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-4 py-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "ghost",
+            size: "sm",
+            onClick: () => navigate("/"),
+            className: "text-muted-foreground hover:text-foreground",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 mr-2" }),
+              "Back"
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-semibold", children: recording.title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 text-sm text-muted-foreground", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatTime(recording.duration || 0) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "•" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              formatDistanceToNow(recording.createdAt),
+              " ago"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "•" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Badge, { variant: "secondary", className: "flex items-center space-x-1", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-3 w-3" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Synced" })
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "outline",
+            size: "sm",
+            onClick: handleCopyLink,
+            className: "flex items-center space-x-2",
+            children: [
+              copied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-4 w-4" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: copied ? "Copied!" : "Copy Link" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "outline",
+            size: "sm",
+            onClick: handleOpenYouTube,
+            className: "flex items-center space-x-2",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Open in YouTube" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "destructive",
+            size: "sm",
+            onClick: () => setShowDeleteConfirm(true),
+            className: "flex items-center space-x-2",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Delete" })
+            ]
+          }
+        )
+      ] })
+    ] }) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-4 py-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative bg-black rounded-lg overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "iframe",
+        {
+          src: `https://www.youtube.com/embed/${recording.youtubeVideoId}?autoplay=0&rel=0`,
+          className: "w-full aspect-video",
+          allowFullScreen: true,
+          title: recording.title
+        }
+      ) }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-80 border-l bg-background flex flex-col", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "outline", onClick: handleCopyLink, className: "flex-1 justify-center", children: [
+            copied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-4 w-4 mr-2" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-4 w-4 mr-2" }),
+            copied ? "Copied!" : "Copy Link"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "outline",
+              onClick: handleOpenYouTube,
+              className: "flex-1 justify-center",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
+                "Open in YouTube"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "destructive",
+              onClick: () => setShowDeleteConfirm(true),
+              className: "flex-1 justify-center",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4 mr-2" }),
+                "Delete"
+              ]
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "font-semibold flex items-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-5 w-5 mr-2" }),
+          "Comments (",
+          comments.length,
+          ")"
+        ] }) }),
+        isConnected && videoId && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              type: "text",
+              placeholder: "Add a comment...",
+              value: newComment,
+              onChange: (e) => setNewComment(e.target.value),
+              onKeyPress: (e) => e.key === "Enter" && handleAddComment(),
+              className: "flex-1 px-3 py-2 border rounded-md text-sm"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              size: "sm",
+              onClick: handleAddComment,
+              disabled: !newComment.trim(),
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-y-auto", children: loadingComments ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center justify-center p-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-6 w-6 animate-spin" }) }) : comments.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-8 text-center text-muted-foreground", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-8 w-8 mx-auto mb-2" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "No comments yet" }),
+          !isConnected && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs mt-1", children: "Connect to YouTube to view comments" })
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 space-y-4", children: comments.map((comment) => {
+          var _a;
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium", children: ((_a = comment.authorDisplayName) == null ? void 0 : _a.charAt(0)) || "U" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-sm", children: comment.authorDisplayName }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground", children: comment.publishedAt ? new Date(comment.publishedAt).toLocaleDateString() : "" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm mt-1", children: comment.textDisplay }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 mt-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "flex items-center space-x-1 text-xs text-muted-foreground hover:text-foreground", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "h-3 w-3" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: comment.likeCount || 0 })
+                  ] }),
+                  comment.canReply && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      onClick: () => setReplyingTo(replyingTo === comment.id ? null : comment.id),
+                      className: "text-xs text-muted-foreground hover:text-foreground",
+                      children: "Reply"
+                    }
+                  )
+                ] })
+              ] })
+            ] }),
+            replyingTo === comment.id && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "ml-10 flex space-x-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  type: "text",
+                  placeholder: "Write a reply...",
+                  value: replyText,
+                  onChange: (e) => setReplyText(e.target.value),
+                  onKeyPress: (e) => e.key === "Enter" && handleReply(comment.id),
+                  className: "flex-1 px-3 py-2 border rounded-md text-sm"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  size: "sm",
+                  onClick: () => handleReply(comment.id),
+                  disabled: !replyText.trim(),
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+                }
+              )
+            ] }),
+            comment.replies && comment.replies.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-10 space-y-2", children: comment.replies.map((reply) => {
+              var _a2;
+              return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs font-medium", children: ((_a2 = reply.authorDisplayName) == null ? void 0 : _a2.charAt(0)) || "U" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-xs", children: reply.authorDisplayName }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground", children: reply.publishedAt ? new Date(reply.publishedAt).toLocaleDateString() : "" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs mt-1", children: reply.textDisplay })
+                ] })
+              ] }, reply.id);
+            }) })
+          ] }, comment.id);
+        }) }) })
+      ] })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DeleteConfirmationModal,
+      {
+        isOpen: showDeleteConfirm,
+        onClose: () => setShowDeleteConfirm(false),
+        onConfirm: handleDelete,
+        recording,
+        isLoading: isDeleting
+      }
+    )
+  ] });
+}
+export {
+  VideoSharePage as default
+};
