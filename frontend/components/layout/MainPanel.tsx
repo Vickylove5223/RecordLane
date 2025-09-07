@@ -813,18 +813,15 @@ function MainPanelComponent() {
   );
 }
 
-// Export with error boundary and performance monitoring
-export default withErrorBoundary(
-  withPerformanceMonitoring(MainPanelComponent, 'MainPanel'),
-  {
-    fallback: (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center">
-          <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Failed to Load Main Panel</h2>
-          <p className="text-muted-foreground">Please refresh the page to try again.</p>
-        </div>
+// Export with error boundary
+export default withErrorBoundary(MainPanelComponent, {
+  fallback: (
+    <div className="flex-1 flex items-center justify-center p-8">
+      <div className="text-center">
+        <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Failed to Load Main Panel</h2>
+        <p className="text-muted-foreground">Please refresh the page to try again.</p>
       </div>
-    )
-  }
-);
+    </div>
+  )
+});

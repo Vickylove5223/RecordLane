@@ -84,13 +84,6 @@ export const UPLOAD_CONFIG = {
   timeoutMs: 30000,
 };
 
-// Performance Configuration
-export const PERFORMANCE_CONFIG = {
-  maxCacheSize: 50 * 1024 * 1024,
-  cacheExpirationMs: 24 * 60 * 60 * 1000,
-  lazyLoadThreshold: 100,
-  debounceMs: 300,
-};
 
 // UI Configuration
 export const UI_CONFIG = {
