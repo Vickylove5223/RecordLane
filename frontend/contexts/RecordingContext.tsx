@@ -85,11 +85,21 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: recording-pulse 1.5s ease-in-out infinite;"></div>
         <span>Recording in progress...</span>
-        <button onclick="window.stopRecordingFromNotification()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
+        <button id="stop-recording-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
       </div>
     `;
     notification.id = 'recording-notification';
     document.body.appendChild(notification);
+    
+    // Add event listener to the stop button
+    const stopBtn = document.getElementById('stop-recording-btn');
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => {
+        if ((window as any).stopRecordingFromNotification) {
+          (window as any).stopRecordingFromNotification();
+        }
+      });
+    }
   }, [hideRecordingNotification]);
 
   const startTimer = useCallback(() => {

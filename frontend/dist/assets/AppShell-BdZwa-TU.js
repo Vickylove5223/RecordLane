@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-hPGSSo1I.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
-import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as Clock, y as Badge, W as Wifi, z as WifiOff, _ as __vitePreload, X, A as withErrorBoundary, E as withPerformanceMonitoring, R as RefreshCw, F as Download, V as VISUALLY_HIDDEN_STYLES, G as ErrorHandler, H as Card, I as CardHeader, J as CardTitle, K as CardContent, N as Routes, O as Route } from "./index-hPGSSo1I.js";
-import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-B421qfHJ.js";
-import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-Blf2gY09.js";
-import { E as ExternalLink } from "./external-link-CRNXjY2R.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-RfuAlLGG.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
+import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as Clock, y as Badge, W as Wifi, z as WifiOff, _ as __vitePreload, X, A as withErrorBoundary, E as withPerformanceMonitoring, R as RefreshCw, F as Download, V as VISUALLY_HIDDEN_STYLES, G as ErrorHandler, H as Card, I as CardHeader, J as CardTitle, K as CardContent, N as Routes, O as Route } from "./index-RfuAlLGG.js";
+import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-DM62Dz3G.js";
+import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-C2byWZMx.js";
+import { E as ExternalLink } from "./external-link-CvUBn76S.js";
 import backend from "./client-Ct5oOSl9.js";
 /**
  * @license lucide-react v0.484.0 - ISC
@@ -5642,7 +5642,7 @@ function VideoPreviewPage({ recording, onClose }) {
       if (recording.youtubeVideoId) {
         console.log("Deleting from YouTube with videoId:", recording.youtubeVideoId);
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-hPGSSo1I.js").then((n) => n.Z);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-RfuAlLGG.js").then((n) => n.Z);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);

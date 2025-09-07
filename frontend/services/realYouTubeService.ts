@@ -104,7 +104,7 @@ export class RealYouTubeService {
     try {
       const cached = await this.cache.get('connection-status');
       if (cached && Date.now() - cached.timestamp < 60 * 1000) {
-        return cached.data;
+        return cached.data as YouTubeConnection;
       }
 
       // Check for stored tokens
@@ -318,7 +318,7 @@ export class RealYouTubeService {
     } catch (error) {
       console.error('Failed to delete video from YouTube:', error);
       ErrorHandler.logError('youtube-delete', error, { videoId });
-      throw ErrorHandler.createError('DELETE_FAILED', error.message || 'Failed to delete video from YouTube', error);
+      throw ErrorHandler.createError('DELETE_FAILED', (error as Error).message || 'Failed to delete video from YouTube', error);
     }
   }
 
@@ -443,7 +443,7 @@ export class RealYouTubeService {
           // Don't try to access popup.location.href to avoid COOP errors
           // The OAuth flow will be handled entirely via postMessage from the callback page
         } catch (error) {
-          if (error.name !== 'SecurityError') {
+          if ((error as Error).name !== 'SecurityError') {
             console.warn('Unexpected error during popup polling:', error);
           }
         }
@@ -510,7 +510,7 @@ export class RealYouTubeService {
 
   private static async validateToken(accessToken: string): Promise<boolean> {
     try {
-      const response = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo', {
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

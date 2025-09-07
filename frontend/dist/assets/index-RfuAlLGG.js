@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-d1eR4-R3.js","assets/DeleteConfirmationModal-B421qfHJ.js","assets/external-link-CRNXjY2R.js","assets/modern-card-Blf2gY09.js","assets/client-Ct5oOSl9.js","assets/YouTubeSetupPage-BlurffMP.js","assets/arrow-left-VNA-X41A.js","assets/VideoSharePage-D0nMx8OX.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-BdZwa-TU.js","assets/DeleteConfirmationModal-DM62Dz3G.js","assets/external-link-CvUBn76S.js","assets/modern-card-C2byWZMx.js","assets/client-Ct5oOSl9.js","assets/YouTubeSetupPage-DC-TEqz_.js","assets/arrow-left-G0o8JZYr.js","assets/VideoSharePage-DgGeCg01.js"])))=>i.map(i=>d[i]);
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e = m[i];
@@ -20790,7 +20790,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   }
   static async validateToken(accessToken) {
     try {
-      const response = await fetch("https://www.googleapis.com/oauth2/v1/tokeninfo", {
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/tokeninfo", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${accessToken}`
@@ -22154,11 +22154,19 @@ function RecordingProvider({ children }) {
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: recording-pulse 1.5s ease-in-out infinite;"></div>
         <span>Recording in progress...</span>
-        <button onclick="window.stopRecordingFromNotification()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
+        <button id="stop-recording-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
       </div>
     `;
     notification.id = "recording-notification";
     document.body.appendChild(notification);
+    const stopBtn = document.getElementById("stop-recording-btn");
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        if (window.stopRecordingFromNotification) {
+          window.stopRecordingFromNotification();
+        }
+      });
+    }
   }, [hideRecordingNotification]);
   const startTimer = reactExports.useCallback(() => {
     const startTime = Date.now();
@@ -22633,7 +22641,7 @@ class ErrorBoundary extends reactExports.Component {
       try {
         const testUrls = [
           "https://www.google.com/favicon.ico",
-          "https://www.googleapis.com/oauth2/v1/tokeninfo",
+          "https://www.googleapis.com/oauth2/v3/tokeninfo",
           "https://accounts.google.com"
         ];
         const connectionTests = testUrls.map(
@@ -22996,9 +23004,9 @@ function LoadingSpinner({ text, size = "md", className }) {
     text && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-muted-foreground", children: text })
   ] });
 }
-const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-d1eR4-R3.js"), true ? __vite__mapDeps([0,1,2,3,4]) : void 0));
-const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BlurffMP.js"), true ? __vite__mapDeps([5,3,6,2]) : void 0));
-const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-D0nMx8OX.js"), true ? __vite__mapDeps([7,1,2,6]) : void 0));
+const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-BdZwa-TU.js"), true ? __vite__mapDeps([0,1,2,3,4]) : void 0));
+const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-DC-TEqz_.js"), true ? __vite__mapDeps([5,3,6,2]) : void 0));
+const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-DgGeCg01.js"), true ? __vite__mapDeps([7,1,2,6]) : void 0));
 function AppLoadingFallback() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-primary rounded-full" }) }),
