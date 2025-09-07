@@ -22,11 +22,11 @@ export default function YouTubeSetupPage() {
     },
     {
       title: 'Create OAuth 2.0 Credentials',
-      description: 'Create a "Web application" OAuth client ID. Add the authorized redirect URIs provided in your Encore/Leap dashboard.',
+      description: 'Create a "Web application" OAuth client ID. Add the authorized redirect URIs for your domain.',
     },
     {
-      title: 'Set Encore Secrets',
-      description: 'In your Encore/Leap dashboard, go to the "Infrastructure" tab and set the `GoogleClientID` and `GoogleClientSecret` secrets.',
+      title: 'Configure Supabase Auth',
+      description: 'In your Supabase dashboard, go to Authentication > Providers and enable Google OAuth with your credentials.',
     },
     {
       title: 'Connect Your Account',
@@ -145,20 +145,20 @@ export default function YouTubeSetupPage() {
                 </div>
               </div>
 
-              {/* Encore Secrets Issue */}
+              {/* Supabase Auth Issue */}
               <div className="border-l-4 border-purple-200 bg-purple-50 p-4 rounded-r-lg">
                 <div className="flex items-start space-x-3">
                   <Cloud className="h-5 w-5 text-purple-600 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-purple-800">Encore Secrets Not Working</h3>
+                    <h3 className="font-semibold text-purple-800">Supabase Auth Not Working</h3>
                     <p className="text-sm text-purple-700 mt-1">
-                      If your secrets aren't being recognized:
+                      If your Google OAuth isn't working:
                     </p>
                     <ul className="text-sm text-purple-700 mt-2 space-y-1 ml-4 list-disc">
-                      <li>Check that secrets are set for the correct environment (dev/prod)</li>
-                      <li>Ensure secret names match exactly: <code className="bg-purple-100 px-1 rounded">GoogleClientID</code> and <code className="bg-purple-100 px-1 rounded">GoogleClientSecret</code></li>
-                      <li>Try redeploying your Encore app after setting secrets</li>
-                      <li>Verify the backend server is running and accessible</li>
+                      <li>Check that Google OAuth is enabled in Supabase Authentication > Providers</li>
+                      <li>Ensure your OAuth credentials are correctly configured in Supabase</li>
+                      <li>Verify the redirect URIs match your domain exactly</li>
+                      <li>Check that your Supabase project is active and accessible</li>
                     </ul>
                   </div>
                 </div>
