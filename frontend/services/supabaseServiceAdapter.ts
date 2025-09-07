@@ -1,5 +1,5 @@
-// Service adapter to maintain compatibility with existing frontend code
-// This file provides the same API interface as the original Encore services
+// Service adapter for RecordLane frontend
+// This file provides the API interface for the application
 
 import { 
   createRecording, 
@@ -39,7 +39,7 @@ import {
   type SignInRequest
 } from './supabaseAuthService'
 
-// Re-export all types and functions with the same names as the original Encore services
+// Re-export all types and functions for the application
 export {
   // Recording service
   createRecording,
@@ -77,7 +77,7 @@ export {
   type SignInRequest
 }
 
-// Legacy API compatibility - these functions maintain the same interface as Encore APIs
+// Legacy API compatibility - these functions maintain the same interface as the original APIs
 export const metadataService = {
   create: createRecording,
   get: getRecording,

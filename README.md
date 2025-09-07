@@ -28,36 +28,28 @@ RecordLane replaces popular but expensive screen recording solutions:
 
 ## 📊 Open Source Loom Alternatives Comparison
 
-| Feature | RecordLane | ScreenRec | OpenReplay | ScreenStudio | Loom Clone | ScreenCapture |
-|---------|------------|-----------|------------|--------------|------------|---------------|
-| **Price** | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free |
-| **Privacy** | ✅ Your YouTube | ✅ Local only | ✅ Self-hosted | ✅ Local only | ✅ Local only | ✅ Local only |
-| **Open Source** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Cloud Integration** | ✅ YouTube | ❌ None | ✅ Self-hosted | ❌ None | ❌ None | ❌ None |
-| **Web-Based** | ✅ Yes | ❌ Desktop only | ✅ Web app | ❌ Desktop only | ✅ Yes | ❌ Desktop only |
-| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Camera Recording** | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Drawing Tools** | ✅ Yes | ❌ No | ❌ No | ✅ Yes | ✅ Yes | ❌ No |
-| **Click Highlights** | ✅ Yes | ❌ No | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
-| **Video Editing** | ✅ Client-side | ❌ No | ❌ No | ✅ Basic | ✅ Basic | ❌ No |
-| **Auto Upload** | ✅ YouTube | ❌ Manual | ✅ Self-hosted | ❌ Manual | ❌ Manual | ❌ Manual |
-| **Share Links** | ✅ Instant | ❌ Manual | ✅ Self-hosted | ❌ Manual | ✅ Basic | ❌ Manual |
-| **Mobile Support** | ✅ Yes | ❌ No | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
-| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐⭐ Hard | ⭐⭐⭐⭐⭐ Very Hard | ⭐⭐⭐ Medium | ⭐⭐⭐ Medium | ⭐⭐⭐⭐ Hard |
-| **Active Development** | ✅ Active | ⚠️ Limited | ✅ Active | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
-| **Community** | ✅ Growing | ⚠️ Small | ✅ Large | ⚠️ Small | ⚠️ Small | ⚠️ Small |
+| Feature | RecordLane | [Snapify.it](https://snapify.it/) | Cap.so | OpenReplay | ScreenStudio |
+|---------|------------|-----------------------------------|--------|------------|--------------|
+| **Price** | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free |
+| **Privacy** | ✅ Your YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ✅ Local only |
+| **Open Source** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Cloud Integration** | ✅ YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ❌ None |
+| **Web-Based** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Web app | ❌ Desktop only |
+| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Camera Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes |
+| **Drawing Tools** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes |
+| **Click Highlights** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Video Editing** | ✅ Client-side | ✅ Basic | ✅ Basic | ❌ No | ✅ Basic |
+| **Auto Upload** | ✅ YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ❌ Manual |
+| **Share Links** | ✅ Instant | ✅ Instant | ✅ Instant | ✅ Self-hosted | ❌ Manual |
+| **Mobile Support** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐ Medium | ⭐⭐⭐ Medium | ⭐⭐⭐⭐⭐ Very Hard | ⭐⭐⭐ Medium |
+| **Active Development** | ✅ Active | ✅ Active | ✅ Active | ✅ Active | ⚠️ Limited |
+| **Community** | ✅ Growing | ✅ Large | ✅ Growing | ✅ Large | ⚠️ Small |
 
 ## Demo
 
-> **Note**: Screenshots and demo video will be added here. This section will showcase:
-> - Main recording interface
-> - Recording modes (screen, camera, both)
-> - Drawing and annotation tools
-> - Video editing and trimming
-> - YouTube upload process
-> - Share modal and link generation
-
-*[Screenshots coming soon]*
+*Demo video will be provided here*
 
 ## 🚀 How to Run
 
@@ -189,18 +181,77 @@ RecordLane is built with:
 
 1. **Create a Supabase Project**
    - Go to [Supabase](https://supabase.com/) and create a new project
-   - Note your project URL and anon key
+   - Note your project URL and anon key from Settings > API
 
 2. **Set up Database Tables**
-   - Run the SQL migrations in `supabase-migrations/` directory
-   - Or use the Supabase SQL Editor to create the tables
+   - Run the SQL migrations in `supabase-migrations/` directory:
+   ```sql
+   -- Create recordings table
+   CREATE TABLE recordings (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+     youtube_video_id TEXT UNIQUE NOT NULL,
+     title TEXT NOT NULL,
+     description TEXT,
+     duration INTEGER,
+     file_size BIGINT,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+   
+   -- Create events table
+   CREATE TABLE events (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+     event_type TEXT NOT NULL,
+     event_data JSONB,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+   
+   -- Enable Row Level Security
+   ALTER TABLE recordings ENABLE ROW LEVEL SECURITY;
+   ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+   
+   -- Create policies
+   CREATE POLICY "Users can view own recordings" ON recordings
+     FOR SELECT USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Users can insert own recordings" ON recordings
+     FOR INSERT WITH CHECK (auth.uid() = user_id);
+   
+   CREATE POLICY "Users can update own recordings" ON recordings
+     FOR UPDATE USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Users can delete own recordings" ON recordings
+     FOR DELETE USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Users can view own events" ON events
+     FOR SELECT USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Users can insert own events" ON events
+     FOR INSERT WITH CHECK (auth.uid() = user_id);
+   ```
 
 3. **Configure Environment Variables**
    - Create `.env.local` in the frontend directory:
    ```bash
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   # Supabase Configuration
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
    ```
+   
+   - Or update `frontend/config/supabase.ts` directly:
+   ```typescript
+   export const supabaseConfig = {
+     url: 'https://your-project-id.supabase.co',
+     anonKey: 'your-anon-key-here'
+   }
+   ```
+
+4. **Enable Google OAuth in Supabase**
+   - Go to Authentication > Providers in your Supabase dashboard
+   - Enable Google provider
+   - Add your Google OAuth credentials (see Google OAuth Setup below)
 
 ### Google OAuth Setup
 
@@ -226,16 +277,6 @@ RecordLane uses Google OAuth 2.0 for YouTube integration.
    - In your Supabase project, go to Authentication > Providers
    - Enable Google provider and add your OAuth credentials
 
-## Migration from Encore
-
-If you're upgrading from the previous Encore-based version:
-
-1. **Backup your data** (if you have any existing recordings)
-2. **Set up Supabase** following the configuration steps above
-3. **Update your environment variables** to use Supabase instead of Encore
-4. **Run the database migrations** in the `supabase-migrations/` directory
-
-See `SUPABASE_MIGRATION_GUIDE.md` for detailed migration instructions.
 
 ## Enhanced Features
 

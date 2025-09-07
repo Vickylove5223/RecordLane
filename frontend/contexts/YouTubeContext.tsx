@@ -37,6 +37,54 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
   
   const retryService = new RetryService();
 
+  // Check for persistent tokens on mount
+  useEffect(() => {
+    const initializeConnection = async () => {
+      try {
+        setConnectionError(null);
+        
+        // First check if we have persistent tokens
+        const hasValidTokens = await PersistentTokenService.hasValidTokens();
+        if (hasValidTokens) {
+          // Try to get user email from stored tokens
+          const email = await PersistentTokenService.getUserEmail();
+          if (email) {
+            setIsConnected(true);
+            setUserEmail(email);
+            console.log('✅ YouTube connection restored from persistent tokens');
+            return;
+          }
+        }
+        
+        // If no persistent tokens, try the regular connection flow
+        let connection;
+        if (isYouTubeConfigured()) {
+          // Use frontend service if YouTube is configured with environment variables
+          connection = await FrontendYouTubeService.checkConnection();
+        } else {
+          // Use Supabase service
+          connection = await RealYouTubeService.checkConnection();
+        }
+        
+        setIsConnected(connection.isConnected);
+        setUserEmail(connection.userEmail);
+        
+        if (!connection.isConnected) {
+          setConnectionError('Not Connected to YouTube');
+        }
+      } catch (error) {
+        console.error('Failed to initialize YouTube connection:', error);
+        ErrorHandler.logError('youtube-connection-check', error);
+        
+        setIsConnected(false);
+        setUserEmail(null);
+        setConnectionError('Failed to check connection status');
+      }
+    };
+
+    initializeConnection();
+  }, []);
+
   const checkConnection = useCallback(async () => {
     try {
       setConnectionError(null);
@@ -79,19 +127,6 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       setConnectionError('Failed to check connection status');
     }
   }, []);
-
-  // Check for persistent tokens on mount
-  useEffect(() => {
-    const initializeConnection = async () => {
-      try {
-        await checkConnection();
-      } catch (error) {
-        console.error('Failed to initialize YouTube connection:', error);
-      }
-    };
-
-    initializeConnection();
-  }, [checkConnection]);
 
   const connectYouTube = useCallback(async () => {
     setIsConnecting(true);

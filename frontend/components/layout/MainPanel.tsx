@@ -607,22 +607,6 @@ function MainPanelComponent() {
 
         {/* Footer Section */}
         <div className="mt-16 sm:mt-20 mb-8 sm:mb-12">
-          <div className="text-center">
-            <div className="max-w-2xl mx-auto px-4">
-              <p className="text-sm text-gray-500 mb-4">
-                Built with ❤️ for creators who value privacy and freedom
-              </p>
-              <div className="flex flex-wrap justify-center items-center gap-4 text-xs text-gray-400">
-                <span>Open Source</span>
-                <span>•</span>
-                <span>Privacy First</span>
-                <span>•</span>
-                <span>Free Forever</span>
-                <span>•</span>
-                <span>No Data Collection</span>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>

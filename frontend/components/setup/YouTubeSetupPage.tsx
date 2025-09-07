@@ -18,7 +18,7 @@ export default function YouTubeSetupPage() {
     },
     {
       title: 'Enable YouTube Data API v3',
-      description: 'In "APIs & Services" > "Library", find and enable the YouTube Data API.',
+      description: 'In "APIs & Services" &gt; "Library", find and enable the YouTube Data API.',
     },
     {
       title: 'Create OAuth 2.0 Credentials',

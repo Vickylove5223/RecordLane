@@ -1,5 +1,5 @@
-// Supabase client replacement for Encore client
-// This maintains the same API interface as the original Encore client
+// Supabase client for RecordLane
+// This provides the API interface for the application
 
 import { 
   createRecording, 

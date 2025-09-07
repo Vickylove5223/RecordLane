@@ -27,7 +27,6 @@ import {
   RotateCcw, 
   Trash2, 
   Cloud, 
-  Scissors,
   X,
   CheckCircle,
   ExternalLink,
@@ -52,7 +51,6 @@ import { useApp } from '../../contexts/AppContext';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDistanceToNow, format } from 'date-fns';
 import { YouTubeCommentsService, YouTubeComment } from '../../services/youtubeCommentsService';
-import { VideoTrimmingService } from '../../services/videoTrimmingService';
 
 export default function ReviewPanel() {
   const { recordedBlob, deleteRecording, restartRecording, getPreviewUrl } = useRecording();
@@ -68,14 +66,9 @@ export default function ReviewPanel() {
   const [duration, setDuration] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [showTrimming, setShowTrimming] = useState(false);
-  const [trimStart, setTrimStart] = useState(0);
-  const [trimEnd, setTrimEnd] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ videoId: string; videoUrl: string } | null>(null);
-  const [showConnectPrompt, setShowConnectPrompt] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [trimmedBlob, setTrimmedBlob] = useState<Blob | null>(null);
   const [videoLoading, setVideoLoading] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -89,8 +82,6 @@ export default function ReviewPanel() {
         console.log('Video metadata loaded:', video.duration);
         if (isFinite(video.duration) && video.duration > 0) {
           setDuration(video.duration);
-          setTrimStart(0);
-          setTrimEnd(video.duration);
           setVideoLoading(false);
         }
       };
@@ -203,52 +194,9 @@ export default function ReviewPanel() {
     }
   };
 
-  const handleTrim = async () => {
-    if (!recordedBlob || trimStart >= trimEnd) {
-      toast({
-        title: "Invalid Trim Range",
-        description: "Please select a valid trim range",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      toast({
-        title: "Trimming Video",
-        description: "Please wait while we trim your video...",
-      });
-      
-      const trimmedVideo = await VideoTrimmingService.trimVideo(recordedBlob, trimStart, trimEnd);
-      setTrimmedBlob(trimmedVideo);
-      setShowTrimming(false);
-      
-      // Update the video source to show trimmed version
-      const newPreviewUrl = URL.createObjectURL(trimmedVideo);
-      if (videoRef.current) {
-        videoRef.current.src = newPreviewUrl;
-        videoRef.current.load();
-        // Reset current time to 0 for the trimmed video
-        setCurrentTime(0);
-      }
-      
-      toast({
-        title: "Video Trimmed Successfully",
-        description: `Video trimmed from ${formatTime(trimStart)} to ${formatTime(trimEnd)}`,
-      });
-    } catch (error) {
-      console.error('Trim failed:', error);
-      toast({
-        title: "Trim Failed",
-        description: "Failed to trim the video. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleDownload = () => {
-    const blobToDownload = trimmedBlob || recordedBlob;
-    if (!blobToDownload) {
+    if (!recordedBlob) {
       toast({
         title: "Download Error",
         description: "No video available to download",
@@ -258,7 +206,7 @@ export default function ReviewPanel() {
     }
 
     try {
-      const url = URL.createObjectURL(blobToDownload);
+      const url = URL.createObjectURL(recordedBlob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `${title || 'recording'}.webm`;
@@ -284,23 +232,31 @@ export default function ReviewPanel() {
   const handleSyncToYouTube = async () => {
     if (!isConnected) {
       toast({
-        title: "YouTube Not Connected",
-        description: "Please connect your YouTube account to sync recordings",
-        variant: "destructive",
+        title: "Connect YouTube to Sync",
+        description: "Connect your YouTube account to sync and share your recordings online",
+        action: (
+          <Button
+            size="sm"
+            onClick={handleConnectAndUpload}
+            disabled={isUploading}
+            className="ml-2"
+          >
+            <Wifi className="h-4 w-4 mr-2" />
+            Connect & Sync
+          </Button>
+        ),
       });
-      setShowConnectPrompt(true);
       return;
     }
 
-    const blobToUpload = trimmedBlob || recordedBlob;
-    if (!blobToUpload) return;
+    if (!recordedBlob) return;
 
     setIsUploading(true);
     setUploadProgress(0);
     setUploadSuccess(false);
 
     try {
-      const result = await uploadVideo(blobToUpload, title, privacy, (progress) => {
+      const result = await uploadVideo(recordedBlob, title, privacy, (progress) => {
         setUploadProgress(progress.percentage);
       });
       
@@ -345,7 +301,6 @@ export default function ReviewPanel() {
   const handleConnectAndUpload = async () => {
     try {
       await connectYouTube();
-      setShowConnectPrompt(false);
       await handleSyncToYouTube();
     } catch (error) {
       console.error('Connection failed:', error);
@@ -422,7 +377,6 @@ export default function ReviewPanel() {
                       console.log('Video metadata loaded in JSX:', e.currentTarget.duration);
                       if (isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
                         setDuration(e.currentTarget.duration);
-                        setTrimEnd(e.currentTarget.duration);
                         setVideoLoading(false);
                       }
                     }}
@@ -484,7 +438,7 @@ export default function ReviewPanel() {
                 </div>
 
                 {/* Timeline */}
-                {!uploadSuccess && !showTrimming && !videoLoading && duration > 0 && (
+                {!uploadSuccess && !videoLoading && duration > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm font-medium">
                       <span className="text-foreground">{formatTime(currentTime)}</span>
@@ -518,152 +472,9 @@ export default function ReviewPanel() {
                   </div>
                 )}
 
-                {/* Trimming Interface */}
-                {showTrimming && (
-                  <div className="space-y-6 p-6 bg-muted rounded-lg border">
-                    <style jsx>{`
-                      .slider {
-                        -webkit-appearance: none;
-                        appearance: none;
-                        height: 8px;
-                        border-radius: 4px;
-                        outline: none;
-                      }
-                      .slider::-webkit-slider-thumb {
-                        -webkit-appearance: none;
-                        appearance: none;
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50%;
-                        background: #3b82f6;
-                        cursor: pointer;
-                        border: 2px solid white;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                      }
-                      .slider::-moz-range-thumb {
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50%;
-                        background: #3b82f6;
-                        cursor: pointer;
-                        border: 2px solid white;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                      }
-                    `}</style>
-                    <div className="flex items-center space-x-2">
-                      <Scissors className="h-5 w-5 text-primary" />
-                      <h3 className="text-lg font-semibold">Trim Video</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Start Time</label>
-                        <div className="flex items-center space-x-4">
-                          <input
-                            type="range"
-                            min={0}
-                            max={duration}
-                            step={0.1}
-                            value={trimStart}
-                            onChange={(e) => setTrimStart(parseFloat(e.target.value))}
-                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                            style={{
-                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(trimStart / duration) * 100}%, #e5e7eb ${(trimStart / duration) * 100}%, #e5e7eb 100%)`
-                            }}
-                          />
-                          <Input
-                            type="text"
-                            value={formatTime(trimStart)}
-                            onChange={(e) => {
-                              const timeStr = e.target.value;
-                              const parts = timeStr.split(':');
-                              if (parts.length === 2) {
-                                const minutes = parseInt(parts[0]) || 0;
-                                const seconds = parseInt(parts[1]) || 0;
-                                const totalSeconds = minutes * 60 + seconds;
-                                if (totalSeconds >= 0 && totalSeconds <= duration) {
-                                  setTrimStart(totalSeconds);
-                                }
-                              }
-                            }}
-                            className="w-20 text-center font-mono"
-                            placeholder="0:00"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">End Time</label>
-                        <div className="flex items-center space-x-4">
-                          <input
-                            type="range"
-                            min={0}
-                            max={duration}
-                            step={0.1}
-                            value={trimEnd}
-                            onChange={(e) => setTrimEnd(parseFloat(e.target.value))}
-                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                            style={{
-                              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(trimEnd / duration) * 100}%, #e5e7eb ${(trimEnd / duration) * 100}%, #e5e7eb 100%)`
-                            }}
-                          />
-                          <Input
-                            type="text"
-                            value={formatTime(trimEnd)}
-                            onChange={(e) => {
-                              const timeStr = e.target.value;
-                              const parts = timeStr.split(':');
-                              if (parts.length === 2) {
-                                const minutes = parseInt(parts[0]) || 0;
-                                const seconds = parseInt(parts[1]) || 0;
-                                const totalSeconds = minutes * 60 + seconds;
-                                if (totalSeconds >= 0 && totalSeconds <= duration) {
-                                  setTrimEnd(totalSeconds);
-                                }
-                              }
-                            }}
-                            className="w-20 text-center font-mono"
-                            placeholder="0:00"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="text-sm text-muted-foreground">
-                        Duration: {formatTime(Math.max(0, trimEnd - trimStart))}
-                        {trimStart >= trimEnd && (
-                          <span className="text-red-500 ml-2">⚠️ Start time must be before end time</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <Button variant="outline" onClick={() => setShowTrimming(false)}>
-                        Cancel
-                      </Button>
-                      <div className="flex space-x-3">
-                        <Button 
-                          onClick={handleTrim} 
-                          disabled={trimStart >= trimEnd || (trimEnd - trimStart) < 1}
-                          className="min-w-[120px]"
-                        >
-                          <Scissors className="h-4 w-4 mr-2" />
-                          Apply Trim
-                        </Button>
-                        <Button 
-                          onClick={handleDownload}
-                          variant="outline"
-                          className="min-w-[140px]"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download Locally
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Recording Details */}
-                {!uploadSuccess && !showTrimming && (
+                {!uploadSuccess && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Title</label>
@@ -727,39 +538,6 @@ export default function ReviewPanel() {
                   </div>
                 )}
 
-                {/* Connect YouTube Prompt */}
-                {showConnectPrompt && (
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <WifiOff className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                          Connect YouTube to Sync
-                        </h3>
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-                          Connect your YouTube account to sync and share your recordings online.
-                        </p>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={handleConnectAndUpload}
-                            disabled={isUploading}
-                          >
-                            <Wifi className="h-4 w-4 mr-2" />
-                            Connect & Sync
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setShowConnectPrompt(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Buttons Section */}
                 <div className="pt-4 border-t border-border">
@@ -769,12 +547,12 @@ export default function ReviewPanel() {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => setShowTrimming(!showTrimming)}
+                    onClick={handleDownload}
                     disabled={isUploading}
                     className="flex-1 sm:max-w-[180px] text-sm"
                   >
-                    <Scissors className="h-4 w-4 mr-2" />
-                    {showTrimming ? 'Cancel Trim' : 'Trim'}
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Locally
                   </Button>
                   
                   <Button
