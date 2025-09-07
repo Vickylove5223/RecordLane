@@ -3,9 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ModernCard, DocumentCard, LayeredCardStack, GridCard } from '@/components/ui/modern-card';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
-import { ConnectionStatus } from '@/components/ui/connection-status';
 import { Video, AlertTriangle, Play, ExternalLink, Clock, FileVideo, Upload, Share2, RefreshCw } from 'lucide-react';
-import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { withErrorBoundary } from '../ErrorBoundary';
@@ -85,24 +83,9 @@ function formatDuration(ms: number) {
 }
 
 function MainPanelComponent() {
-  const { isConnected, isConnecting, connectionError } = useYouTube();
   const { state, refreshRecordings } = useApp();
   const { state: recordingState } = useRecording();
   const [selectedRecording, setSelectedRecording] = useState(null);
-
-  const getConnectionStatus = () => {
-    if (connectionError) return 'error';
-    if (isConnecting) return 'connecting';
-    if (isConnected) return 'connected';
-    return 'disconnected';
-  };
-
-  const getConnectionText = () => {
-    if (connectionError) return `Error: ${connectionError}`;
-    if (isConnecting) return 'Connecting to YouTube...';
-    if (isConnected) return 'Connected to YouTube';
-    return 'Not connected';
-  };
 
   const handleRecordingClick = (recording: any) => {
     setSelectedRecording(recording);
@@ -130,15 +113,6 @@ function MainPanelComponent() {
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
             An open-source Loom alternative that's truely totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks.
           </p>
-
-          {/* Connection Status */}
-          <div className="mb-8">
-            <ConnectionStatus 
-              status={getConnectionStatus()}
-              text={getConnectionText()}
-              className="mx-auto"
-            />
-          </div>
 
         </div>
 
