@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { ErrorHandler } from '../utils/errorHandler';
 
 export interface AppState {
   isOnboarded: boolean;
@@ -144,7 +143,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     }
   } catch (error) {
     console.error('Error in app reducer:', error);
-    ErrorHandler.logError('APP_REDUCER_ERROR', error, { action });
+    console.error('App reducer error:', error, { action });
     return { ...state, error: 'An error occurred while updating the application state' };
   }
 }
