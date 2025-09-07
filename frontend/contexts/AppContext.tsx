@@ -205,23 +205,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      const { metadata } = await import('~backend/client');
-      const recordingsResponse = await metadata.list({});
-      
-      if (recordingsResponse.recordings) {
-        const recordings = recordingsResponse.recordings.map((rec: any) => ({
-          id: rec.id,
-          title: rec.title,
-          youtubeVideoId: rec.youtube_video_id,
-          youtubeLink: rec.youtube_link,
-          thumbnail: rec.thumbnail_url,
-          duration: rec.duration * 1000, // Convert seconds to milliseconds
-          createdAt: new Date(rec.created_at),
-          privacy: rec.privacy,
-          uploadStatus: 'completed' as const, // All recordings from backend are synced
-        }));
+      // Try to load recordings from backend, but fallback gracefully if it fails
+      try {
+        const { metadata } = await import('~backend/client');
+        const recordingsResponse = await metadata.list({});
         
-        dispatch({ type: 'LOAD_STATE', payload: { recordings } });
+        if (recordingsResponse.recordings) {
+          const recordings = recordingsResponse.recordings.map((rec: any) => ({
+            id: rec.id,
+            title: rec.title,
+            youtubeVideoId: rec.youtube_video_id,
+            youtubeLink: rec.youtube_link,
+            thumbnail: rec.thumbnail_url,
+            duration: rec.duration * 1000, // Convert seconds to milliseconds
+            createdAt: new Date(rec.created_at),
+            privacy: rec.privacy,
+            uploadStatus: 'completed' as const, // All recordings from backend are synced
+          }));
+          
+          dispatch({ type: 'LOAD_STATE', payload: { recordings } });
+        }
+      } catch (backendError) {
+        console.warn('Backend not available, using local storage only:', backendError);
+        // Don't set error state, just use local storage
       }
     } catch (error) {
       console.error('Failed to refresh recordings:', error);
@@ -283,6 +289,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
               ErrorHandler.logError('STATE_PARSE_ERROR', error);
               localStorage.removeItem('recordlane-app-state');
             }
+          } else {
+            // If no saved state, just initialize with empty recordings
+            dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
           }
         }
       } catch (error) {

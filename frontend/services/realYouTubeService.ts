@@ -9,7 +9,8 @@ import {
   POPUP_CONFIG,
   DEV_CONFIG
 } from '../config';
-import backend from '~backend/client';
+// Dynamic import to avoid build-time errors when backend is not available
+let backend: any = null;
 
 export interface YouTubeConnection {
   isConnected: boolean;
@@ -56,6 +57,12 @@ export class RealYouTubeService {
 
   private static async loadOAuthConfig() {
     try {
+      // Dynamically import backend client
+      if (!backend) {
+        const backendModule = await import('~backend/client');
+        backend = backendModule.default;
+      }
+      
       const config = await backend.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
@@ -446,6 +453,12 @@ export class RealYouTubeService {
 
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenData> {
     try {
+      // Ensure backend is loaded
+      if (!backend) {
+        const backendModule = await import('~backend/client');
+        backend = backendModule.default;
+      }
+      
       const result = await backend.auth.exchangeCode({
         code,
         codeVerifier,
@@ -465,6 +478,12 @@ export class RealYouTubeService {
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.refreshToken) {
         return false;
+      }
+
+      // Ensure backend is loaded
+      if (!backend) {
+        const backendModule = await import('~backend/client');
+        backend = backendModule.default;
       }
 
       const result = await backend.auth.refreshToken({
