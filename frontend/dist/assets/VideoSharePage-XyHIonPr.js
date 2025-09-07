@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-RfuAlLGG.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
-import { Q as useParams, w as useNavigate, r as reactExports, s as useApp, v as useYouTube, t as useToast, j as jsxRuntimeExports, x as LoaderCircle, B as Button, C as Clock, y as Badge, W as Wifi, _ as __vitePreload } from "./index-RfuAlLGG.js";
-import { Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal } from "./DeleteConfirmationModal-DM62Dz3G.js";
-import { A as ArrowLeft } from "./arrow-left-G0o8JZYr.js";
-import { E as ExternalLink } from "./external-link-CvUBn76S.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-Bw6xhQI4.js","assets/index-OnCZvb9u.css"])))=>i.map(i=>d[i]);
+import { Q as useParams, w as useNavigate, r as reactExports, s as useApp, v as useYouTube, t as useToast, j as jsxRuntimeExports, x as LoaderCircle, B as Button, C as Clock, y as Badge, W as Wifi, _ as __vitePreload } from "./index-Bw6xhQI4.js";
+import { Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal } from "./DeleteConfirmationModal-Deo0390E.js";
+import { A as ArrowLeft } from "./arrow-left-C7dCW_bn.js";
+import { E as ExternalLink } from "./external-link-DU7XJA3r.js";
 function VideoSharePage() {
   const { recordingId } = useParams();
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ function VideoSharePage() {
     try {
       if (recording.youtubeVideoId) {
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-RfuAlLGG.js").then((n) => n.Z);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-Bw6xhQI4.js").then((n) => n.a0);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);

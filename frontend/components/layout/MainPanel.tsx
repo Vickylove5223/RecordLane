@@ -473,70 +473,6 @@ function MainPanelComponent() {
           </div>
         </div>
 
-        {/* We Built RecordLane for Everyone */}
-        <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 sm:p-12">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-900 to-indigo-600 bg-clip-text text-transparent">
-                We Built RecordLane for Everyone
-              </h2>
-              <p className="text-blue-700 max-w-3xl mx-auto text-lg">
-                From students to enterprise teams, RecordLane empowers everyone to create, share, and collaborate through video without barriers.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🎓</span>
-                </div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Students & Educators</h3>
-                <p className="text-blue-700 text-sm">
-                  Create educational content, record lectures, and share knowledge without worrying about costs or data privacy.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🚀</span>
-                </div>
-                <h3 className="text-lg font-semibold text-green-900 mb-2">Startups & Entrepreneurs</h3>
-                <p className="text-green-700 text-sm">
-                  Build your business with professional screen recordings without the overhead of expensive tools or vendor lock-in.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">👨‍💻</span>
-                </div>
-                <h3 className="text-lg font-semibold text-purple-900 mb-2">Developers & Tech Teams</h3>
-                <p className="text-purple-700 text-sm">
-                  Document code, create tutorials, and share technical knowledge with open source tools you can trust and customize.
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🏢</span>
-                </div>
-                <h3 className="text-lg font-semibold text-orange-900 mb-2">Enterprise Teams</h3>
-                <p className="text-orange-700 text-sm">
-                  Self-host RecordLane for complete control over your data, compliance, and security requirements.
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <div className="inline-flex items-center space-x-2 bg-white border border-blue-200 rounded-full px-6 py-3 shadow-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-blue-800 font-medium">
-                  <strong>Join thousands of users</strong> who have already made the switch to free, open-source screen recording
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* How does RecordLane work? */}
         <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
@@ -656,59 +592,6 @@ function MainPanelComponent() {
           </div>
         </div>
 
-        {/* Ways to Use RecordLane */}
-        <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Ways to Use RecordLane
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Perfect for creators, educators, developers, and anyone who needs to share their screen
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-              <h3 className="text-lg font-semibold mb-3 text-blue-900">🎓 Education & Training</h3>
-              <ul className="space-y-2 text-sm text-blue-800">
-                <li>• Create tutorial videos and courses</li>
-                <li>• Record lectures and presentations</li>
-                <li>• Build step-by-step guides</li>
-                <li>• Share knowledge with students</li>
-              </ul>
-            </div>
-            
-            <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-100">
-              <h3 className="text-lg font-semibold mb-3 text-green-900">💼 Business & Work</h3>
-              <ul className="space-y-2 text-sm text-green-800">
-                <li>• Record meetings and demos</li>
-                <li>• Create product walkthroughs</li>
-                <li>• Build internal documentation</li>
-                <li>• Share progress updates</li>
-              </ul>
-            </div>
-            
-            <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
-              <h3 className="text-lg font-semibold mb-3 text-purple-900">👨‍💻 Development & Tech</h3>
-              <ul className="space-y-2 text-sm text-purple-800">
-                <li>• Record coding sessions</li>
-                <li>• Create bug reports with video</li>
-                <li>• Build technical documentation</li>
-                <li>• Share development processes</li>
-              </ul>
-            </div>
-            
-            <div className="p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border border-orange-100">
-              <h3 className="text-lg font-semibold mb-3 text-orange-900">🎬 Content Creation</h3>
-              <ul className="space-y-2 text-sm text-orange-800">
-                <li>• Create YouTube content</li>
-                <li>• Build social media videos</li>
-                <li>• Record gaming sessions</li>
-                <li>• Share creative processes</li>
-              </ul>
-            </div>
-          </div>
-        </div>
 
         {/* FAQ */}
         <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
@@ -774,32 +657,6 @@ function MainPanelComponent() {
           </div>
         </div>
 
-        {/* Getting Started Tips */}
-        {(() => {
-          const syncedRecordings = state.recordings.filter(recording => 
-            recording.uploadStatus === 'completed' && recording.youtubeLink
-          );
-          return syncedRecordings.length === 0 && (
-            <div className="max-w-4xl mx-auto px-4">
-              <GridCard className="text-center p-6 sm:p-8">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                  <Play className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Ready to Record!</h3>
-                <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-                  Click the red record button in the top-right corner to start your first recording. 
-                  Connect to YouTube to sync your recordings and see them here.
-                </p>
-                <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-blue-800 font-medium">
-                    <strong>Tip:</strong> Only synced recordings appear here. Connect to YouTube to upload and view your recordings.
-                  </span>
-                </div>
-              </GridCard>
-            </div>
-          );
-        })()}
       </div>
 
       {/* Video Modal */}

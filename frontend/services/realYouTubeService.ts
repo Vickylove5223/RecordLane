@@ -9,7 +9,7 @@ import {
   POPUP_CONFIG,
   DEV_CONFIG
 } from '../config';
-import { AuthService } from './supabaseService';
+// Dynamic import to avoid build-time errors when backend is not available
 let backend: any = null;
 
 export interface YouTubeConnection {
@@ -57,18 +57,24 @@ export class RealYouTubeService {
 
   private static async loadOAuthConfig() {
     try {
-      const config = await AuthService.getConfig();
+      // Dynamically import Supabase client
+      if (!backend) {
+        const backendModule = await import('../supabaseClient');
+        backend = backendModule.default;
+      }
+      
+      const config = await backend.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
         clientId: config.clientID,
       };
-      console.log('OAuth config loaded from Supabase successfully');
+      console.log('OAuth config loaded from backend successfully');
     } catch (error) {
-      console.error('Failed to load OAuth config from Supabase:', error);
+      console.error('Failed to load OAuth config from backend:', error);
       ErrorHandler.logError('oauth-config-load', error);
       
-      // Throw error to indicate OAuth configuration is not available
-      throw new Error('OAuth configuration not available. Please check your Supabase configuration.');
+      // Throw error to indicate backend is not available
+      throw new Error('Backend server is not running. Please start the backend server to enable YouTube integration.');
     }
   }
 
@@ -447,7 +453,13 @@ export class RealYouTubeService {
 
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenData> {
     try {
-      const result = await AuthService.exchangeCode({
+      // Ensure backend is loaded
+      if (!backend) {
+        const backendModule = await import('../supabaseClient');
+        backend = backendModule.default;
+      }
+      
+      const result = await backend.auth.exchangeCode({
         code,
         codeVerifier,
         redirectUri: getRedirectUri(),
@@ -468,7 +480,13 @@ export class RealYouTubeService {
         return false;
       }
 
-      const result = await AuthService.refreshToken({
+      // Ensure backend is loaded
+      if (!backend) {
+        const backendModule = await import('../supabaseClient');
+        backend = backendModule.default;
+      }
+
+      const result = await backend.auth.refreshToken({
         refreshToken: tokenData.refreshToken,
       });
 

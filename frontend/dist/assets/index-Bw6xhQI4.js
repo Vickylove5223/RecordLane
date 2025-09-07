@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-d1eR4-R3.js","assets/DeleteConfirmationModal-B421qfHJ.js","assets/external-link-CRNXjY2R.js","assets/modern-card-Blf2gY09.js","assets/client-Ct5oOSl9.js","assets/YouTubeSetupPage-BlurffMP.js","assets/arrow-left-VNA-X41A.js","assets/VideoSharePage-D0nMx8OX.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/supabaseClient-D1ONPppL.js","assets/supabase-aC0e6cYW.js","assets/AppShell-CZkkL6W_.js","assets/DeleteConfirmationModal-Deo0390E.js","assets/external-link-DU7XJA3r.js","assets/modern-card-DvsgR42d.js","assets/YouTubeSetupPage-CaNLuwQr.js","assets/arrow-left-C7dCW_bn.js","assets/VideoSharePage-XyHIonPr.js"])))=>i.map(i=>d[i]);
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e = m[i];
@@ -57,6 +57,30 @@ function _mergeNamespaces(n, m) {
 })();
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+function getAugmentedNamespace(n) {
+  if (Object.prototype.hasOwnProperty.call(n, "__esModule")) return n;
+  var f = n.default;
+  if (typeof f == "function") {
+    var a = function a2() {
+      if (this instanceof a2) {
+        return Reflect.construct(f, arguments, this.constructor);
+      }
+      return f.apply(this, arguments);
+    };
+    a.prototype = f.prototype;
+  } else a = {};
+  Object.defineProperty(a, "__esModule", { value: true });
+  Object.keys(n).forEach(function(k) {
+    var d = Object.getOwnPropertyDescriptor(n, k);
+    Object.defineProperty(a, k, d.get ? d : {
+      enumerable: true,
+      get: function() {
+        return n[k];
+      }
+    });
+  });
+  return a;
 }
 var jsxRuntime = { exports: {} };
 var reactJsxRuntime_production = {};
@@ -19372,9 +19396,9 @@ function AppProvider({ children }) {
       dispatch2({ type: "SET_LOADING", payload: true });
       try {
         const { metadata } = await __vitePreload(async () => {
-          const { metadata: metadata2 } = await import("./client-Ct5oOSl9.js");
+          const { metadata: metadata2 } = await import("./supabaseClient-D1ONPppL.js");
           return { metadata: metadata2 };
-        }, true ? [] : void 0);
+        }, true ? __vite__mapDeps([0,1]) : void 0);
         const recordingsResponse = await metadata.list({});
         if (recordingsResponse.recordings) {
           const recordings = recordingsResponse.recordings.map((rec) => ({
@@ -19409,9 +19433,9 @@ function AppProvider({ children }) {
         dispatch2({ type: "SET_LOADING", payload: true });
         try {
           const { metadata } = await __vitePreload(async () => {
-            const { metadata: metadata2 } = await import("./client-Ct5oOSl9.js");
+            const { metadata: metadata2 } = await import("./supabaseClient-D1ONPppL.js");
             return { metadata: metadata2 };
-          }, true ? [] : void 0);
+          }, true ? __vite__mapDeps([0,1]) : void 0);
           const recordingsResponse = await metadata.list({});
           if (recordingsResponse.recordings) {
             const recordings = recordingsResponse.recordings.map((rec) => ({
@@ -20439,7 +20463,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   static async loadOAuthConfig() {
     try {
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-D1ONPppL.js"), true ? __vite__mapDeps([0,1]) : void 0);
         backend = backendModule.default;
       }
       const config = await backend.auth.getConfig();
@@ -20744,7 +20768,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   static async exchangeCodeForToken(code, codeVerifier) {
     try {
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-D1ONPppL.js"), true ? __vite__mapDeps([0,1]) : void 0);
         backend = backendModule.default;
       }
       const result = await backend.auth.exchangeCode({
@@ -20766,7 +20790,7 @@ const _RealYouTubeService = class _RealYouTubeService {
         return false;
       }
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-D1ONPppL.js"), true ? __vite__mapDeps([0,1]) : void 0);
         backend = backendModule.default;
       }
       const result = await backend.auth.refreshToken({
@@ -20790,7 +20814,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   }
   static async validateToken(accessToken) {
     try {
-      const response = await fetch("https://www.googleapis.com/oauth2/v1/tokeninfo", {
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/tokeninfo", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${accessToken}`
@@ -22154,11 +22178,19 @@ function RecordingProvider({ children }) {
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: recording-pulse 1.5s ease-in-out infinite;"></div>
         <span>Recording in progress...</span>
-        <button onclick="window.stopRecordingFromNotification()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
+        <button id="stop-recording-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
       </div>
     `;
     notification.id = "recording-notification";
     document.body.appendChild(notification);
+    const stopBtn = document.getElementById("stop-recording-btn");
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        if (window.stopRecordingFromNotification) {
+          window.stopRecordingFromNotification();
+        }
+      });
+    }
   }, [hideRecordingNotification]);
   const startTimer = reactExports.useCallback(() => {
     const startTime = Date.now();
@@ -22633,7 +22665,7 @@ class ErrorBoundary extends reactExports.Component {
       try {
         const testUrls = [
           "https://www.google.com/favicon.ico",
-          "https://www.googleapis.com/oauth2/v1/tokeninfo",
+          "https://www.googleapis.com/oauth2/v3/tokeninfo",
           "https://accounts.google.com"
         ];
         const connectionTests = testUrls.map(
@@ -22996,9 +23028,9 @@ function LoadingSpinner({ text, size = "md", className }) {
     text && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-muted-foreground", children: text })
   ] });
 }
-const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-d1eR4-R3.js"), true ? __vite__mapDeps([0,1,2,3,4]) : void 0));
-const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BlurffMP.js"), true ? __vite__mapDeps([5,3,6,2]) : void 0));
-const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-D0nMx8OX.js"), true ? __vite__mapDeps([7,1,2,6]) : void 0));
+const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-CZkkL6W_.js"), true ? __vite__mapDeps([2,3,4,5,1]) : void 0));
+const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-CaNLuwQr.js"), true ? __vite__mapDeps([6,5,7,4]) : void 0));
+const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-XyHIonPr.js"), true ? __vite__mapDeps([8,3,4,7]) : void 0));
 function AppLoadingFallback() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-primary rounded-full" }) }),
@@ -23076,6 +23108,7 @@ ReactDOM$1.createRoot(document.getElementById("root")).render(
   /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) })
 );
 export {
+  getDefaultExportFromCjs as $,
   withErrorBoundary as A,
   Button as B,
   Clock as C,
@@ -23101,9 +23134,10 @@ export {
   Wifi as W,
   X,
   createContext2 as Y,
-  realYouTubeService as Z,
+  getAugmentedNamespace as Z,
   __vitePreload as _,
   createContextScope as a,
+  realYouTubeService as a0,
   Presence as b,
   createLucideIcon as c,
   composeEventHandlers as d,

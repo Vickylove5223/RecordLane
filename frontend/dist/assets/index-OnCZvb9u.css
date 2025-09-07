@@ -2849,6 +2849,10 @@
       background-color: var(--color-blue-100);
     }
 
+    .hover\:bg-blue-600:hover {
+      background-color: var(--color-blue-600);
+    }
+
     .hover\:bg-gray-50:hover {
       background-color: var(--color-gray-50);
     }
@@ -7388,6 +7392,10 @@ body[data-recording="true"]:after {
 
     .hover\:bg-blue-100:hover {
       background-color: var(--color-blue-100);
+    }
+
+    .hover\:bg-blue-600:hover {
+      background-color: var(--color-blue-600);
     }
 
     .hover\:bg-destructive\/90:hover {
