@@ -1,31 +1,16 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from './contexts/AppContext';
 import { YouTubeProvider } from './contexts/YouTubeContext';
 import { RecordingProvider } from './contexts/RecordingContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { LoadingSpinner } from '@/components/ui/spinner';
 import './App.css';
 
-// Lazy load main components for better performance
-const AppShell = lazy(() => import('./components/AppShell'));
-const YouTubeSetupPage = lazy(() => import('./components/setup/YouTubeSetupPage'));
-const VideoSharePage = lazy(() => import('./components/pages/VideoSharePage'));
-
-function AppLoadingFallback() {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <div className="w-8 h-8 bg-primary rounded-full"></div>
-        </div>
-        <h1 className="text-2xl font-bold mb-2">RecordLane</h1>
-        <LoadingSpinner text="Loading..." />
-      </div>
-    </div>
-  );
-}
+// Import components directly (no lazy loading)
+import AppShell from './components/AppShell';
+import YouTubeSetupPage from './components/setup/YouTubeSetupPage';
+import VideoSharePage from './components/pages/VideoSharePage';
 
 function AppInner() {
   return (
@@ -34,13 +19,11 @@ function AppInner() {
         <YouTubeProvider>
           <RecordingProvider>
             <Router>
-              <Suspense fallback={<AppLoadingFallback />}>
-                <Routes>
-                  <Route path="/video/:recordingId" element={<VideoSharePage />} />
-                  <Route path="/setup" element={<YouTubeSetupPage />} />
-                  <Route path="*" element={<AppShell />} />
-                </Routes>
-              </Suspense>
+              <Routes>
+                <Route path="/video/:recordingId" element={<VideoSharePage />} />
+                <Route path="/setup" element={<YouTubeSetupPage />} />
+                <Route path="*" element={<AppShell />} />
+              </Routes>
               <Toaster />
             </Router>
           </RecordingProvider>
