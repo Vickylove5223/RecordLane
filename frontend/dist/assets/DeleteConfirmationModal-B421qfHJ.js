@@ -1,5 +1,37 @@
-import { c as createLucideIcon, r as reactExports, e as useCallbackRef$1, u as useComposedRefs, j as jsxRuntimeExports, P as Primitive, Y as React, f as useLayoutEffect2, i as useControllableState, a as createContextScope, b as Presence, d as composeEventHandlers, m as Portal$1, n as createSlot, D as DismissableLayer, Z as createContext2, g as cn, X, T as TriangleAlert, H as Download, B as Button } from "./index-C3SkEJPH.js";
-import { E as ExternalLink } from "./external-link-B-Bz-w0c.js";
+import { c as createLucideIcon, r as reactExports, e as useCallbackRef$1, u as useComposedRefs, j as jsxRuntimeExports, P as Primitive, S as React, f as useLayoutEffect2, U as CacheService, G as ErrorHandler, i as useControllableState, a as createContextScope, b as Presence, d as composeEventHandlers, m as Portal$1, n as createSlot, D as DismissableLayer, Y as createContext2, g as cn, X, T as TriangleAlert, F as Download, B as Button } from "./index-hPGSSo1I.js";
+import { E as ExternalLink } from "./external-link-CRNXjY2R.js";
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$6 = [
+  ["path", { d: "M8 2v4", key: "1cmpym" }],
+  ["path", { d: "M16 2v4", key: "4m81vk" }],
+  ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
+  ["path", { d: "M3 10h18", key: "8toen8" }]
+];
+const Calendar = createLucideIcon("calendar", __iconNode$6);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$5 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$5);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$4 = [
+  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
+  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
+];
+const Copy = createLucideIcon("copy", __iconNode$4);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -7,20 +39,25 @@ import { E as ExternalLink } from "./external-link-B-Bz-w0c.js";
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$3 = [
-  ["path", { d: "M8 2v4", key: "1cmpym" }],
-  ["path", { d: "M16 2v4", key: "4m81vk" }],
-  ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
-  ["path", { d: "M3 10h18", key: "8toen8" }]
+  [
+    "path",
+    {
+      d: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
+      key: "c3ymky"
+    }
+  ]
 ];
-const Calendar = createLucideIcon("calendar", __iconNode$3);
+const Heart = createLucideIcon("heart", __iconNode$3);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$2 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$2);
+const __iconNode$2 = [
+  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
+];
+const MessageCircle = createLucideIcon("message-circle", __iconNode$2);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -28,10 +65,16 @@ const Check = createLucideIcon("check", __iconNode$2);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$1 = [
-  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
-  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
+  [
+    "path",
+    {
+      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
+      key: "1ffxy3"
+    }
+  ],
+  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
 ];
-const Copy = createLucideIcon("copy", __iconNode$1);
+const Send = createLucideIcon("send", __iconNode$1);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -248,14 +291,15 @@ function createFocusScopesStack() {
     add(focusScope) {
       const activeFocusScope = stack[0];
       if (focusScope !== activeFocusScope) {
-        activeFocusScope?.pause();
+        activeFocusScope == null ? void 0 : activeFocusScope.pause();
       }
       stack = arrayRemove(stack, focusScope);
       stack.unshift(focusScope);
     },
     remove(focusScope) {
+      var _a;
       stack = arrayRemove(stack, focusScope);
-      stack[0]?.resume();
+      (_a = stack[0]) == null ? void 0 : _a.resume();
     }
   };
 }
@@ -1103,7 +1147,7 @@ function constructNow(date) {
 }
 function differenceInCalendarMonths(laterDate, earlierDate, options) {
   const [laterDate_, earlierDate_] = normalizeDates(
-    options?.in,
+    options == null ? void 0 : options.in,
     laterDate,
     earlierDate
   );
@@ -1139,7 +1183,7 @@ function isLastDayOfMonth(date, options) {
 }
 function differenceInMonths(laterDate, earlierDate, options) {
   const [laterDate_, workingLaterDate, earlierDate_] = normalizeDates(
-    options?.in,
+    options == null ? void 0 : options.in,
     laterDate,
     laterDate,
     earlierDate
@@ -1236,7 +1280,7 @@ const formatDistance$1 = (token, count2, options) => {
   } else {
     result = tokenValue.other.replace("{{count}}", count2.toString());
   }
-  if (options?.addSuffix) {
+  if (options == null ? void 0 : options.addSuffix) {
     if (options.comparison && options.comparison > 0) {
       return "in " + result;
     } else {
@@ -1295,15 +1339,15 @@ const formatRelativeLocale = {
 const formatRelative = (token, _date, _baseDate, _options) => formatRelativeLocale[token];
 function buildLocalizeFn(args) {
   return (value, options) => {
-    const context = options?.context ? String(options.context) : "standalone";
+    const context = (options == null ? void 0 : options.context) ? String(options.context) : "standalone";
     let valuesArray;
     if (context === "formatting" && args.formattingValues) {
       const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
-      const width = options?.width ? String(options.width) : defaultWidth;
+      const width = (options == null ? void 0 : options.width) ? String(options.width) : defaultWidth;
       valuesArray = args.formattingValues[width] || args.formattingValues[defaultWidth];
     } else {
       const defaultWidth = args.defaultWidth;
-      const width = options?.width ? String(options.width) : args.defaultWidth;
+      const width = (options == null ? void 0 : options.width) ? String(options.width) : args.defaultWidth;
       valuesArray = args.values[width] || args.values[defaultWidth];
     }
     const index = args.argumentCallback ? args.argumentCallback(value) : value;
@@ -1654,16 +1698,16 @@ const enUS = {
 };
 function formatDistance(laterDate, earlierDate, options) {
   const defaultOptions2 = getDefaultOptions();
-  const locale = options?.locale ?? defaultOptions2.locale ?? enUS;
+  const locale = (options == null ? void 0 : options.locale) ?? defaultOptions2.locale ?? enUS;
   const minutesInAlmostTwoDays = 2520;
   const comparison = compareAsc(laterDate, earlierDate);
   if (isNaN(comparison)) throw new RangeError("Invalid time value");
   const localizeOptions = Object.assign({}, options, {
-    addSuffix: options?.addSuffix,
+    addSuffix: options == null ? void 0 : options.addSuffix,
     comparison
   });
   const [laterDate_, earlierDate_] = normalizeDates(
-    options?.in,
+    options == null ? void 0 : options.in,
     ...comparison > 0 ? [earlierDate, laterDate] : [laterDate, earlierDate]
   );
   const seconds = differenceInSeconds(earlierDate_, laterDate_);
@@ -1671,7 +1715,7 @@ function formatDistance(laterDate, earlierDate, options) {
   const minutes = Math.round((seconds - offsetInSeconds) / 60);
   let months;
   if (minutes < 2) {
-    if (options?.includeSeconds) {
+    if (options == null ? void 0 : options.includeSeconds) {
       if (seconds < 5) {
         return locale.formatDistance("lessThanXSeconds", 5, localizeOptions);
       } else if (seconds < 10) {
@@ -1727,6 +1771,272 @@ function formatDistance(laterDate, earlierDate, options) {
 function formatDistanceToNow(date, options) {
   return formatDistance(date, constructNow(date), options);
 }
+const _YouTubeCommentsService = class _YouTubeCommentsService {
+  // 5 minutes
+  static async getComments(videoId, pageToken) {
+    try {
+      console.log("YouTubeCommentsService.getComments called with videoId:", videoId);
+      const cacheKey = `comments-${videoId}-${pageToken || "first"}`;
+      const cached = await this.cache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        console.log("Returning cached comments:", cached.data);
+        return cached.data;
+      }
+      const tokenData = this.getStoredTokenData();
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
+        console.error("No access token found");
+        throw new Error("Authentication required");
+      }
+      console.log("Fetching comment threads for videoId:", videoId);
+      const threadsResponse = await this.fetchCommentThreads(videoId, pageToken);
+      console.log("Comment threads response:", threadsResponse);
+      const comments = [];
+      for (const thread of threadsResponse.items) {
+        const topComment = this.transformComment(thread.snippet.topLevelComment.snippet);
+        topComment.id = thread.snippet.topLevelComment.id;
+        topComment.parentId = void 0;
+        topComment.totalReplyCount = thread.snippet.totalReplyCount;
+        topComment.canReply = thread.snippet.canReply;
+        if (thread.snippet.totalReplyCount > 0) {
+          const replies = await this.fetchReplies(thread.id);
+          topComment.replies = replies;
+        }
+        comments.push(topComment);
+      }
+      const result = {
+        comments,
+        nextPageToken: threadsResponse.nextPageToken,
+        totalResults: threadsResponse.pageInfo.totalResults
+      };
+      console.log("Final comments result:", result);
+      await this.cache.set(cacheKey, result, this.CACHE_DURATION);
+      return result;
+    } catch (error) {
+      console.error("Failed to fetch YouTube comments:", error);
+      ErrorHandler.logError("youtube-comments-fetch", error, { videoId, pageToken });
+      throw error;
+    }
+  }
+  static async addComment(videoId, text, parentId) {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
+        throw new Error("Authentication required");
+      }
+      if (parentId) {
+        return await this.addReply(parentId, text);
+      }
+      const response = await fetch("https://www.googleapis.com/youtube/v3/commentThreads", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tokenData.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          snippet: {
+            videoId,
+            topLevelComment: {
+              snippet: {
+                textOriginal: text
+              }
+            }
+          }
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add comment: ${errorText}`);
+      }
+      const result = await response.json();
+      const comment = this.transformComment(result.snippet.topLevelComment.snippet);
+      comment.id = result.snippet.topLevelComment.id;
+      comment.parentId = parentId;
+      comment.totalReplyCount = 0;
+      comment.canReply = true;
+      await this.cache.delete(`comments-${videoId}-first`);
+      return comment;
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      ErrorHandler.logError("youtube-comment-add", error, { videoId, text, parentId });
+      throw error;
+    }
+  }
+  static async addReply(parentId, text) {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
+        throw new Error("Authentication required");
+      }
+      const response = await fetch("https://www.googleapis.com/youtube/v3/comments", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tokenData.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          snippet: {
+            parentId,
+            textOriginal: text
+          }
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add reply: ${errorText}`);
+      }
+      const result = await response.json();
+      const comment = this.transformComment(result.snippet);
+      comment.id = result.id;
+      comment.parentId = parentId;
+      comment.totalReplyCount = 0;
+      comment.canReply = true;
+      await this.cache.clear();
+      return comment;
+    } catch (error) {
+      console.error("Failed to add reply:", error);
+      ErrorHandler.logError("youtube-comment-reply", error, { parentId, text });
+      throw error;
+    }
+  }
+  static async likeComment(commentId) {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
+        throw new Error("Authentication required");
+      }
+      const response = await fetch("https://www.googleapis.com/youtube/v3/comments/rate", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tokenData.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: commentId,
+          rating: "like"
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to like comment: ${errorText}`);
+      }
+    } catch (error) {
+      console.error("Failed to like comment:", error);
+      ErrorHandler.logError("youtube-comment-like", error, { commentId });
+      throw error;
+    }
+  }
+  static async unlikeComment(commentId) {
+    try {
+      const tokenData = this.getStoredTokenData();
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
+        throw new Error("Authentication required");
+      }
+      const response = await fetch("https://www.googleapis.com/youtube/v3/comments/rate", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tokenData.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: commentId,
+          rating: "none"
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to unlike comment: ${errorText}`);
+      }
+    } catch (error) {
+      console.error("Failed to unlike comment:", error);
+      ErrorHandler.logError("youtube-comment-unlike", error, { commentId });
+      throw error;
+    }
+  }
+  static async fetchCommentThreads(videoId, pageToken) {
+    const tokenData = this.getStoredTokenData();
+    const params = new URLSearchParams({
+      part: "snippet,replies",
+      videoId,
+      maxResults: "20",
+      order: "time",
+      textFormat: "plainText"
+    });
+    if (pageToken) {
+      params.append("pageToken", pageToken);
+    }
+    const url = `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`;
+    console.log("Fetching comment threads from URL:", url);
+    const response = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${tokenData.accessToken}`
+      }
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Comment threads fetch failed:", response.status, errorText);
+      throw new Error(`Failed to fetch comment threads: ${response.status} ${errorText}`);
+    }
+    const result = await response.json();
+    console.log("Comment threads fetch successful:", result);
+    return result;
+  }
+  static async fetchReplies(parentId) {
+    const tokenData = this.getStoredTokenData();
+    const params = new URLSearchParams({
+      part: "snippet",
+      parentId,
+      maxResults: "10",
+      textFormat: "plainText"
+    });
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/comments?${params.toString()}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${tokenData.accessToken}`
+        }
+      }
+    );
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch replies: ${errorText}`);
+    }
+    const result = await response.json();
+    return result.items.map((item) => ({
+      ...this.transformComment(item.snippet),
+      id: item.id,
+      parentId
+    }));
+  }
+  static transformComment(snippet) {
+    return {
+      id: "",
+      authorDisplayName: snippet.authorDisplayName || "Unknown",
+      authorProfileImageUrl: snippet.authorProfileImageUrl || "",
+      textDisplay: snippet.textDisplay || "",
+      textOriginal: snippet.textOriginal || "",
+      likeCount: parseInt(snippet.likeCount) || 0,
+      publishedAt: snippet.publishedAt || (/* @__PURE__ */ new Date()).toISOString(),
+      updatedAt: snippet.updatedAt || (/* @__PURE__ */ new Date()).toISOString(),
+      canReply: snippet.canReply || false,
+      canRate: snippet.canRate || false,
+      viewerRating: snippet.viewerRating || "none",
+      totalReplyCount: 0
+    };
+  }
+  static getStoredTokenData() {
+    try {
+      const accessToken = localStorage.getItem("recordlane-access-token");
+      if (!accessToken) return null;
+      return { accessToken };
+    } catch (error) {
+      console.error("Failed to get stored token data:", error);
+      return null;
+    }
+  }
+};
+_YouTubeCommentsService.cache = new CacheService("youtube-comments");
+_YouTubeCommentsService.CACHE_DURATION = 5 * 60 * 1e3;
+let YouTubeCommentsService = _YouTubeCommentsService;
 var DIALOG_NAME = "Dialog";
 var [createDialogContext, createDialogScope] = createContextScope(DIALOG_NAME);
 var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
@@ -1854,8 +2164,9 @@ var DialogContentModal = reactExports.forwardRef(
         trapFocus: context.open,
         disableOutsidePointerEvents: true,
         onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
+          var _a;
           event.preventDefault();
-          context.triggerRef.current?.focus();
+          (_a = context.triggerRef.current) == null ? void 0 : _a.focus();
         }),
         onPointerDownOutside: composeEventHandlers(props.onPointerDownOutside, (event) => {
           const originalEvent = event.detail.originalEvent;
@@ -1884,16 +2195,18 @@ var DialogContentNonModal = reactExports.forwardRef(
         trapFocus: false,
         disableOutsidePointerEvents: false,
         onCloseAutoFocus: (event) => {
-          props.onCloseAutoFocus?.(event);
+          var _a, _b;
+          (_a = props.onCloseAutoFocus) == null ? void 0 : _a.call(props, event);
           if (!event.defaultPrevented) {
-            if (!hasInteractedOutsideRef.current) context.triggerRef.current?.focus();
+            if (!hasInteractedOutsideRef.current) (_b = context.triggerRef.current) == null ? void 0 : _b.focus();
             event.preventDefault();
           }
           hasInteractedOutsideRef.current = false;
           hasPointerDownOutsideRef.current = false;
         },
         onInteractOutside: (event) => {
-          props.onInteractOutside?.(event);
+          var _a, _b;
+          (_a = props.onInteractOutside) == null ? void 0 : _a.call(props, event);
           if (!event.defaultPrevented) {
             hasInteractedOutsideRef.current = true;
             if (event.detail.originalEvent.type === "pointerdown") {
@@ -1901,7 +2214,7 @@ var DialogContentNonModal = reactExports.forwardRef(
             }
           }
           const target = event.target;
-          const targetIsTrigger = context.triggerRef.current?.contains(target);
+          const targetIsTrigger = (_b = context.triggerRef.current) == null ? void 0 : _b.contains(target);
           if (targetIsTrigger) event.preventDefault();
           if (event.detail.originalEvent.type === "focusin" && hasPointerDownOutsideRef.current) {
             event.preventDefault();
@@ -2013,7 +2326,8 @@ var DescriptionWarning = ({ contentRef, descriptionId }) => {
   const descriptionWarningContext = useWarningContext(DESCRIPTION_WARNING_NAME);
   const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${descriptionWarningContext.contentName}}.`;
   reactExports.useEffect(() => {
-    const describedById = contentRef.current?.getAttribute("aria-describedby");
+    var _a;
+    const describedById = (_a = contentRef.current) == null ? void 0 : _a.getAttribute("aria-describedby");
     if (descriptionId && describedById) {
       const hasDescription = document.getElementById(descriptionId);
       if (!hasDescription) console.warn(MESSAGE);
@@ -2211,17 +2525,21 @@ export {
   Calendar as C,
   DeleteConfirmationModal as D,
   FocusScope as F,
+  Heart as H,
+  MessageCircle as M,
   ReactRemoveScroll as R,
+  Send as S,
   Trash2 as T,
+  YouTubeCommentsService as Y,
   useFocusGuards as a,
-  Dialog as b,
-  DialogContent as c,
-  Check as d,
-  DialogHeader as e,
+  Check as b,
+  Copy as c,
+  Dialog as d,
+  DialogContent as e,
   formatDistanceToNow as f,
-  DialogTitle as g,
+  DialogHeader as g,
   hideOthers as h,
-  DialogDescription as i,
-  Copy as j,
+  DialogTitle as i,
+  DialogDescription as j,
   useId as u
 };

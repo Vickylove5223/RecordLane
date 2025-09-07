@@ -90,10 +90,7 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     `;
     notification.id = 'recording-notification';
     document.body.appendChild(notification);
-    
-    // Set up the global stop function
-    (window as any).stopRecordingFromNotification = stopRecording;
-  }, [hideRecordingNotification, stopRecording]);
+  }, [hideRecordingNotification]);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
@@ -333,7 +330,7 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
       document.body.setAttribute('data-recording', 'true');
       
       // Show custom recording notification
-      this.showRecordingNotification();
+      showRecordingNotification();
       
       toast({
         title: "Recording Started",

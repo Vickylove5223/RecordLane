@@ -1,8 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-zIYQuoIJ.js","assets/index-DYyxTtMa.css"])))=>i.map(i=>d[i]);
-import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as CacheService, E as ErrorHandler, y as Clock, z as Badge, W as Wifi, A as WifiOff, _ as __vitePreload, X, F as withErrorBoundary, G as withPerformanceMonitoring, R as RefreshCw, H as Download, V as VISUALLY_HIDDEN_STYLES, I as backend, J as Card, K as CardHeader, N as CardTitle, O as CardContent, Q as Routes, S as Route } from "./index-zIYQuoIJ.js";
-import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-CNAlB3Qu.js";
-import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-SQoDlo1C.js";
-import { E as ExternalLink } from "./external-link-C0GgvLGE.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-hPGSSo1I.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
+import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as Clock, y as Badge, W as Wifi, z as WifiOff, _ as __vitePreload, X, A as withErrorBoundary, E as withPerformanceMonitoring, R as RefreshCw, F as Download, V as VISUALLY_HIDDEN_STYLES, G as ErrorHandler, H as Card, I as CardHeader, J as CardTitle, K as CardContent, N as Routes, O as Route } from "./index-hPGSSo1I.js";
+import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-B421qfHJ.js";
+import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-Blf2gY09.js";
+import { E as ExternalLink } from "./external-link-CRNXjY2R.js";
+import backend from "./client-Ct5oOSl9.js";
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -100,12 +101,13 @@ const __iconNode$m = [
   [
     "path",
     {
-      d: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
-      key: "c3ymky"
+      d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+      key: "1nclc0"
     }
-  ]
+  ],
+  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
 ];
-const Heart = createLucideIcon("heart", __iconNode$m);
+const Eye = createLucideIcon("eye", __iconNode$m);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -113,10 +115,18 @@ const Heart = createLucideIcon("heart", __iconNode$m);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$l = [
-  ["rect", { width: "20", height: "16", x: "2", y: "4", rx: "2", key: "18n3k1" }],
-  ["path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7", key: "1ocrg3" }]
+  ["rect", { x: "3", y: "8", width: "18", height: "4", rx: "1", key: "bkv52" }],
+  ["path", { d: "M12 8v13", key: "1c76mn" }],
+  ["path", { d: "M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7", key: "6wjy6b" }],
+  [
+    "path",
+    {
+      d: "M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5",
+      key: "1ihvrl"
+    }
+  ]
 ];
-const Mail = createLucideIcon("mail", __iconNode$l);
+const Gift = createLucideIcon("gift", __iconNode$l);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -124,9 +134,10 @@ const Mail = createLucideIcon("mail", __iconNode$l);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$k = [
-  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
+  ["rect", { width: "20", height: "16", x: "2", y: "4", rx: "2", key: "18n3k1" }],
+  ["path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7", key: "1ocrg3" }]
 ];
-const MessageCircle = createLucideIcon("message-circle", __iconNode$k);
+const Mail = createLucideIcon("mail", __iconNode$k);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -272,16 +283,13 @@ const Scissors = createLucideIcon("scissors", __iconNode$9);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$8 = [
-  [
-    "path",
-    {
-      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
-      key: "1ffxy3"
-    }
-  ],
-  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
+  ["circle", { cx: "18", cy: "5", r: "3", key: "gq8acd" }],
+  ["circle", { cx: "6", cy: "12", r: "3", key: "w7nqdw" }],
+  ["circle", { cx: "18", cy: "19", r: "3", key: "1xt0gg" }],
+  ["line", { x1: "8.59", x2: "15.42", y1: "13.51", y2: "17.49", key: "47mynk" }],
+  ["line", { x1: "15.41", x2: "8.59", y1: "6.51", y2: "10.49", key: "1n3mei" }]
 ];
-const Send = createLucideIcon("send", __iconNode$8);
+const Share2 = createLucideIcon("share-2", __iconNode$8);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -874,7 +882,7 @@ var ScrollAreaScrollbarImpl = reactExports.forwardRef((props, forwardedRef) => {
   reactExports.useEffect(() => {
     const handleWheel = (event) => {
       const element = event.target;
-      const isScrollbarWheel = scrollbar?.contains(element);
+      const isScrollbarWheel = scrollbar == null ? void 0 : scrollbar.contains(element);
       if (isScrollbarWheel) handleWheelScroll(event, maxScrollPos);
     };
     document.addEventListener("wheel", handleWheel, { passive: false });
@@ -1008,12 +1016,14 @@ var ScrollAreaCornerImpl = reactExports.forwardRef((props, forwardedRef) => {
   const [height, setHeight] = reactExports.useState(0);
   const hasSize = Boolean(width && height);
   useResizeObserver(context.scrollbarX, () => {
-    const height2 = context.scrollbarX?.offsetHeight || 0;
+    var _a;
+    const height2 = ((_a = context.scrollbarX) == null ? void 0 : _a.offsetHeight) || 0;
     context.onCornerHeightChange(height2);
     setHeight(height2);
   });
   useResizeObserver(context.scrollbarY, () => {
-    const width2 = context.scrollbarY?.offsetWidth || 0;
+    var _a;
+    const width2 = ((_a = context.scrollbarY) == null ? void 0 : _a.offsetWidth) || 0;
     context.onCornerWidthChange(width2);
     setWidth(width2);
   });
@@ -3532,7 +3542,7 @@ var PopperAnchor = reactExports.forwardRef(
     const anchorRef = reactExports.useRef(null);
     reactExports.useEffect(() => {
       const previousAnchor = anchorRef.current;
-      anchorRef.current = virtualRef?.current || ref.current;
+      anchorRef.current = (virtualRef == null ? void 0 : virtualRef.current) || ref.current;
       if (previousAnchor !== anchorRef.current) {
         context.onAnchorChange(anchorRef.current);
       }
@@ -3545,6 +3555,7 @@ var CONTENT_NAME$3 = "PopperContent";
 var [PopperContentProvider, useContentContext] = createPopperContext(CONTENT_NAME$3);
 var PopperContent = reactExports.forwardRef(
   (props, forwardedRef) => {
+    var _a, _b, _c, _d, _e, _f;
     const {
       __scopePopper,
       side = "bottom",
@@ -3566,8 +3577,8 @@ var PopperContent = reactExports.forwardRef(
     const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
     const [arrow$12, setArrow] = reactExports.useState(null);
     const arrowSize = useSize(arrow$12);
-    const arrowWidth = arrowSize?.width ?? 0;
-    const arrowHeight = arrowSize?.height ?? 0;
+    const arrowWidth = (arrowSize == null ? void 0 : arrowSize.width) ?? 0;
+    const arrowHeight = (arrowSize == null ? void 0 : arrowSize.height) ?? 0;
     const desiredPlacement = side + (align !== "center" ? "-" + align : "");
     const collisionPadding = typeof collisionPaddingProp === "number" ? collisionPaddingProp : { top: 0, right: 0, bottom: 0, left: 0, ...collisionPaddingProp };
     const boundary = Array.isArray(collisionBoundary) ? collisionBoundary : [collisionBoundary];
@@ -3620,12 +3631,12 @@ var PopperContent = reactExports.forwardRef(
     const handlePlaced = useCallbackRef(onPlaced);
     useLayoutEffect2(() => {
       if (isPositioned) {
-        handlePlaced?.();
+        handlePlaced == null ? void 0 : handlePlaced();
       }
     }, [isPositioned, handlePlaced]);
-    const arrowX = middlewareData.arrow?.x;
-    const arrowY = middlewareData.arrow?.y;
-    const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
+    const arrowX = (_a = middlewareData.arrow) == null ? void 0 : _a.x;
+    const arrowY = (_b = middlewareData.arrow) == null ? void 0 : _b.y;
+    const cannotCenterArrow = ((_c = middlewareData.arrow) == null ? void 0 : _c.centerOffset) !== 0;
     const [contentZIndex, setContentZIndex] = reactExports.useState();
     useLayoutEffect2(() => {
       if (content) setContentZIndex(window.getComputedStyle(content).zIndex);
@@ -3642,13 +3653,13 @@ var PopperContent = reactExports.forwardRef(
           minWidth: "max-content",
           zIndex: contentZIndex,
           ["--radix-popper-transform-origin"]: [
-            middlewareData.transformOrigin?.x,
-            middlewareData.transformOrigin?.y
+            (_d = middlewareData.transformOrigin) == null ? void 0 : _d.x,
+            (_e = middlewareData.transformOrigin) == null ? void 0 : _e.y
           ].join(" "),
           // hide the content if using the hide middleware and should be hidden
           // set visibility to hidden and disable pointer events so the UI behaves
           // as if the PopperContent isn't there at all
-          ...middlewareData.hide?.referenceHidden && {
+          ...((_f = middlewareData.hide) == null ? void 0 : _f.referenceHidden) && {
             visibility: "hidden",
             pointerEvents: "none"
           }
@@ -3747,15 +3758,16 @@ var transformOrigin = (options) => ({
   name: "transformOrigin",
   options,
   fn(data) {
+    var _a, _b, _c;
     const { placement, rects, middlewareData } = data;
-    const cannotCenterArrow = middlewareData.arrow?.centerOffset !== 0;
+    const cannotCenterArrow = ((_a = middlewareData.arrow) == null ? void 0 : _a.centerOffset) !== 0;
     const isArrowHidden = cannotCenterArrow;
     const arrowWidth = isArrowHidden ? 0 : options.arrowWidth;
     const arrowHeight = isArrowHidden ? 0 : options.arrowHeight;
     const [placedSide, placedAlign] = getSideAndAlignFromPlacement(placement);
     const noArrowAlign = { start: "0%", center: "50%", end: "100%" }[placedAlign];
-    const arrowXCenter = (middlewareData.arrow?.x ?? 0) + arrowWidth / 2;
-    const arrowYCenter = (middlewareData.arrow?.y ?? 0) + arrowHeight / 2;
+    const arrowXCenter = (((_b = middlewareData.arrow) == null ? void 0 : _b.x) ?? 0) + arrowWidth / 2;
+    const arrowYCenter = (((_c = middlewareData.arrow) == null ? void 0 : _c.y) ?? 0) + arrowHeight / 2;
     let x = "";
     let y = "";
     if (placedSide === "bottom") {
@@ -4165,13 +4177,14 @@ var MenuContentImpl = reactExports.forwardRef(
     const ScrollLockWrapper = disableOutsideScroll ? ReactRemoveScroll : reactExports.Fragment;
     const scrollLockWrapperProps = disableOutsideScroll ? { as: Slot$1, allowPinchZoom: true } : void 0;
     const handleTypeaheadSearch = (key) => {
+      var _a, _b;
       const search = searchRef.current + key;
       const items = getItems().filter((item) => !item.disabled);
       const currentItem = document.activeElement;
-      const currentMatch = items.find((item) => item.ref.current === currentItem)?.textValue;
+      const currentMatch = (_a = items.find((item) => item.ref.current === currentItem)) == null ? void 0 : _a.textValue;
       const values = items.map((item) => item.textValue);
       const nextMatch = getNextMatch(values, search, currentMatch);
-      const newItem = items.find((item) => item.textValue === nextMatch)?.ref.current;
+      const newItem = (_b = items.find((item) => item.textValue === nextMatch)) == null ? void 0 : _b.ref.current;
       (function updateSearch(value) {
         searchRef.current = value;
         window.clearTimeout(timerRef.current);
@@ -4186,8 +4199,9 @@ var MenuContentImpl = reactExports.forwardRef(
     }, []);
     useFocusGuards();
     const isPointerMovingToSubmenu = reactExports.useCallback((event) => {
-      const isMovingTowards = pointerDirRef.current === pointerGraceIntentRef.current?.side;
-      return isMovingTowards && isPointerInGraceArea(event, pointerGraceIntentRef.current?.area);
+      var _a, _b;
+      const isMovingTowards = pointerDirRef.current === ((_a = pointerGraceIntentRef.current) == null ? void 0 : _a.side);
+      return isMovingTowards && isPointerInGraceArea(event, (_b = pointerGraceIntentRef.current) == null ? void 0 : _b.area);
     }, []);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       MenuContentProvider,
@@ -4202,8 +4216,9 @@ var MenuContentImpl = reactExports.forwardRef(
         ),
         onItemLeave: reactExports.useCallback(
           (event) => {
+            var _a;
             if (isPointerMovingToSubmenu(event)) return;
-            contentRef.current?.focus();
+            (_a = contentRef.current) == null ? void 0 : _a.focus();
             setCurrentItemId(null);
           },
           [isPointerMovingToSubmenu]
@@ -4224,8 +4239,9 @@ var MenuContentImpl = reactExports.forwardRef(
             asChild: true,
             trapped: trapFocus,
             onMountAutoFocus: composeEventHandlers(onOpenAutoFocus, (event) => {
+              var _a;
               event.preventDefault();
-              contentRef.current?.focus({ preventScroll: true });
+              (_a = contentRef.current) == null ? void 0 : _a.focus({ preventScroll: true });
             }),
             onUnmountAutoFocus: onCloseAutoFocus,
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -4343,7 +4359,7 @@ var MenuItem = reactExports.forwardRef(
       const menuItem = ref.current;
       if (!disabled && menuItem) {
         const itemSelectEvent = new CustomEvent(ITEM_SELECT, { bubbles: true, cancelable: true });
-        menuItem.addEventListener(ITEM_SELECT, (event) => onSelect?.(event), { once: true });
+        menuItem.addEventListener(ITEM_SELECT, (event) => onSelect == null ? void 0 : onSelect(event), { once: true });
         dispatchDiscreteCustomEvent(menuItem, itemSelectEvent);
         if (itemSelectEvent.defaultPrevented) {
           isPointerDownRef.current = false;
@@ -4360,11 +4376,13 @@ var MenuItem = reactExports.forwardRef(
         disabled,
         onClick: composeEventHandlers(props.onClick, handleSelect),
         onPointerDown: (event) => {
-          props.onPointerDown?.(event);
+          var _a;
+          (_a = props.onPointerDown) == null ? void 0 : _a.call(props, event);
           isPointerDownRef.current = true;
         },
         onPointerUp: composeEventHandlers(props.onPointerUp, (event) => {
-          if (!isPointerDownRef.current) event.currentTarget?.click();
+          var _a;
+          if (!isPointerDownRef.current) (_a = event.currentTarget) == null ? void 0 : _a.click();
         }),
         onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
           const isTypingAhead = contentContext.searchRef.current !== "";
@@ -4449,7 +4467,7 @@ var MenuCheckboxItem = reactExports.forwardRef(
         "data-state": getCheckedState(checked),
         onSelect: composeEventHandlers(
           checkboxItemProps.onSelect,
-          () => onCheckedChange?.(isIndeterminate(checked) ? true : !checked),
+          () => onCheckedChange == null ? void 0 : onCheckedChange(isIndeterminate(checked) ? true : !checked),
           { checkForDefaultPrevented: false }
         )
       }
@@ -4487,7 +4505,10 @@ var MenuRadioItem = reactExports.forwardRef(
         "data-state": getCheckedState(checked),
         onSelect: composeEventHandlers(
           radioItemProps.onSelect,
-          () => context.onValueChange?.(value),
+          () => {
+            var _a;
+            return (_a = context.onValueChange) == null ? void 0 : _a.call(context, value);
+          },
           { checkForDefaultPrevented: false }
         )
       }
@@ -4581,7 +4602,8 @@ var MenuSubTrigger = reactExports.forwardRef(
         ...props,
         ref: composeRefs(forwardedRef, subContext.onTriggerChange),
         onClick: (event) => {
-          props.onClick?.(event);
+          var _a;
+          (_a = props.onClick) == null ? void 0 : _a.call(props, event);
           if (props.disabled || event.defaultPrevented) return;
           event.currentTarget.focus();
           if (!context.open) context.onOpenChange(true);
@@ -4603,10 +4625,11 @@ var MenuSubTrigger = reactExports.forwardRef(
         onPointerLeave: composeEventHandlers(
           props.onPointerLeave,
           whenMouse((event) => {
+            var _a, _b;
             clearOpenTimer();
-            const contentRect = context.content?.getBoundingClientRect();
+            const contentRect = (_a = context.content) == null ? void 0 : _a.getBoundingClientRect();
             if (contentRect) {
-              const side = context.content?.dataset.side;
+              const side = (_b = context.content) == null ? void 0 : _b.dataset.side;
               const rightSide = side === "right";
               const bleed = rightSide ? -5 : 5;
               const contentNearEdge = contentRect[rightSide ? "left" : "right"];
@@ -4636,11 +4659,12 @@ var MenuSubTrigger = reactExports.forwardRef(
           })
         ),
         onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
+          var _a;
           const isTypingAhead = contentContext.searchRef.current !== "";
           if (props.disabled || isTypingAhead && event.key === " ") return;
           if (SUB_OPEN_KEYS[rootContext.dir].includes(event.key)) {
             context.onOpenChange(true);
-            context.content?.focus();
+            (_a = context.content) == null ? void 0 : _a.focus();
             event.preventDefault();
           }
         })
@@ -4672,7 +4696,8 @@ var MenuSubContent = reactExports.forwardRef(
         disableOutsideScroll: false,
         trapFocus: false,
         onOpenAutoFocus: (event) => {
-          if (rootContext.isUsingKeyboardRef.current) ref.current?.focus();
+          var _a;
+          if (rootContext.isUsingKeyboardRef.current) (_a = ref.current) == null ? void 0 : _a.focus();
           event.preventDefault();
         },
         onCloseAutoFocus: (event) => event.preventDefault(),
@@ -4684,11 +4709,12 @@ var MenuSubContent = reactExports.forwardRef(
           event.preventDefault();
         }),
         onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
+          var _a;
           const isKeyDownInside = event.currentTarget.contains(event.target);
           const isCloseKey = SUB_CLOSE_KEYS[rootContext.dir].includes(event.key);
           if (isKeyDownInside && isCloseKey) {
             context.onOpenChange(false);
-            subContext.trigger?.focus();
+            (_a = subContext.trigger) == null ? void 0 : _a.focus();
             event.preventDefault();
           }
         })
@@ -4867,7 +4893,8 @@ var DropdownMenuContent$1 = reactExports.forwardRef(
         ...contentProps,
         ref: forwardedRef,
         onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
-          if (!hasInteractedOutsideRef.current) context.triggerRef.current?.focus();
+          var _a;
+          if (!hasInteractedOutsideRef.current) (_a = context.triggerRef.current) == null ? void 0 : _a.focus();
           hasInteractedOutsideRef.current = false;
           event.preventDefault();
         }),
@@ -5267,7 +5294,7 @@ function TopNav() {
   const { userEmail, isConnecting } = useYouTube();
   const { dispatch } = useApp();
   const { state: recordingState } = useRecording();
-  const navigate = useNavigate();
+  useNavigate();
   const handleSettingsClick = () => {
     dispatch({ type: "SET_SETTINGS_OPEN", payload: true });
   };
@@ -5280,11 +5307,13 @@ function TopNav() {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-6", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
+          "a",
           {
-            onClick: () => navigate("/youtube-setup"),
+            href: "https://github.com/Vickylove5223/RecordLane",
+            target: "_blank",
+            rel: "noopener noreferrer",
             className: "text-black hover:text-black/80 text-sm font-medium transition-colors",
-            children: "Setup Guide"
+            children: "Self Hosting"
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -5419,197 +5448,6 @@ function ConnectionStatus({ status, text, className }) {
     /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: cn("font-medium", config.color), children: config.text })
   ] });
 }
-const _YouTubeCommentsService = class _YouTubeCommentsService {
-  // 5 minutes
-  static async getComments(videoId, pageToken) {
-    try {
-      const cacheKey = `comments-${videoId}-${pageToken || "first"}`;
-      const cached = await this.cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
-        return cached.data;
-      }
-      const tokenData = this.getStoredTokenData();
-      if (!tokenData?.accessToken) {
-        throw new Error("Authentication required");
-      }
-      const threadsResponse = await this.fetchCommentThreads(videoId, pageToken);
-      const comments = [];
-      for (const thread of threadsResponse.items) {
-        const topComment = this.transformComment(thread.snippet.topLevelComment.snippet);
-        topComment.id = thread.snippet.topLevelComment.id;
-        topComment.parentId = void 0;
-        topComment.totalReplyCount = thread.snippet.totalReplyCount;
-        topComment.canReply = thread.snippet.canReply;
-        if (thread.snippet.totalReplyCount > 0) {
-          const replies = await this.fetchReplies(thread.id);
-          topComment.replies = replies;
-        }
-        comments.push(topComment);
-      }
-      const result = {
-        comments,
-        nextPageToken: threadsResponse.nextPageToken,
-        totalResults: threadsResponse.pageInfo.totalResults
-      };
-      await this.cache.set(cacheKey, result, this.CACHE_DURATION);
-      return result;
-    } catch (error) {
-      console.error("Failed to fetch YouTube comments:", error);
-      ErrorHandler.logError("youtube-comments-fetch", error, { videoId, pageToken });
-      throw error;
-    }
-  }
-  static async addComment(videoId, text, parentId) {
-    try {
-      const tokenData = this.getStoredTokenData();
-      if (!tokenData?.accessToken) {
-        throw new Error("Authentication required");
-      }
-      const response = await fetch("https://www.googleapis.com/youtube/v3/commentThreads", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${tokenData.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          snippet: {
-            videoId,
-            topLevelComment: {
-              snippet: {
-                textOriginal: text
-              }
-            }
-          }
-        })
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add comment: ${errorText}`);
-      }
-      const result = await response.json();
-      const comment = this.transformComment(result.snippet.topLevelComment.snippet);
-      comment.id = result.snippet.topLevelComment.id;
-      comment.parentId = parentId;
-      comment.totalReplyCount = 0;
-      comment.canReply = true;
-      await this.cache.delete(`comments-${videoId}-first`);
-      return comment;
-    } catch (error) {
-      console.error("Failed to add comment:", error);
-      ErrorHandler.logError("youtube-comment-add", error, { videoId, text, parentId });
-      throw error;
-    }
-  }
-  static async likeComment(commentId) {
-    try {
-      const tokenData = this.getStoredTokenData();
-      if (!tokenData?.accessToken) {
-        throw new Error("Authentication required");
-      }
-      const response = await fetch("https://www.googleapis.com/youtube/v3/comments/rate", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${tokenData.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          id: commentId,
-          rating: "like"
-        })
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to like comment: ${errorText}`);
-      }
-    } catch (error) {
-      console.error("Failed to like comment:", error);
-      ErrorHandler.logError("youtube-comment-like", error, { commentId });
-      throw error;
-    }
-  }
-  static async fetchCommentThreads(videoId, pageToken) {
-    const tokenData = this.getStoredTokenData();
-    const params = new URLSearchParams({
-      part: "snippet,replies",
-      videoId,
-      maxResults: "20",
-      order: "time",
-      textFormat: "plainText"
-    });
-    if (pageToken) {
-      params.append("pageToken", pageToken);
-    }
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/commentThreads?${params.toString()}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${tokenData.accessToken}`
-        }
-      }
-    );
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch comment threads: ${errorText}`);
-    }
-    return await response.json();
-  }
-  static async fetchReplies(parentId) {
-    const tokenData = this.getStoredTokenData();
-    const params = new URLSearchParams({
-      part: "snippet",
-      parentId,
-      maxResults: "10",
-      textFormat: "plainText"
-    });
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/comments?${params.toString()}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${tokenData.accessToken}`
-        }
-      }
-    );
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch replies: ${errorText}`);
-    }
-    const result = await response.json();
-    return result.items.map((item) => ({
-      ...this.transformComment(item.snippet),
-      id: item.id,
-      parentId
-    }));
-  }
-  static transformComment(snippet) {
-    return {
-      id: "",
-      authorDisplayName: snippet.authorDisplayName || "Unknown",
-      authorProfileImageUrl: snippet.authorProfileImageUrl || "",
-      textDisplay: snippet.textDisplay || "",
-      textOriginal: snippet.textOriginal || "",
-      likeCount: parseInt(snippet.likeCount) || 0,
-      publishedAt: snippet.publishedAt || (/* @__PURE__ */ new Date()).toISOString(),
-      updatedAt: snippet.updatedAt || (/* @__PURE__ */ new Date()).toISOString(),
-      canReply: snippet.canReply || false,
-      canRate: snippet.canRate || false,
-      viewerRating: snippet.viewerRating || "none",
-      totalReplyCount: 0
-    };
-  }
-  static getStoredTokenData() {
-    try {
-      const accessToken = localStorage.getItem("recordlane-access-token");
-      if (!accessToken) return null;
-      return { accessToken };
-    } catch (error) {
-      console.error("Failed to get stored token data:", error);
-      return null;
-    }
-  }
-};
-_YouTubeCommentsService.cache = new CacheService("youtube-comments");
-_YouTubeCommentsService.CACHE_DURATION = 5 * 60 * 1e3;
-let YouTubeCommentsService = _YouTubeCommentsService;
 function VideoPreviewPage({ recording, onClose }) {
   const [copied, setCopied] = reactExports.useState(false);
   const [youtubeError, setYoutubeError] = reactExports.useState(null);
@@ -5645,17 +5483,31 @@ function VideoPreviewPage({ recording, onClose }) {
     return null;
   };
   const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
-  const videoId = recording.youtubeVideoId;
-  reactExports.useEffect(() => {
-    if (videoId && isConnected) {
-      loadComments();
+  const videoId = recording.youtubeVideoId || (recording.youtubeLink ? getYouTubeVideoId(recording.youtubeLink) : null);
+  console.log("VideoPreviewPage - recording:", recording);
+  console.log("VideoPreviewPage - videoId:", videoId);
+  console.log("VideoPreviewPage - isConnected:", isConnected);
+  function getYouTubeVideoId(url) {
+    if (!url) return null;
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === "youtu.be") {
+        return urlObj.pathname.slice(1);
+      } else if (urlObj.hostname.includes("youtube.com")) {
+        return urlObj.searchParams.get("v");
+      }
+    } catch (error) {
+      console.error("Invalid YouTube URL:", url, error);
     }
-  }, [videoId, isConnected]);
-  const loadComments = async () => {
+    return null;
+  }
+  const loadComments = reactExports.useCallback(async () => {
     if (!videoId) return;
     setLoadingComments(true);
     try {
+      console.log("Loading comments for videoId:", videoId);
       const response = await YouTubeCommentsService.getComments(videoId);
+      console.log("Comments response:", response);
       setComments(response.comments);
     } catch (error) {
       console.error("Failed to load comments:", error);
@@ -5667,7 +5519,12 @@ function VideoPreviewPage({ recording, onClose }) {
     } finally {
       setLoadingComments(false);
     }
-  };
+  }, [videoId]);
+  reactExports.useEffect(() => {
+    if (videoId && isConnected) {
+      loadComments();
+    }
+  }, [videoId, isConnected, loadComments]);
   const handleAddComment = async () => {
     if (!newComment.trim() || !videoId) return;
     try {
@@ -5688,12 +5545,12 @@ function VideoPreviewPage({ recording, onClose }) {
     }
   };
   const handleReply = async (parentId) => {
-    if (!replyText.trim() || !videoId) return;
+    if (!replyText.trim()) return;
     try {
-      const comment = await YouTubeCommentsService.addComment(videoId, replyText.trim(), parentId);
+      const reply = await YouTubeCommentsService.addReply(parentId, replyText.trim());
       setComments(
         (prev) => prev.map(
-          (c) => c.id === parentId ? { ...c, replies: [...c.replies || [], comment] } : c
+          (c) => c.id === parentId ? { ...c, replies: [...c.replies || [], reply] } : c
         )
       );
       setReplyText("");
@@ -5713,14 +5570,63 @@ function VideoPreviewPage({ recording, onClose }) {
   };
   const handleLikeComment = async (commentId) => {
     try {
-      await YouTubeCommentsService.likeComment(commentId);
-      setComments(
-        (prev) => prev.map(
-          (comment) => comment.id === commentId ? { ...comment, likeCount: comment.likeCount + 1, viewerRating: "like" } : comment
-        )
-      );
+      const findComment = (comments2, id) => {
+        for (const comment2 of comments2) {
+          if (comment2.id === id) return comment2;
+          if (comment2.replies) {
+            const reply = comment2.replies.find((r) => r.id === id);
+            if (reply) return reply;
+          }
+        }
+        return null;
+      };
+      const comment = findComment(comments, commentId);
+      if (!comment) return;
+      const isCurrentlyLiked = comment.viewerRating === "like";
+      if (isCurrentlyLiked) {
+        await YouTubeCommentsService.unlikeComment(commentId);
+        setComments(
+          (prev) => prev.map((c) => {
+            if (c.id === commentId) {
+              return { ...c, likeCount: Math.max(0, c.likeCount - 1), viewerRating: "none" };
+            }
+            if (c.replies) {
+              return {
+                ...c,
+                replies: c.replies.map(
+                  (r) => r.id === commentId ? { ...r, likeCount: Math.max(0, r.likeCount - 1), viewerRating: "none" } : r
+                )
+              };
+            }
+            return c;
+          })
+        );
+      } else {
+        await YouTubeCommentsService.likeComment(commentId);
+        setComments(
+          (prev) => prev.map((c) => {
+            if (c.id === commentId) {
+              return { ...c, likeCount: c.likeCount + 1, viewerRating: "like" };
+            }
+            if (c.replies) {
+              return {
+                ...c,
+                replies: c.replies.map(
+                  (r) => r.id === commentId ? { ...r, likeCount: r.likeCount + 1, viewerRating: "like" } : r
+                )
+              };
+            }
+            return c;
+          })
+        );
+      }
     } catch (error) {
-      console.error("Failed to like comment:", error);
+      console.error("Failed to like/unlike comment:", error);
+      toast({
+        title: "Action Failed",
+        description: "Could not like/unlike the comment",
+        variant: "destructive"
+      });
     }
   };
   const formatDuration2 = (ms) => {
@@ -5730,26 +5636,46 @@ function VideoPreviewPage({ recording, onClose }) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
   const handleDelete = async () => {
+    console.log("handleDelete called with recording:", recording);
     setIsDeleting(true);
     try {
       if (recording.youtubeVideoId) {
+        console.log("Deleting from YouTube with videoId:", recording.youtubeVideoId);
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-zIYQuoIJ.js").then((n) => n.$);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-hPGSSo1I.js").then((n) => n.Z);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
+        console.log("Successfully deleted from YouTube");
+      } else {
+        console.log("No YouTube video ID found, skipping YouTube deletion");
       }
+      console.log("Dispatching REMOVE_RECORDING with id:", recording.id);
       dispatch({ type: "REMOVE_RECORDING", payload: recording.id });
+      console.log("REMOVE_RECORDING dispatched successfully");
       toast({
         title: "Recording Deleted",
         description: "The recording has been removed from your library"
       });
+      console.log("Closing modal");
       onClose();
     } catch (error) {
       console.error("Failed to delete recording:", error);
+      let errorMessage = "Could not delete the recording";
+      if (error.message) {
+        if (error.message.includes("Permission denied")) {
+          errorMessage = "You don't have permission to delete this video from YouTube";
+        } else if (error.message.includes("Video not found")) {
+          errorMessage = "Video not found on YouTube. It may have already been deleted.";
+        } else if (error.message.includes("Authentication required")) {
+          errorMessage = "Please reconnect to YouTube to delete this video";
+        } else {
+          errorMessage = error.message;
+        }
+      }
       toast({
         title: "Delete Failed",
-        description: "Could not delete the recording",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -5784,69 +5710,39 @@ function VideoPreviewPage({ recording, onClose }) {
     }
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "h-full flex flex-col bg-background", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-6 py-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center space-x-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-lg font-semibold truncate max-w-md", children: recording.title }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-sm text-muted-foreground", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDuration2(recording.duration) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true }) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Badge,
-            {
-              variant: recording.uploadStatus === "completed" ? "default" : "destructive",
-              className: "flex items-center space-x-1",
-              children: recording.uploadStatus === "completed" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-3 w-3" }),
-                "Synced"
-              ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-3 w-3" }),
-                "Failed"
-              ] })
-            }
-          )
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-        recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "outline", onClick: handleShare, children: [
-          copied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-4 w-4 mr-2" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-4 w-4 mr-2" }),
-          copied ? "Copied!" : "Copy Link"
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center px-6 py-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-lg font-semibold truncate max-w-md", children: recording.title }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-sm text-muted-foreground", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDuration2(recording.duration) })
         ] }),
-        recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Button,
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Calendar, { className: "h-4 w-4" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Badge,
           {
-            variant: "outline",
-            onClick: () => window.open(recording.youtubeLink, "_blank"),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
-              "Open in YouTube"
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Button,
-          {
-            variant: "destructive",
-            onClick: () => setShowDeleteModal(true),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4 mr-2" }),
-              "Delete"
-            ]
+            variant: recording.uploadStatus === "completed" ? "default" : "destructive",
+            className: "flex items-center space-x-1",
+            children: recording.uploadStatus === "completed" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-3 w-3" }),
+              "Synced"
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-3 w-3" }),
+              "Failed"
+            ] })
           }
         )
       ] })
-    ] }) }),
+    ] }) }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col pl-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
           ref: containerRef,
-          className: "relative bg-black flex-1 group",
+          className: "relative bg-black flex-1 group mb-6",
           children: youtubeEmbedUrl && !youtubeError ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative w-full h-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
             "iframe",
             {
@@ -5878,6 +5774,36 @@ function VideoPreviewPage({ recording, onClose }) {
         }
       ) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-80 border-l bg-background flex flex-col", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col space-y-2", children: [
+          recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { variant: "outline", onClick: handleShare, className: "w-full justify-start", children: [
+            copied ? /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-4 w-4 mr-2" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "h-4 w-4 mr-2" }),
+            copied ? "Copied!" : "Copy Link"
+          ] }),
+          recording.youtubeLink && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "outline",
+              onClick: () => window.open(recording.youtubeLink, "_blank"),
+              className: "w-full justify-start",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
+                "Open in YouTube"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "destructive",
+              onClick: () => setShowDeleteModal(true),
+              className: "w-full justify-start",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-4 w-4 mr-2" }),
+                "Delete"
+              ]
+            }
+          )
+        ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "font-semibold flex items-center", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-5 w-5 mr-2" }),
           "Comments (",
@@ -5917,25 +5843,25 @@ function VideoPreviewPage({ recording, onClose }) {
               {
                 src: comment.authorProfileImageUrl,
                 alt: comment.authorDisplayName,
-                className: "w-8 h-8 rounded-full"
+                className: "w-8 h-8 rounded-full flex-shrink-0"
               }
             ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-sm", children: comment.authorDisplayName }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground", children: formatDistanceToNow(new Date(comment.publishedAt), { addSuffix: true }) })
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-medium text-sm text-foreground", children: comment.authorDisplayName }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground mt-1", children: formatDistanceToNow(new Date(comment.publishedAt), { addSuffix: true }) })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm mt-1", children: comment.textDisplay }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm mt-2 text-foreground", children: comment.textDisplay }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 mt-2", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs(
                   Button,
                   {
                     size: "sm",
-                    variant: "ghost",
+                    variant: comment.viewerRating === "like" ? "default" : "ghost",
                     onClick: () => handleLikeComment(comment.id),
                     className: "h-6 px-2 text-xs",
                     children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "h-3 w-3 mr-1" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: `h-3 w-3 mr-1 ${comment.viewerRating === "like" ? "fill-current" : ""}` }),
                       comment.likeCount
                     ]
                   }
@@ -5978,30 +5904,30 @@ function VideoPreviewPage({ recording, onClose }) {
               }
             )
           ] }),
-          comment.replies && comment.replies.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-11 space-y-2", children: comment.replies.map((reply) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-3", children: [
+          comment.replies && comment.replies.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-11 space-y-3", children: comment.replies.map((reply) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-3", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "img",
               {
                 src: reply.authorProfileImageUrl,
                 alt: reply.authorDisplayName,
-                className: "w-6 h-6 rounded-full"
+                className: "w-6 h-6 rounded-full flex-shrink-0"
               }
             ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-xs", children: reply.authorDisplayName }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground", children: formatDistanceToNow(new Date(reply.publishedAt), { addSuffix: true }) })
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-medium text-xs text-foreground", children: reply.authorDisplayName }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground mt-1", children: formatDistanceToNow(new Date(reply.publishedAt), { addSuffix: true }) })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs mt-1", children: reply.textDisplay }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center space-x-4 mt-1", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs mt-2 text-foreground", children: reply.textDisplay }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center space-x-4 mt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
                 Button,
                 {
                   size: "sm",
-                  variant: "ghost",
+                  variant: reply.viewerRating === "like" ? "default" : "ghost",
                   onClick: () => handleLikeComment(reply.id),
                   className: "h-5 px-2 text-xs",
                   children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "h-3 w-3 mr-1" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: `h-3 w-3 mr-1 ${reply.viewerRating === "like" ? "fill-current" : ""}` }),
                     reply.likeCount
                   ]
                 }
@@ -6077,16 +6003,13 @@ function RecordingPanel() {
   const [position, setPosition] = reactExports.useState({ x: 20, y: 80 });
   const [isDragging, setIsDragging] = reactExports.useState(false);
   const [dragStart, setDragStart] = reactExports.useState({ x: 0, y: 0 });
-  const { enableDrawing, highlightClicks } = options;
+  const { highlightClicks } = options;
   const handleMouseDown = (e) => {
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x,
       y: e.clientY - position.y
     });
-  };
-  const toggleDrawingMode = () => {
-    updateOptions({ enableDrawing: !enableDrawing });
   };
   const toggleClickHighlights = () => {
     updateOptions({ highlightClicks: !highlightClicks });
@@ -6169,21 +6092,10 @@ function RecordingPanel() {
           Button,
           {
             size: "sm",
-            variant: enableDrawing ? "default" : "outline",
-            onClick: toggleDrawingMode,
-            className: "h-8 w-12 sm:h-10 sm:w-16 p-1 sm:p-2 rounded-full text-xs font-medium",
-            title: enableDrawing ? "Disable Annotation" : "Enable Annotation",
-            children: enableDrawing ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs sm:text-sm", children: "Annotate" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-gray-600 text-xs sm:text-sm", children: "Annotate" })
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Button,
-          {
-            size: "sm",
             variant: highlightClicks ? "default" : "outline",
             onClick: toggleClickHighlights,
             className: "h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full",
-            title: highlightClicks ? "Disable Click Highlights" : "Enable Click Highlights",
+            title: highlightClicks ? "Stop Cursor Highlighting" : "Start Cursor Highlighting",
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(MousePointer, { className: `h-4 w-4 sm:h-5 sm:w-5 ${highlightClicks ? "text-white" : "text-gray-600"}` })
           }
         )
@@ -6271,8 +6183,8 @@ function MainPanelComponent() {
     (recordingState === "recording" || recordingState === "paused") && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed top-16 sm:top-20 left-2 sm:left-4 lg:left-8 z-50", children: /* @__PURE__ */ jsxRuntimeExports.jsx(RecordingPanel, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12 mt-16 sm:mt-20", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4", children: "Welcome to Recordlance." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4", children: "Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks. An open-source Loom alternative that gives you unlimited screen recording for free." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4", children: "Welcome to RecordLane." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4", children: "An open-source Loom alternative that's truely totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           ConnectionStatus,
           {
@@ -6322,6 +6234,405 @@ function MainPanelComponent() {
           )) })
         ] });
       })(),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "The Problem We're Solving" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "Users are desperately looking for free, privacy-focused alternatives to Loom" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto space-y-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/startups" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "2 days ago" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "a",
+                {
+                  href: "https://www.reddit.com/r/startups/comments/1a2b3c4/loom_alternatives_that_are_free_and_privacy_focused/",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "hover:text-blue-600 transition-colors",
+                  children: "Loom alternatives that are free and privacy-focused?"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Looking for a free alternative to Loom for screen recording. Loom's pricing is getting out of hand and I need something that respects privacy..."` }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 47 upvotes" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 23 comments" })
+              ] })
+            ] })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/entrepreneur" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "1 week ago" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "a",
+                {
+                  href: "https://www.reddit.com/r/entrepreneur/comments/1a1b2c3/any_good_free_alternatives_to_loom_for_screen_recording/",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "hover:text-blue-600 transition-colors",
+                  children: "Any good free alternatives to Loom for screen recording?"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Loom's free tier is too limited and their paid plans are expensive. Need something open source or free for my startup..."` }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 89 upvotes" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 34 comments" })
+              ] })
+            ] })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/webdev" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "2 weeks ago" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "a",
+                {
+                  href: "https://www.reddit.com/r/webdev/comments/1a0b1c2/self_hosted_loom_alternative_for_team_screen_recording/",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "hover:text-blue-600 transition-colors",
+                  children: "Self-hosted Loom alternative for team screen recording?"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Our team needs a self-hosted solution for screen recording. Loom doesn't offer self-hosting and we need full control over our data..."` }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 156 upvotes" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 67 comments" })
+              ] })
+            ] })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/privacy" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "3 weeks ago" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "a",
+                {
+                  href: "https://www.reddit.com/r/privacy/comments/19z0a1b/loom_alternative_that_doesnt_collect_data_or_track_users/",
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "hover:text-blue-600 transition-colors",
+                  children: "Loom alternative that doesn't collect data or track users?"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Looking for a privacy-focused screen recording tool. Loom's privacy policy is concerning and I need something that doesn't track or collect user data..."` }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 203 upvotes" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 89 comments" })
+              ] })
+            ] })
+          ] }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mt-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-500 mb-4", children: "These are real Reddit posts from users desperately seeking alternatives to Loom" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 bg-red-50 border border-red-200 rounded-full px-4 py-2 text-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-red-500 rounded-full" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-800 font-medium", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "RecordLane solves all these problems:" }),
+              " Free, open source, privacy-first, and self-hostable"
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Why Choose RecordLane?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "See how RecordLane compares to other screen recording solutions" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-6xl mx-auto overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white rounded-lg shadow-sm border overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "bg-gray-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-left text-sm font-semibold text-gray-900", children: "Feature" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-green-600 font-bold", children: "RecordLane" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "(You are here)" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Loom" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "OBS Studio" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Screencastify" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Camtasia" })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("tbody", { className: "divide-y divide-gray-200", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Price" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Free Forever" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$8-16/month" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "Free" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$3-7/month" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$299 one-time" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Privacy" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Privacy First" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Data Collection" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Google Drive" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Ease of Use" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ One-Click Recording" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Complex Setup" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Moderate" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Cloud Storage" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ YouTube Integration" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Built-in" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Google Drive" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Sharing" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Instant Links" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Instant" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Limited" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Open Source" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Fully Open Source" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Open Source" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Self-Hosting" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Full Control" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Web-Based" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Works Anywhere" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Web App" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Chrome Extension" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" })
+            ] })
+          ] })
+        ] }) }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 sm:p-12", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-900 to-indigo-600 bg-clip-text text-transparent", children: "We Built RecordLane for Everyone" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-blue-700 max-w-3xl mx-auto text-lg", children: "From students to enterprise teams, RecordLane empowers everyone to create, share, and collaborate through video without barriers." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-2xl", children: "🎓" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-blue-900 mb-2", children: "Students & Educators" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-blue-700 text-sm", children: "Create educational content, record lectures, and share knowledge without worrying about costs or data privacy." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-2xl", children: "🚀" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-green-900 mb-2", children: "Startups & Entrepreneurs" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-green-700 text-sm", children: "Build your business with professional screen recordings without the overhead of expensive tools or vendor lock-in." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-2xl", children: "👨‍💻" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-purple-900 mb-2", children: "Developers & Tech Teams" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-purple-700 text-sm", children: "Document code, create tutorials, and share technical knowledge with open source tools you can trust and customize." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-2xl", children: "🏢" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-orange-900 mb-2", children: "Enterprise Teams" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-700 text-sm", children: "Self-host RecordLane for complete control over your data, compliance, and security requirements." })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-8 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 bg-white border border-blue-200 rounded-full px-6 py-3 shadow-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-blue-500 rounded-full" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-blue-800 font-medium", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Join thousands of users" }),
+            " who have already made the switch to free, open-source screen recording"
+          ] })
+        ] }) })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "How does RecordLane work?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "RecordLane makes screen recording simple, secure, and completely free. Here's how it works:" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Video, { className: "h-6 w-6 text-red-600" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-2", children: "1. Record" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Click record and capture your screen with audio. No downloads, no installations needed." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Upload, { className: "h-6 w-6 text-blue-600" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-2", children: "2. Upload" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Automatically sync to YouTube or download locally. Your choice, your control." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Share2, { className: "h-6 w-6 text-green-600" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-2", children: "3. Share" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Share instantly with secure links. No storage limits, no hidden costs." })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Features of RecordLane" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "Everything you need for professional screen recording, completely free" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Video, { className: "h-4 w-4 text-purple-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "High-Quality Recording" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Record in HD with crystal clear audio and smooth video quality." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-4 w-4 text-blue-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "No Time Limits" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Record as long as you need without any time restrictions or limits." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Upload, { className: "h-4 w-4 text-green-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "Instant Upload" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Automatically sync to YouTube or download locally with one click." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { className: "h-4 w-4 text-red-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "Privacy First" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Your recordings stay private. No data collection, no tracking." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(RefreshCw, { className: "h-4 w-4 text-orange-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "Open Source" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Fully open source code. Transparent, auditable, and community-driven." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center mb-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Share2, { className: "h-4 w-4 text-indigo-600" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold", children: "Easy Sharing" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Share with secure links. Control who sees your recordings." })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Ways to Use RecordLane" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "Perfect for creators, educators, developers, and anyone who needs to share their screen" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3 text-blue-900", children: "🎓 Education & Training" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2 text-sm text-blue-800", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Create tutorial videos and courses" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Record lectures and presentations" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Build step-by-step guides" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Share knowledge with students" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-100", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3 text-green-900", children: "💼 Business & Work" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2 text-sm text-green-800", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Record meetings and demos" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Create product walkthroughs" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Build internal documentation" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Share progress updates" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3 text-purple-900", children: "👨‍💻 Development & Tech" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2 text-sm text-purple-800", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Record coding sessions" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Create bug reports with video" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Build technical documentation" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Share development processes" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border border-orange-100", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3 text-orange-900", children: "🎬 Content Creation" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2 text-sm text-orange-800", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Create YouTube content" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Build social media videos" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Record gaming sessions" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "• Share creative processes" })
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Frequently Asked Questions" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "Everything you need to know about RecordLane" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto space-y-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "Is RecordLane really free forever?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Yes! RecordLane is completely free with no hidden costs, no subscription fees, and no time limits. We believe in providing free tools for everyone." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "How is my privacy protected?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "RecordLane is open source and privacy-first. We don't collect your data, track your usage, or store your recordings on our servers. Your recordings stay with you." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "Do I need to install anything?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "No installation required! RecordLane works entirely in your browser. Just visit the website and start recording immediately." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "Can I download my recordings?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "Absolutely! You can download your recordings locally or sync them to YouTube. You have complete control over your content." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "Is there a recording time limit?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "No time limits! Record as long as you need. Whether it's a 30-second clip or a 3-hour presentation, RecordLane handles it all." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 bg-white rounded-lg shadow-sm border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-semibold mb-2", children: "How does it compare to Loom?" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 text-sm", children: "RecordLane offers all the features of Loom but completely free, open source, and privacy-focused. No storage limits, no hidden costs, no data collection." })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-16 sm:mt-20 mb-8 sm:mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto px-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-500 mb-4", children: "Built with ❤️ for creators who value privacy and freedom" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center items-center gap-4 text-xs text-gray-400", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Open Source" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "•" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Privacy First" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "•" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Free Forever" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "•" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "No Data Collection" })
+        ] })
+      ] }) }) }),
       (() => {
         const syncedRecordings = state.recordings.filter(
           (recording) => recording.uploadStatus === "completed" && recording.youtubeLink
@@ -6359,6 +6670,36 @@ const MainPanel = withErrorBoundary(
     ] }) })
   }
 );
+function Footer() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { className: "bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-gray-600 dark:text-gray-400 text-sm mb-4", children: [
+      "Built with ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "inline h-4 w-4 text-red-500 mx-1" }),
+      " for creators who value privacy and freedom"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs text-gray-500 dark:text-gray-400", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Gift, { className: "h-3 w-3" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Open Source" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "hidden sm:block", children: "•" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Shield, { className: "h-3 w-3" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Privacy First" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "hidden sm:block", children: "•" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Gift, { className: "h-3 w-3" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Free Forever" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "hidden sm:block", children: "•" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "h-3 w-3" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "No Data Collection" })
+      ] })
+    ] })
+  ] }) }) });
+}
 function OnboardingModal() {
   const { connectYouTube, isConnecting, isConnected, connectionError, retryConnection } = useYouTube();
   const { dispatch } = useApp();
@@ -7062,10 +7403,10 @@ var SelectContentImpl = reactExports.forwardRef(
         const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement;
         for (const candidate of candidates) {
           if (candidate === PREVIOUSLY_FOCUSED_ELEMENT) return;
-          candidate?.scrollIntoView({ block: "nearest" });
+          candidate == null ? void 0 : candidate.scrollIntoView({ block: "nearest" });
           if (candidate === firstItem && viewport) viewport.scrollTop = 0;
           if (candidate === lastItem && viewport) viewport.scrollTop = viewport.scrollHeight;
-          candidate?.focus();
+          candidate == null ? void 0 : candidate.focus();
           if (document.activeElement !== PREVIOUSLY_FOCUSED_ELEMENT) return;
         }
       },
@@ -7085,9 +7426,10 @@ var SelectContentImpl = reactExports.forwardRef(
       if (content) {
         let pointerMoveDelta = { x: 0, y: 0 };
         const handlePointerMove = (event) => {
+          var _a, _b;
           pointerMoveDelta = {
-            x: Math.abs(Math.round(event.pageX) - (triggerPointerDownPosRef.current?.x ?? 0)),
-            y: Math.abs(Math.round(event.pageY) - (triggerPointerDownPosRef.current?.y ?? 0))
+            x: Math.abs(Math.round(event.pageX) - (((_a = triggerPointerDownPosRef.current) == null ? void 0 : _a.x) ?? 0)),
+            y: Math.abs(Math.round(event.pageY) - (((_b = triggerPointerDownPosRef.current) == null ? void 0 : _b.y) ?? 0))
           };
         };
         const handlePointerUp = (event) => {
@@ -7139,7 +7481,7 @@ var SelectContentImpl = reactExports.forwardRef(
       },
       [context.value]
     );
-    const handleItemLeave = reactExports.useCallback(() => content?.focus(), [content]);
+    const handleItemLeave = reactExports.useCallback(() => content == null ? void 0 : content.focus(), [content]);
     const itemTextRefCallback = reactExports.useCallback(
       (node, value, disabled) => {
         const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
@@ -7188,7 +7530,8 @@ var SelectContentImpl = reactExports.forwardRef(
               event.preventDefault();
             },
             onUnmountAutoFocus: composeEventHandlers(onCloseAutoFocus, (event) => {
-              context.trigger?.focus({ preventScroll: true });
+              var _a;
+              (_a = context.trigger) == null ? void 0 : _a.focus({ preventScroll: true });
               event.preventDefault();
             }),
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7346,7 +7689,7 @@ var SelectItemAlignedPosition = reactExports.forwardRef((props, forwardedRef) =>
       contentWrapper.style.margin = `${CONTENT_MARGIN}px 0`;
       contentWrapper.style.minHeight = minContentHeight + "px";
       contentWrapper.style.maxHeight = availableHeight + "px";
-      onPlaced?.();
+      onPlaced == null ? void 0 : onPlaced();
       requestAnimationFrame(() => shouldExpandOnScrollRef.current = true);
     }
   }, [
@@ -7370,7 +7713,7 @@ var SelectItemAlignedPosition = reactExports.forwardRef((props, forwardedRef) =>
     (node) => {
       if (node && shouldRepositionRef.current === true) {
         position();
-        focusSelectedItem?.();
+        focusSelectedItem == null ? void 0 : focusSelectedItem();
         shouldRepositionRef.current = false;
       }
     },
@@ -7490,7 +7833,7 @@ var SelectViewport = reactExports.forwardRef(
           onScroll: composeEventHandlers(viewportProps.onScroll, (event) => {
             const viewport = event.currentTarget;
             const { contentWrapper, shouldExpandOnScrollRef } = viewportContext;
-            if (shouldExpandOnScrollRef?.current && contentWrapper) {
+            if ((shouldExpandOnScrollRef == null ? void 0 : shouldExpandOnScrollRef.current) && contentWrapper) {
               const scrolledBy = Math.abs(prevScrollTopRef.current - viewport.scrollTop);
               if (scrolledBy > 0) {
                 const availableHeight = window.innerHeight - CONTENT_MARGIN * 2;
@@ -7554,7 +7897,10 @@ var SelectItem$1 = reactExports.forwardRef(
     const [isFocused, setIsFocused] = reactExports.useState(false);
     const composedRefs = useComposedRefs(
       forwardedRef,
-      (node) => contentContext.itemRefCallback?.(node, value, disabled)
+      (node) => {
+        var _a;
+        return (_a = contentContext.itemRefCallback) == null ? void 0 : _a.call(contentContext, node, value, disabled);
+      }
     );
     const textId = useId();
     const pointerTypeRef = reactExports.useRef("touch");
@@ -7578,7 +7924,7 @@ var SelectItem$1 = reactExports.forwardRef(
         textId,
         isSelected,
         onItemTextChange: reactExports.useCallback((node) => {
-          setTextValue((prevTextValue) => prevTextValue || (node?.textContent ?? "").trim());
+          setTextValue((prevTextValue) => prevTextValue || ((node == null ? void 0 : node.textContent) ?? "").trim());
         }, []),
         children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           Collection.ItemSlot,
@@ -7612,20 +7958,23 @@ var SelectItem$1 = reactExports.forwardRef(
                   pointerTypeRef.current = event.pointerType;
                 }),
                 onPointerMove: composeEventHandlers(itemProps.onPointerMove, (event) => {
+                  var _a;
                   pointerTypeRef.current = event.pointerType;
                   if (disabled) {
-                    contentContext.onItemLeave?.();
+                    (_a = contentContext.onItemLeave) == null ? void 0 : _a.call(contentContext);
                   } else if (pointerTypeRef.current === "mouse") {
                     event.currentTarget.focus({ preventScroll: true });
                   }
                 }),
                 onPointerLeave: composeEventHandlers(itemProps.onPointerLeave, (event) => {
+                  var _a;
                   if (event.currentTarget === document.activeElement) {
-                    contentContext.onItemLeave?.();
+                    (_a = contentContext.onItemLeave) == null ? void 0 : _a.call(contentContext);
                   }
                 }),
                 onKeyDown: composeEventHandlers(itemProps.onKeyDown, (event) => {
-                  const isTypingAhead = contentContext.searchRef?.current !== "";
+                  var _a;
+                  const isTypingAhead = ((_a = contentContext.searchRef) == null ? void 0 : _a.current) !== "";
                   if (isTypingAhead && event.key === " ") return;
                   if (SELECTION_KEYS.includes(event.key)) handleSelect();
                   if (event.key === " ") event.preventDefault();
@@ -7652,9 +8001,12 @@ var SelectItemText = reactExports.forwardRef(
       forwardedRef,
       (node) => setItemTextNode(node),
       itemContext.onItemTextChange,
-      (node) => contentContext.itemTextRefCallback?.(node, itemContext.value, itemContext.disabled)
+      (node) => {
+        var _a;
+        return (_a = contentContext.itemTextRefCallback) == null ? void 0 : _a.call(contentContext, node, itemContext.value, itemContext.disabled);
+      }
     );
-    const textContent = itemTextNode?.textContent;
+    const textContent = itemTextNode == null ? void 0 : itemTextNode.textContent;
     const nativeOption = reactExports.useMemo(
       () => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value),
       [itemContext.disabled, itemContext.value, textContent]
@@ -7762,8 +8114,9 @@ var SelectScrollButtonImpl = reactExports.forwardRef((props, forwardedRef) => {
     return () => clearAutoScrollTimer();
   }, [clearAutoScrollTimer]);
   useLayoutEffect2(() => {
+    var _a;
     const activeItem = getItems().find((item) => item.ref.current === document.activeElement);
-    activeItem?.ref.current?.scrollIntoView({ block: "nearest" });
+    (_a = activeItem == null ? void 0 : activeItem.ref.current) == null ? void 0 : _a.scrollIntoView({ block: "nearest" });
   }, [getItems]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     Primitive.div,
@@ -7778,7 +8131,8 @@ var SelectScrollButtonImpl = reactExports.forwardRef((props, forwardedRef) => {
         }
       }),
       onPointerMove: composeEventHandlers(scrollIndicatorProps.onPointerMove, () => {
-        contentContext.onItemLeave?.();
+        var _a;
+        (_a = contentContext.onItemLeave) == null ? void 0 : _a.call(contentContext);
         if (autoScrollTimerRef.current === null) {
           autoScrollTimerRef.current = window.setInterval(onAutoScroll, 50);
         }
@@ -8195,6 +8549,7 @@ function ReviewPanel() {
         console.log("Video metadata loaded:", video.duration);
         if (isFinite(video.duration) && video.duration > 0) {
           setDuration(video.duration);
+          setTrimStart(0);
           setTrimEnd(video.duration);
           setVideoLoading(false);
         }
@@ -8446,273 +8801,347 @@ function ReviewPanel() {
   }
   const progressPercentage = duration > 0 ? currentTime / duration * 100 : 0;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: true, onOpenChange: () => !isUploading && handleClose(), children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-5xl max-h-[95vh] w-[95vw] sm:w-full flex flex-col p-0 overflow-hidden", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-6 border-b border-border bg-background", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogHeader, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: true, onOpenChange: () => !isUploading && handleClose(), children: /* @__PURE__ */ jsxRuntimeExports.jsx(DialogContent, { className: "max-w-5xl max-h-[95vh] w-[95vw] sm:w-full p-0 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "h-full", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-b border-border pb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogHeader, { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center space-x-2 text-xl font-semibold", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Review Recording" }),
           uploadSuccess && /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheckBig, { className: "h-5 w-5 text-green-500" })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(DialogDescription, { className: "text-base text-muted-foreground mt-2", children: uploadSuccess ? "Your recording has been successfully synced to YouTube" : "Review your recording and sync to YouTube" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(DialogDescription, { className: "text-base text-muted-foreground mt-1", children: uploadSuccess ? "Your recording has been successfully synced to YouTube" : "Review your recording and sync to YouTube" })
       ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "h-full", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 space-y-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative bg-black rounded-lg overflow-hidden", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "video",
-            {
-              ref: videoRef,
-              src: previewUrl,
-              className: "w-full h-auto max-h-64 sm:max-h-80 lg:max-h-96 min-h-48 sm:min-h-56 lg:min-h-64",
-              controls: false,
-              preload: "metadata",
-              playsInline: true,
-              onLoadedMetadata: (e) => {
-                console.log("Video metadata loaded in JSX:", e.currentTarget.duration);
-                if (isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
-                  setDuration(e.currentTarget.duration);
-                  setTrimEnd(e.currentTarget.duration);
-                  setVideoLoading(false);
-                }
-              },
-              onError: (e) => {
-                console.error("Video error in JSX:", e);
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative bg-black rounded-lg overflow-hidden", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "video",
+          {
+            ref: videoRef,
+            src: previewUrl,
+            className: "w-full h-auto max-h-64 sm:max-h-80 lg:max-h-96 min-h-48 sm:min-h-56 lg:min-h-64",
+            controls: false,
+            preload: "metadata",
+            playsInline: true,
+            onLoadedMetadata: (e) => {
+              console.log("Video metadata loaded in JSX:", e.currentTarget.duration);
+              if (isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
+                setDuration(e.currentTarget.duration);
+                setTrimEnd(e.currentTarget.duration);
                 setVideoLoading(false);
-                toast({
-                  title: "Video Error",
-                  description: "Failed to load video preview",
-                  variant: "destructive"
-                });
               }
+            },
+            onError: (e) => {
+              console.error("Video error in JSX:", e);
+              setVideoLoading(false);
+              toast({
+                title: "Video Error",
+                description: "Failed to load video preview",
+                variant: "destructive"
+              });
+            }
+          }
+        ),
+        videoLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(LoadingSpinner, { size: "lg" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white text-sm mt-2", children: "Loading video preview..." })
+        ] }) }),
+        !uploadSuccess && !videoLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Button,
+          {
+            size: "lg",
+            variant: "secondary",
+            onClick: togglePlayPause,
+            disabled: isUploading,
+            className: "rounded-full h-16 w-16",
+            children: isPlaying ? /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "h-6 w-6" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-6 w-6 ml-1" })
+          }
+        ) }),
+        isUploading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            CircularProgress,
+            {
+              progress: uploadProgress,
+              size: 80,
+              className: "text-white mb-4"
             }
           ),
-          videoLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(LoadingSpinner, { size: "lg" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white text-sm mt-2", children: "Loading video preview..." })
-          ] }) }),
-          !uploadSuccess && !videoLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              size: "lg",
-              variant: "secondary",
-              onClick: togglePlayPause,
-              disabled: isUploading,
-              className: "rounded-full h-16 w-16",
-              children: isPlaying ? /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "h-6 w-6" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-6 w-6 ml-1" })
-            }
-          ) }),
-          isUploading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              CircularProgress,
-              {
-                progress: uploadProgress,
-                size: 80,
-                className: "text-white mb-4"
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white text-sm", children: uploadSuccess ? "Sync Complete!" : "Syncing to YouTube..." })
+        ] }) })
+      ] }),
+      !uploadSuccess && !showTrimming && !videoLoading && duration > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-sm font-medium", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-foreground", children: formatTime(currentTime) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-muted-foreground", children: [
+            "/ ",
+            formatTime(duration)
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: "h-3 bg-muted rounded-full cursor-pointer trim-timeline relative group",
+            style: { "--progress": `${progressPercentage}%` },
+            onClick: (e) => {
+              if (!isUploading && duration > 0) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                const newTime = percent * duration;
+                handleSeek(newTime);
               }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white text-sm", children: uploadSuccess ? "Sync Complete!" : "Syncing to YouTube..." })
-          ] }) })
-        ] }),
-        !uploadSuccess && !showTrimming && !videoLoading && duration > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-sm font-medium", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-foreground", children: formatTime(currentTime) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-muted-foreground", children: [
-              "/ ",
-              formatTime(duration)
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "div",
-            {
-              className: "h-3 bg-muted rounded-full cursor-pointer trim-timeline relative group",
-              style: { "--progress": `${progressPercentage}%` },
-              onClick: (e) => {
-                if (!isUploading && duration > 0) {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                  const newTime = percent * duration;
-                  handleSeek(newTime);
-                }
-              },
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "div",
-                  {
-                    className: "h-full bg-primary rounded-full relative transition-all duration-200",
-                    style: { width: `${progressPercentage}%` },
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-primary rounded-full border-2 border-background shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "div",
-                  {
-                    className: "h-full bg-primary/30 rounded-full",
-                    style: { width: `${progressPercentage}%` }
-                  }
-                ) })
-              ]
-            }
-          )
-        ] }),
-        showTrimming && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 p-6 bg-muted rounded-lg border", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Scissors, { className: "h-5 w-5 text-primary" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold", children: "Trim Video" })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium text-foreground", children: "Start Time" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "input",
-                  {
-                    type: "range",
-                    min: 0,
-                    max: duration,
-                    step: 0.1,
-                    value: trimStart,
-                    onChange: (e) => setTrimStart(parseFloat(e.target.value)),
-                    className: "flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border", children: formatTime(trimStart) })
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium text-foreground", children: "End Time" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "input",
-                  {
-                    type: "range",
-                    min: 0,
-                    max: duration,
-                    step: 0.1,
-                    value: trimEnd,
-                    onChange: (e) => setTrimEnd(parseFloat(e.target.value)),
-                    className: "flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-mono w-20 text-center bg-background px-2 py-1 rounded border", children: formatTime(trimEnd) })
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-sm text-muted-foreground", children: [
-              "Duration: ",
-              formatTime(trimEnd - trimStart)
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "outline", onClick: () => setShowTrimming(false), children: "Cancel" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-3", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                Button,
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
                 {
-                  onClick: handleTrim,
-                  disabled: trimStart >= trimEnd || trimEnd - trimStart < 1,
-                  className: "min-w-[120px]",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(Scissors, { className: "h-4 w-4 mr-2" }),
-                    "Apply Trim"
-                  ]
+                  className: "h-full bg-primary rounded-full relative transition-all duration-200",
+                  style: { width: `${progressPercentage}%` },
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-primary rounded-full border-2 border-background shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" })
                 }
               ),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                Button,
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
                 {
-                  onClick: handleDownload,
-                  variant: "outline",
-                  className: "min-w-[140px]",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-4 w-4 mr-2" }),
-                    "Download Locally"
-                  ]
+                  className: "h-full bg-primary/30 rounded-full",
+                  style: { width: `${progressPercentage}%` }
+                }
+              ) })
+            ]
+          }
+        )
+      ] }),
+      showTrimming && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 p-6 bg-muted rounded-lg border", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("style", { jsx: true, children: `
+                      .slider {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        height: 8px;
+                        border-radius: 4px;
+                        outline: none;
+                      }
+                      .slider::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #3b82f6;
+                        cursor: pointer;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                      }
+                      .slider::-moz-range-thumb {
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #3b82f6;
+                        cursor: pointer;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                      }
+                    ` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Scissors, { className: "h-5 w-5 text-primary" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold", children: "Trim Video" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium text-foreground", children: "Start Time" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  type: "range",
+                  min: 0,
+                  max: duration,
+                  step: 0.1,
+                  value: trimStart,
+                  onChange: (e) => setTrimStart(parseFloat(e.target.value)),
+                  className: "flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider",
+                  style: {
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${trimStart / duration * 100}%, #e5e7eb ${trimStart / duration * 100}%, #e5e7eb 100%)`
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  type: "text",
+                  value: formatTime(trimStart),
+                  onChange: (e) => {
+                    const timeStr = e.target.value;
+                    const parts = timeStr.split(":");
+                    if (parts.length === 2) {
+                      const minutes = parseInt(parts[0]) || 0;
+                      const seconds = parseInt(parts[1]) || 0;
+                      const totalSeconds = minutes * 60 + seconds;
+                      if (totalSeconds >= 0 && totalSeconds <= duration) {
+                        setTrimStart(totalSeconds);
+                      }
+                    }
+                  },
+                  className: "w-20 text-center font-mono",
+                  placeholder: "0:00"
                 }
               )
             ] })
-          ] })
-        ] }),
-        !uploadSuccess && !showTrimming && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium", children: "Title" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Input,
-              {
-                value: title,
-                onChange: (e) => setTitle(e.target.value),
-                placeholder: "Enter recording title",
-                disabled: isUploading
-              }
-            )
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium", children: "Privacy" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: privacy, onValueChange: (v) => setPrivacy(v), disabled: isUploading, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {}) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "public", children: "Public" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "unlisted", children: "Unlisted (Anyone with link)" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "private", children: "Private (Only you)" })
-              ] })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium text-foreground", children: "End Time" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  type: "range",
+                  min: 0,
+                  max: duration,
+                  step: 0.1,
+                  value: trimEnd,
+                  onChange: (e) => setTrimEnd(parseFloat(e.target.value)),
+                  className: "flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider",
+                  style: {
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${trimEnd / duration * 100}%, #e5e7eb ${trimEnd / duration * 100}%, #e5e7eb 100%)`
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  type: "text",
+                  value: formatTime(trimEnd),
+                  onChange: (e) => {
+                    const timeStr = e.target.value;
+                    const parts = timeStr.split(":");
+                    if (parts.length === 2) {
+                      const minutes = parseInt(parts[0]) || 0;
+                      const seconds = parseInt(parts[1]) || 0;
+                      const totalSeconds = minutes * 60 + seconds;
+                      if (totalSeconds >= 0 && totalSeconds <= duration) {
+                        setTrimEnd(totalSeconds);
+                      }
+                    }
+                  },
+                  className: "w-20 text-center font-mono",
+                  placeholder: "0:00"
+                }
+              )
             ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-sm text-muted-foreground", children: [
+            "Duration: ",
+            formatTime(Math.max(0, trimEnd - trimStart)),
+            trimStart >= trimEnd && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-red-500 ml-2", children: "⚠️ Start time must be before end time" })
           ] })
         ] }),
-        isUploading && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          ProgressIndicator,
-          {
-            progress: uploadProgress,
-            status: uploadSuccess ? "completed" : "uploading",
-            text: uploadSuccess ? "Sync completed successfully!" : void 0
-          }
-        ),
-        uploadSuccess && uploadResult && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheckBig, { className: "h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-green-800 dark:text-green-200", children: "Recording synced successfully!" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-green-700 dark:text-green-300 mt-1", children: "Your recording is now available on YouTube" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex space-x-2 mt-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Button, { variant: "outline", onClick: () => setShowTrimming(false), children: "Cancel" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                onClick: handleTrim,
+                disabled: trimStart >= trimEnd || trimEnd - trimStart < 1,
+                className: "min-w-[120px]",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Scissors, { className: "h-4 w-4 mr-2" }),
+                  "Apply Trim"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                onClick: handleDownload,
+                variant: "outline",
+                className: "min-w-[140px]",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-4 w-4 mr-2" }),
+                  "Download Locally"
+                ]
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      !uploadSuccess && !showTrimming && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium", children: "Title" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Input,
+            {
+              value: title,
+              onChange: (e) => setTitle(e.target.value),
+              placeholder: "Enter recording title",
+              disabled: isUploading
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-sm font-medium", children: "Privacy" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: privacy, onValueChange: (v) => setPrivacy(v), disabled: isUploading, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SelectTrigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {}) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "public", children: "Public" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "unlisted", children: "Unlisted (Anyone with link)" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "private", children: "Private (Only you)" })
+            ] })
+          ] })
+        ] })
+      ] }),
+      isUploading && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ProgressIndicator,
+        {
+          progress: uploadProgress,
+          status: uploadSuccess ? "completed" : "uploading",
+          text: uploadSuccess ? "Sync completed successfully!" : void 0
+        }
+      ),
+      uploadSuccess && uploadResult && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheckBig, { className: "h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-green-800 dark:text-green-200", children: "Recording synced successfully!" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-green-700 dark:text-green-300 mt-1", children: "Your recording is now available on YouTube" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex space-x-2 mt-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              size: "sm",
+              variant: "outline",
+              onClick: () => window.open(uploadResult.videoUrl, "_blank"),
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
+                "View on YouTube"
+              ]
+            }
+          ) })
+        ] })
+      ] }) }),
+      showConnectPrompt && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-yellow-800 dark:text-yellow-200 mb-2", children: "Connect YouTube to Sync" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-yellow-700 dark:text-yellow-300 mb-3", children: "Connect your YouTube account to sync and share your recordings online." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                onClick: handleConnectAndUpload,
+                disabled: isUploading,
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-4 w-4 mr-2" }),
+                  "Connect & Sync"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
               Button,
               {
                 size: "sm",
                 variant: "outline",
-                onClick: () => window.open(uploadResult.videoUrl, "_blank"),
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "h-4 w-4 mr-2" }),
-                  "View on YouTube"
-                ]
+                onClick: () => setShowConnectPrompt(false),
+                children: "Cancel"
               }
-            ) })
+            )
           ] })
-        ] }) }),
-        showConnectPrompt && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-yellow-800 dark:text-yellow-200 mb-2", children: "Connect YouTube to Sync" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-yellow-700 dark:text-yellow-300 mb-3", children: "Connect your YouTube account to sync and share your recordings online." }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                Button,
-                {
-                  size: "sm",
-                  onClick: handleConnectAndUpload,
-                  disabled: isUploading,
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "h-4 w-4 mr-2" }),
-                    "Connect & Sync"
-                  ]
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  size: "sm",
-                  variant: "outline",
-                  onClick: () => setShowConnectPrompt(false),
-                  children: "Cancel"
-                }
-              )
-            ] })
-          ] })
-        ] }) })
-      ] }) }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 sm:p-6 border-t border-border", children: [
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pt-4 border-t border-border", children: [
         !uploadSuccess && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col space-y-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -8773,7 +9202,7 @@ function ReviewPanel() {
           "Done"
         ] })
       ] })
-    ] }) }),
+    ] }) }) }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: showDeleteConfirmation, onOpenChange: setShowDeleteConfirmation, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-md", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogHeader, { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center space-x-2", children: [
@@ -8793,13 +9222,14 @@ function ReviewPanel() {
   ] });
 }
 function ShareModal() {
+  var _a, _b;
   const { state, dispatch } = useApp();
   const [privacy, setPrivacy] = reactExports.useState("unlisted");
   const [copied, setCopied] = reactExports.useState(false);
   const { toast } = useToast();
   const isOpen = state.shareModalOpen;
-  const shareLink = state.shareModalData?.shareLink || "";
-  const title = state.shareModalData?.title || "";
+  const shareLink = ((_a = state.shareModalData) == null ? void 0 : _a.shareLink) || "";
+  const title = ((_b = state.shareModalData) == null ? void 0 : _b.title) || "";
   const handleClose = () => {
     dispatch({ type: "SET_SHARE_MODAL_OPEN", payload: false });
   };
@@ -9024,7 +9454,7 @@ const _TokenService = class _TokenService {
   static async _performTokenRefresh() {
     try {
       const tokenData = this.getStoredTokenData();
-      if (!tokenData?.refreshToken) {
+      if (!(tokenData == null ? void 0 : tokenData.refreshToken)) {
         console.log("No refresh token available");
         this.clearTokens();
         this.notifyRefreshListeners(false);
@@ -9131,7 +9561,7 @@ const _TokenService = class _TokenService {
   // Check if we have stored tokens
   static hasStoredTokens() {
     const tokenData = this.getStoredTokenData();
-    return !!tokenData?.accessToken;
+    return !!(tokenData == null ? void 0 : tokenData.accessToken);
   }
   // Get token expiry info
   static getTokenExpiry() {
@@ -9721,139 +10151,6 @@ function ClickHighlighter({ enabled }) {
   }, [enabled, handleClick]);
   return null;
 }
-function DrawingOverlay({ enabled, onDisable }) {
-  const canvasRef = reactExports.useRef(null);
-  const [isDrawing, setIsDrawing] = reactExports.useState(false);
-  const [lastPoint, setLastPoint] = reactExports.useState(null);
-  const [isInitialized, setIsInitialized] = reactExports.useState(false);
-  const getPointFromEvent = reactExports.useCallback((event) => {
-    if (!canvasRef.current) return null;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
-    const clientY = "touches" in event ? event.touches[0].clientY : event.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
-  }, []);
-  const startDrawing = reactExports.useCallback((event) => {
-    if (!enabled || !canvasRef.current) return;
-    event.preventDefault();
-    setIsDrawing(true);
-    const point = getPointFromEvent(event);
-    if (point) {
-      setLastPoint(point);
-    }
-  }, [enabled, getPointFromEvent]);
-  const draw = reactExports.useCallback((event) => {
-    if (!isDrawing || !enabled || !canvasRef.current || !lastPoint) return;
-    event.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const currentPoint = getPointFromEvent(event);
-    if (!currentPoint) return;
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.stroke();
-    setLastPoint(currentPoint);
-  }, [isDrawing, enabled, lastPoint, getPointFromEvent]);
-  const stopDrawing = reactExports.useCallback(() => {
-    setIsDrawing(false);
-    setLastPoint(null);
-  }, []);
-  const clearCanvas = reactExports.useCallback(() => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }, []);
-  reactExports.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (!enabled) {
-      canvas.removeEventListener("mousedown", startDrawing);
-      document.removeEventListener("mousemove", draw);
-      document.removeEventListener("mouseup", stopDrawing);
-      clearCanvas();
-      return;
-    }
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.strokeStyle = "#ff4444";
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-    }
-    const handleMouseDown = (e) => startDrawing(e);
-    const handleMouseMove = (e) => draw(e);
-    const handleMouseUp = () => stopDrawing();
-    const handleTouchStart = (e) => startDrawing(e);
-    const handleTouchMove = (e) => draw(e);
-    const handleTouchEnd = () => stopDrawing();
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("touchend", handleTouchEnd);
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const ctx2 = canvas.getContext("2d");
-      if (ctx2) {
-        ctx2.strokeStyle = "#ff4444";
-        ctx2.lineWidth = 3;
-        ctx2.lineCap = "round";
-        ctx2.lineJoin = "round";
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onDisable?.();
-      } else if (event.key === "c" && (event.ctrlKey || event.metaKey)) {
-        clearCanvas();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("touchend", handleTouchEnd);
-      document.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [enabled, onDisable, clearCanvas]);
-  if (!enabled) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "canvas",
-    {
-      ref: canvasRef,
-      className: `drawing-overlay ${enabled ? "active" : ""}`,
-      style: {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: enabled ? "auto" : "none",
-        zIndex: 9998,
-        cursor: enabled ? "crosshair" : "default",
-        touchAction: "none"
-        // Prevent scrolling on touch devices
-      }
-    }
-  );
-}
 function ScreenshotFlash({ trigger, onComplete }) {
   const [show, setShow] = reactExports.useState(false);
   reactExports.useEffect(() => {
@@ -9861,7 +10158,7 @@ function ScreenshotFlash({ trigger, onComplete }) {
       setShow(true);
       const timer = setTimeout(() => {
         setShow(false);
-        onComplete?.();
+        onComplete == null ? void 0 : onComplete();
       }, 200);
       return () => clearTimeout(timer);
     }
@@ -9874,18 +10171,12 @@ function AppShell() {
   const { state: recordingState, options, updateOptions } = useRecording();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen bg-background", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(TopNav, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-1 pt-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 flex flex-col", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Routes, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "*", element: /* @__PURE__ */ jsxRuntimeExports.jsx(MainPanel, {}) }) }) }) }),
-    recordingState === "stopped" && /* @__PURE__ */ jsxRuntimeExports.jsx(ReviewPanel, {}),
-    (recordingState === "recording" || recordingState === "paused") && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(ClickHighlighter, { enabled: options.highlightClicks }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        DrawingOverlay,
-        {
-          enabled: options.enableDrawing,
-          onDisable: () => updateOptions({ enableDrawing: false })
-        }
-      )
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 pt-16 flex-col", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Routes, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "*", element: /* @__PURE__ */ jsxRuntimeExports.jsx(MainPanel, {}) }) }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Footer, {})
     ] }),
+    recordingState === "stopped" && /* @__PURE__ */ jsxRuntimeExports.jsx(ReviewPanel, {}),
+    (recordingState === "recording" || recordingState === "paused") && /* @__PURE__ */ jsxRuntimeExports.jsx(ClickHighlighter, { enabled: options.highlightClicks }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScreenshotFlash, { trigger: false }),
     !state.isOnboarded && /* @__PURE__ */ jsxRuntimeExports.jsx(OnboardingModal, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(ShareModal, {}),

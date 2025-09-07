@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-CuhKtEi2.js","assets/DeleteConfirmationModal-DiJRh7LC.js","assets/external-link-B-Bz-w0c.js","assets/modern-card-B86KsHwS.js","assets/YouTubeSetupPage-BjyzpDFZ.js","assets/arrow-left-BYgRD7iI.js","assets/VideoSharePage-CLOcVpY-.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/AppShell-d1eR4-R3.js","assets/DeleteConfirmationModal-B421qfHJ.js","assets/external-link-CRNXjY2R.js","assets/modern-card-Blf2gY09.js","assets/client-Ct5oOSl9.js","assets/YouTubeSetupPage-BlurffMP.js","assets/arrow-left-VNA-X41A.js","assets/VideoSharePage-D0nMx8OX.js"])))=>i.map(i=>d[i]);
 function _mergeNamespaces(n, m) {
   for (var i = 0; i < m.length; i++) {
     const e = m[i];
@@ -20,28 +20,36 @@ function _mergeNamespaces(n, m) {
 }
 (function polyfill() {
   const relList = document.createElement("link").relList;
-  if (relList && relList.supports && relList.supports("modulepreload")) return;
-  for (const link of document.querySelectorAll('link[rel="modulepreload"]')) processPreload(link);
+  if (relList && relList.supports && relList.supports("modulepreload")) {
+    return;
+  }
+  for (const link of document.querySelectorAll('link[rel="modulepreload"]')) {
+    processPreload(link);
+  }
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      if (mutation.type !== "childList") continue;
-      for (const node of mutation.addedNodes) if (node.tagName === "LINK" && node.rel === "modulepreload") processPreload(node);
+      if (mutation.type !== "childList") {
+        continue;
+      }
+      for (const node of mutation.addedNodes) {
+        if (node.tagName === "LINK" && node.rel === "modulepreload")
+          processPreload(node);
+      }
     }
-  }).observe(document, {
-    childList: true,
-    subtree: true
-  });
+  }).observe(document, { childList: true, subtree: true });
   function getFetchOpts(link) {
     const fetchOpts = {};
     if (link.integrity) fetchOpts.integrity = link.integrity;
     if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
-    if (link.crossOrigin === "use-credentials") fetchOpts.credentials = "include";
+    if (link.crossOrigin === "use-credentials")
+      fetchOpts.credentials = "include";
     else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
     else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
   function processPreload(link) {
-    if (link.ep) return;
+    if (link.ep)
+      return;
     link.ep = true;
     const fetchOpts = getFetchOpts(link);
     fetch(link.href, fetchOpts);
@@ -555,7 +563,7 @@ const React$1 = /* @__PURE__ */ _mergeNamespaces({
   __proto__: null,
   default: React
 }, [reactExports]);
-var client$1 = { exports: {} };
+var client = { exports: {} };
 var reactDomClient_production = {};
 var scheduler = { exports: {} };
 var scheduler_production = {};
@@ -12076,7 +12084,7 @@ function requireReactDomClient_production() {
 }
 var hasRequiredClient;
 function requireClient() {
-  if (hasRequiredClient) return client$1.exports;
+  if (hasRequiredClient) return client.exports;
   hasRequiredClient = 1;
   function checkDCE() {
     if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined" || typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== "function") {
@@ -12090,9 +12098,9 @@ function requireClient() {
   }
   {
     checkDCE();
-    client$1.exports = requireReactDomClient_production();
+    client.exports = requireReactDomClient_production();
   }
-  return client$1.exports;
+  return client.exports;
 }
 var clientExports = requireClient();
 const ReactDOM$1 = /* @__PURE__ */ getDefaultExportFromCjs(clientExports);
@@ -12104,43 +12112,63 @@ const seen = {};
 const __vitePreload = function preload(baseModule, deps, importerUrl) {
   let promise = Promise.resolve();
   if (deps && deps.length > 0) {
-    let allSettled = function(promises$2) {
-      return Promise.all(promises$2.map((p) => Promise.resolve(p).then((value$1) => ({
-        status: "fulfilled",
-        value: value$1
-      }), (reason) => ({
-        status: "rejected",
-        reason
-      }))));
+    let allSettled2 = function(promises) {
+      return Promise.all(
+        promises.map(
+          (p) => Promise.resolve(p).then(
+            (value) => ({ status: "fulfilled", value }),
+            (reason) => ({ status: "rejected", reason })
+          )
+        )
+      );
     };
     document.getElementsByTagName("link");
-    const cspNonceMeta = document.querySelector("meta[property=csp-nonce]");
-    const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
-    promise = allSettled(deps.map((dep) => {
-      dep = assetsURL(dep);
-      if (dep in seen) return;
-      seen[dep] = true;
-      const isCss = dep.endsWith(".css");
-      const cssSelector = isCss ? '[rel="stylesheet"]' : "";
-      if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) return;
-      const link = document.createElement("link");
-      link.rel = isCss ? "stylesheet" : scriptRel;
-      if (!isCss) link.as = "script";
-      link.crossOrigin = "";
-      link.href = dep;
-      if (cspNonce) link.setAttribute("nonce", cspNonce);
-      document.head.appendChild(link);
-      if (isCss) return new Promise((res, rej) => {
-        link.addEventListener("load", res);
-        link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
-      });
-    }));
+    const cspNonceMeta = document.querySelector(
+      "meta[property=csp-nonce]"
+    );
+    const cspNonce = (cspNonceMeta == null ? void 0 : cspNonceMeta.nonce) || (cspNonceMeta == null ? void 0 : cspNonceMeta.getAttribute("nonce"));
+    promise = allSettled2(
+      deps.map((dep) => {
+        dep = assetsURL(dep);
+        if (dep in seen) return;
+        seen[dep] = true;
+        const isCss = dep.endsWith(".css");
+        const cssSelector = isCss ? '[rel="stylesheet"]' : "";
+        if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) {
+          return;
+        }
+        const link = document.createElement("link");
+        link.rel = isCss ? "stylesheet" : scriptRel;
+        if (!isCss) {
+          link.as = "script";
+        }
+        link.crossOrigin = "";
+        link.href = dep;
+        if (cspNonce) {
+          link.setAttribute("nonce", cspNonce);
+        }
+        document.head.appendChild(link);
+        if (isCss) {
+          return new Promise((res, rej) => {
+            link.addEventListener("load", res);
+            link.addEventListener(
+              "error",
+              () => rej(new Error(`Unable to preload CSS for ${dep}`))
+            );
+          });
+        }
+      })
+    );
   }
-  function handlePreloadError(err$2) {
-    const e$1 = new Event("vite:preloadError", { cancelable: true });
-    e$1.payload = err$2;
-    window.dispatchEvent(e$1);
-    if (!e$1.defaultPrevented) throw err$2;
+  function handlePreloadError(err) {
+    const e = new Event("vite:preloadError", {
+      cancelable: true
+    });
+    e.payload = err;
+    window.dispatchEvent(e);
+    if (!e.defaultPrevented) {
+      throw err;
+    }
   }
   return promise.then((res) => {
     for (const item of res || []) {
@@ -12424,7 +12452,8 @@ function flattenRoutes(routes, branches = [], parentsMeta = [], parentPath = "",
     });
   };
   routes.forEach((route, index) => {
-    if (route.path === "" || !route.path?.includes("?")) {
+    var _a;
+    if (route.path === "" || !((_a = route.path) == null ? void 0 : _a.includes("?"))) {
       flattenRoute(route, index);
     } else {
       for (let exploded of explodeOptionalSegments(route.path)) {
@@ -12875,6 +12904,7 @@ function useRoutes(routes, locationArg) {
   return useRoutesImpl(routes, locationArg);
 }
 function useRoutesImpl(routes, locationArg, dataRouterState, unstable_onError, future) {
+  var _a;
   invariant(
     useInRouterContext(),
     // TODO: This error is probably because they somehow have 2 versions of the
@@ -12903,7 +12933,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
   if (locationArg) {
     let parsedLocationArg = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
     invariant(
-      parentPathnameBase === "/" || parsedLocationArg.pathname?.startsWith(parentPathnameBase),
+      parentPathnameBase === "/" || ((_a = parsedLocationArg.pathname) == null ? void 0 : _a.startsWith(parentPathnameBase)),
       `When overriding the location using \`<Routes location>\` or \`useRoutes(routes, location)\`, the location pathname must begin with the portion of the URL pathname that was matched by all parent routes. The current pathname base is "${parentPathnameBase}" but pathname "${parsedLocationArg.pathname}" was given in the \`location\` prop.`
     );
     location = parsedLocationArg;
@@ -13056,10 +13086,10 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, uns
     }
   }
   let renderedMatches = matches;
-  let errors = dataRouterState?.errors;
+  let errors = dataRouterState == null ? void 0 : dataRouterState.errors;
   if (errors != null) {
     let errorIndex = renderedMatches.findIndex(
-      (m) => m.route.id && errors?.[m.route.id] !== void 0
+      (m) => m.route.id && (errors == null ? void 0 : errors[m.route.id]) !== void 0
     );
     invariant(
       errorIndex >= 0,
@@ -13196,6 +13226,7 @@ function useRouteId() {
   );
 }
 function useRouteError() {
+  var _a;
   let error = reactExports.useContext(RouteErrorContext);
   let state = useDataRouterState(
     "useRouteError"
@@ -13208,7 +13239,7 @@ function useRouteError() {
   if (error !== void 0) {
     return error;
   }
-  return state.errors?.[routeId];
+  return (_a = state.errors) == null ? void 0 : _a[routeId];
 }
 function useNavigateStable() {
   let { router } = useDataRouterContext(
@@ -13553,11 +13584,12 @@ function getNewMatchesForLinks(page, nextMatches, currentMatches, manifest, loca
     return match.route.id !== currentMatches[index].route.id;
   };
   let matchPathChanged = (match, index) => {
+    var _a;
     return (
       // param change, /users/123 -> /users/456
       currentMatches[index].pathname !== match.pathname || // splat param changed, which is not present in match.path
       // e.g. /files/images/avatar.jpg -> files/finances.xls
-      currentMatches[index].route.path?.endsWith("*") && currentMatches[index].params["*"] !== match.params["*"]
+      ((_a = currentMatches[index].route.path) == null ? void 0 : _a.endsWith("*")) && currentMatches[index].params["*"] !== match.params["*"]
     );
   };
   if (mode === "assets") {
@@ -13567,6 +13599,7 @@ function getNewMatchesForLinks(page, nextMatches, currentMatches, manifest, loca
   }
   if (mode === "data") {
     return nextMatches.filter((match, index) => {
+      var _a;
       let manifestRoute = manifest.routes[match.route.id];
       if (!manifestRoute || !manifestRoute.hasLoader) {
         return false;
@@ -13580,7 +13613,7 @@ function getNewMatchesForLinks(page, nextMatches, currentMatches, manifest, loca
             location.pathname + location.search + location.hash,
             window.origin
           ),
-          currentParams: currentMatches[0]?.params || {},
+          currentParams: ((_a = currentMatches[0]) == null ? void 0 : _a.params) || {},
           nextUrl: new URL(page, window.origin),
           nextParams: match.params,
           defaultShouldRevalidate: true
@@ -13798,11 +13831,12 @@ function PrefetchPageLinksImpl({
     let routesParams = /* @__PURE__ */ new Set();
     let foundOptOutRoute = false;
     nextMatches.forEach((m) => {
+      var _a;
       let manifestRoute = manifest.routes[m.route.id];
       if (!manifestRoute || !manifestRoute.hasLoader) {
         return;
       }
-      if (!newMatchesForData.some((m2) => m2.route.id === m.route.id) && m.route.id in loaderData && routeModules[m.route.id]?.shouldRevalidate) {
+      if (!newMatchesForData.some((m2) => m2.route.id === m.route.id) && m.route.id in loaderData && ((_a = routeModules[m.route.id]) == null ? void 0 : _a.shouldRevalidate)) {
         foundOptOutRoute = true;
       } else if (manifestRoute.hasClientLoader) {
         foundOptOutRoute = true;
@@ -14063,7 +14097,7 @@ var Form = reactExports.forwardRef(
       if (event.defaultPrevented) return;
       event.preventDefault();
       let submitter = event.nativeEvent.submitter;
-      let submitMethod = submitter?.getAttribute("formmethod") || method;
+      let submitMethod = (submitter == null ? void 0 : submitter.getAttribute("formmethod")) || method;
       submit(submitter || event.currentTarget, {
         fetcherKey,
         method: submitMethod,
@@ -14344,9 +14378,9 @@ function useToast() {
 }
 function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
   return function handleEvent(event) {
-    originalEventHandler?.(event);
+    originalEventHandler == null ? void 0 : originalEventHandler(event);
     if (checkForDefaultPrevented === false || !event.defaultPrevented) {
-      return ourEventHandler?.(event);
+      return ourEventHandler == null ? void 0 : ourEventHandler(event);
     }
   };
 }
@@ -14407,14 +14441,16 @@ function createContextScope(scopeName, createContextScopeDeps = []) {
     const index = defaultContexts.length;
     defaultContexts = [...defaultContexts, defaultContext];
     const Provider2 = (props) => {
+      var _a;
       const { scope, children, ...context } = props;
-      const Context = scope?.[scopeName]?.[index] || BaseContext;
+      const Context = ((_a = scope == null ? void 0 : scope[scopeName]) == null ? void 0 : _a[index]) || BaseContext;
       const value = reactExports.useMemo(() => context, Object.values(context));
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Context.Provider, { value, children });
     };
     Provider2.displayName = rootComponentName + "Provider";
     function useContext2(consumerName, scope) {
-      const Context = scope?.[scopeName]?.[index] || BaseContext;
+      var _a;
+      const Context = ((_a = scope == null ? void 0 : scope[scopeName]) == null ? void 0 : _a[index]) || BaseContext;
       const context = reactExports.useContext(Context);
       if (context) return context;
       if (defaultContext !== void 0) return defaultContext;
@@ -14427,7 +14463,7 @@ function createContextScope(scopeName, createContextScopeDeps = []) {
       return reactExports.createContext(defaultContext);
     });
     return function useScope(scope) {
-      const contexts = scope?.[scopeName] || scopeContexts;
+      const contexts = (scope == null ? void 0 : scope[scopeName]) || scopeContexts;
       return reactExports.useMemo(
         () => ({ [`__scope${scopeName}`]: { ...scope, [scopeName]: contexts } }),
         [scope, contexts]
@@ -14528,12 +14564,13 @@ function mergeProps(slotProps, childProps) {
   return { ...slotProps, ...overrideProps };
 }
 function getElementRef$1(element) {
-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+  var _a, _b;
+  let getter = (_a = Object.getOwnPropertyDescriptor(element.props, "ref")) == null ? void 0 : _a.get;
   let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
   if (mayWarn) {
     return element.ref;
   }
-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+  getter = (_b = Object.getOwnPropertyDescriptor(element, "ref")) == null ? void 0 : _b.get;
   mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
   if (mayWarn) {
     return element.props.ref;
@@ -14642,9 +14679,12 @@ function useCallbackRef(callback) {
   reactExports.useEffect(() => {
     callbackRef.current = callback;
   });
-  return reactExports.useMemo(() => (...args) => callbackRef.current?.(...args), []);
+  return reactExports.useMemo(() => (...args) => {
+    var _a;
+    return (_a = callbackRef.current) == null ? void 0 : _a.call(callbackRef, ...args);
+  }, []);
 }
-function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis?.document) {
+function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
   const onEscapeKeyDown = useCallbackRef(onEscapeKeyDownProp);
   reactExports.useEffect(() => {
     const handleKeyDown = (event) => {
@@ -14679,7 +14719,7 @@ var DismissableLayer = reactExports.forwardRef(
     } = props;
     const context = reactExports.useContext(DismissableLayerContext);
     const [node, setNode] = reactExports.useState(null);
-    const ownerDocument = node?.ownerDocument ?? globalThis?.document;
+    const ownerDocument = (node == null ? void 0 : node.ownerDocument) ?? (globalThis == null ? void 0 : globalThis.document);
     const [, force] = reactExports.useState({});
     const composedRefs = useComposedRefs(forwardedRef, (node2) => setNode(node2));
     const layers = Array.from(context.layers);
@@ -14692,22 +14732,22 @@ var DismissableLayer = reactExports.forwardRef(
       const target = event.target;
       const isPointerDownOnBranch = [...context.branches].some((branch) => branch.contains(target));
       if (!isPointerEventsEnabled || isPointerDownOnBranch) return;
-      onPointerDownOutside?.(event);
-      onInteractOutside?.(event);
-      if (!event.defaultPrevented) onDismiss?.();
+      onPointerDownOutside == null ? void 0 : onPointerDownOutside(event);
+      onInteractOutside == null ? void 0 : onInteractOutside(event);
+      if (!event.defaultPrevented) onDismiss == null ? void 0 : onDismiss();
     }, ownerDocument);
     const focusOutside = useFocusOutside((event) => {
       const target = event.target;
       const isFocusInBranch = [...context.branches].some((branch) => branch.contains(target));
       if (isFocusInBranch) return;
-      onFocusOutside?.(event);
-      onInteractOutside?.(event);
-      if (!event.defaultPrevented) onDismiss?.();
+      onFocusOutside == null ? void 0 : onFocusOutside(event);
+      onInteractOutside == null ? void 0 : onInteractOutside(event);
+      if (!event.defaultPrevented) onDismiss == null ? void 0 : onDismiss();
     }, ownerDocument);
     useEscapeKeydown((event) => {
       const isHighestLayer = index === context.layers.size - 1;
       if (!isHighestLayer) return;
-      onEscapeKeyDown?.(event);
+      onEscapeKeyDown == null ? void 0 : onEscapeKeyDown(event);
       if (!event.defaultPrevented && onDismiss) {
         event.preventDefault();
         onDismiss();
@@ -14780,7 +14820,7 @@ var DismissableLayerBranch = reactExports.forwardRef((props, forwardedRef) => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...props, ref: composedRefs });
 });
 DismissableLayerBranch.displayName = BRANCH_NAME;
-function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis?.document) {
+function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
   const handlePointerDownOutside = useCallbackRef(onPointerDownOutside);
   const isPointerInsideReactTreeRef = reactExports.useRef(false);
   const handleClickRef = reactExports.useRef(() => {
@@ -14823,7 +14863,7 @@ function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis?
     onPointerDownCapture: () => isPointerInsideReactTreeRef.current = true
   };
 }
-function useFocusOutside(onFocusOutside, ownerDocument = globalThis?.document) {
+function useFocusOutside(onFocusOutside, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
   const handleFocusOutside = useCallbackRef(onFocusOutside);
   const isFocusInsideReactTreeRef = reactExports.useRef(false);
   reactExports.useEffect(() => {
@@ -14859,14 +14899,15 @@ function handleAndDispatchCustomEvent$1(name, handler, detail, { discrete }) {
 }
 var Root = DismissableLayer;
 var Branch = DismissableLayerBranch;
-var useLayoutEffect2 = globalThis?.document ? reactExports.useLayoutEffect : () => {
+var useLayoutEffect2 = (globalThis == null ? void 0 : globalThis.document) ? reactExports.useLayoutEffect : () => {
 };
 var PORTAL_NAME = "Portal";
 var Portal = reactExports.forwardRef((props, forwardedRef) => {
+  var _a;
   const { container: containerProp, ...portalProps } = props;
   const [mounted, setMounted] = reactExports.useState(false);
   useLayoutEffect2(() => setMounted(true), []);
-  const container = containerProp || mounted && globalThis?.document?.body;
+  const container = containerProp || mounted && ((_a = globalThis == null ? void 0 : globalThis.document) == null ? void 0 : _a.body);
   return container ? ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(Primitive.div, { ...portalProps, ref: forwardedRef }), container) : null;
 });
 Portal.displayName = PORTAL_NAME;
@@ -14917,7 +14958,7 @@ function usePresence(present) {
       const currentAnimationName = getAnimationName(styles);
       if (present) {
         send("MOUNT");
-      } else if (currentAnimationName === "none" || styles?.display === "none") {
+      } else if (currentAnimationName === "none" || (styles == null ? void 0 : styles.display) === "none") {
         send("UNMOUNT");
       } else {
         const isAnimating = prevAnimationName !== currentAnimationName;
@@ -14977,15 +15018,16 @@ function usePresence(present) {
   };
 }
 function getAnimationName(styles) {
-  return styles?.animationName || "none";
+  return (styles == null ? void 0 : styles.animationName) || "none";
 }
 function getElementRef(element) {
-  let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+  var _a, _b;
+  let getter = (_a = Object.getOwnPropertyDescriptor(element.props, "ref")) == null ? void 0 : _a.get;
   let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
   if (mayWarn) {
     return element.ref;
   }
-  getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+  getter = (_b = Object.getOwnPropertyDescriptor(element, "ref")) == null ? void 0 : _b.get;
   mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
   if (mayWarn) {
     return element.props.ref;
@@ -15022,10 +15064,11 @@ function useControllableState({
   }
   const setValue = reactExports.useCallback(
     (nextValue) => {
+      var _a;
       if (isControlled) {
         const value2 = isFunction(nextValue) ? nextValue(prop) : nextValue;
         if (value2 !== prop) {
-          onChangeRef.current?.(value2);
+          (_a = onChangeRef.current) == null ? void 0 : _a.call(onChangeRef, value2);
         }
       } else {
         setUncontrolledProp(nextValue);
@@ -15046,8 +15089,9 @@ function useUncontrolledState({
     onChangeRef.current = onChange;
   }, [onChange]);
   reactExports.useEffect(() => {
+    var _a;
     if (prevValueRef.current !== value) {
-      onChangeRef.current?.(value);
+      (_a = onChangeRef.current) == null ? void 0 : _a.call(onChangeRef, value);
       prevValueRef.current = value;
     }
   }, [value, prevValueRef]);
@@ -15148,8 +15192,9 @@ var ToastViewport$1 = reactExports.forwardRef(
     const hasToasts = context.toastCount > 0;
     reactExports.useEffect(() => {
       const handleKeyDown = (event) => {
+        var _a;
         const isHotkeyPressed = hotkey.length !== 0 && hotkey.every((key) => event[key] || event.code === key);
-        if (isHotkeyPressed) ref.current?.focus();
+        if (isHotkeyPressed) (_a = ref.current) == null ? void 0 : _a.focus();
       };
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
@@ -15212,6 +15257,7 @@ var ToastViewport$1 = reactExports.forwardRef(
       const viewport = ref.current;
       if (viewport) {
         const handleKeyDown = (event) => {
+          var _a, _b, _c;
           const isMetaKey = event.altKey || event.ctrlKey || event.metaKey;
           const isTabKey = event.key === "Tab" && !isMetaKey;
           if (isTabKey) {
@@ -15219,7 +15265,7 @@ var ToastViewport$1 = reactExports.forwardRef(
             const isTabbingBackwards = event.shiftKey;
             const targetIsViewport = event.target === viewport;
             if (targetIsViewport && isTabbingBackwards) {
-              headFocusProxyRef.current?.focus();
+              (_a = headFocusProxyRef.current) == null ? void 0 : _a.focus();
               return;
             }
             const tabbingDirection = isTabbingBackwards ? "backwards" : "forwards";
@@ -15228,7 +15274,7 @@ var ToastViewport$1 = reactExports.forwardRef(
             if (focusFirst(sortedCandidates.slice(index + 1))) {
               event.preventDefault();
             } else {
-              isTabbingBackwards ? headFocusProxyRef.current?.focus() : tailFocusProxyRef.current?.focus();
+              isTabbingBackwards ? (_b = headFocusProxyRef.current) == null ? void 0 : _b.focus() : (_c = tailFocusProxyRef.current) == null ? void 0 : _c.focus();
             }
           }
         };
@@ -15289,8 +15335,9 @@ var FocusProxy = reactExports.forwardRef(
         ref: forwardedRef,
         style: { position: "fixed" },
         onFocus: (event) => {
+          var _a;
           const prevFocusedElement = event.relatedTarget;
-          const isFocusFromOutsideViewport = !context.viewport?.contains(prevFocusedElement);
+          const isFocusFromOutsideViewport = !((_a = context.viewport) == null ? void 0 : _a.contains(prevFocusedElement));
           if (isFocusFromOutsideViewport) onFocusFromOutsideViewport();
         }
       }
@@ -15383,8 +15430,9 @@ var ToastImpl = reactExports.forwardRef(
     const closeTimerRef = reactExports.useRef(0);
     const { onToastAdd, onToastRemove } = context;
     const handleClose = useCallbackRef(() => {
-      const isFocusInToast = node?.contains(document.activeElement);
-      if (isFocusInToast) context.viewport?.focus();
+      var _a;
+      const isFocusInToast = node == null ? void 0 : node.contains(document.activeElement);
+      if (isFocusInToast) (_a = context.viewport) == null ? void 0 : _a.focus();
       onClose();
     });
     const startTimer = reactExports.useCallback(
@@ -15401,13 +15449,13 @@ var ToastImpl = reactExports.forwardRef(
       if (viewport) {
         const handleResume = () => {
           startTimer(closeTimerRemainingTimeRef.current);
-          onResume?.();
+          onResume == null ? void 0 : onResume();
         };
         const handlePause = () => {
           const elapsedTime = (/* @__PURE__ */ new Date()).getTime() - closeTimerStartTimeRef.current;
           closeTimerRemainingTimeRef.current = closeTimerRemainingTimeRef.current - elapsedTime;
           window.clearTimeout(closeTimerRef.current);
-          onPause?.();
+          onPause == null ? void 0 : onPause();
         };
         viewport.addEventListener(VIEWPORT_PAUSE, handlePause);
         viewport.addEventListener(VIEWPORT_RESUME, handleResume);
@@ -15458,7 +15506,7 @@ var ToastImpl = reactExports.forwardRef(
                 style: { userSelect: "none", touchAction: "none", ...props.style },
                 onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
                   if (event.key !== "Escape") return;
-                  onEscapeKeyDown?.(event.nativeEvent);
+                  onEscapeKeyDown == null ? void 0 : onEscapeKeyDown(event.nativeEvent);
                   if (!event.nativeEvent.defaultPrevented) {
                     context.isFocusedToastEscapeKeyDownRef.current = true;
                     handleClose();
@@ -15996,6 +16044,7 @@ const createClassGroupUtils = (config) => {
   };
 };
 const getGroupRecursive = (classParts, classPartObject) => {
+  var _a;
   if (classParts.length === 0) {
     return classPartObject.classGroupId;
   }
@@ -16009,15 +16058,15 @@ const getGroupRecursive = (classParts, classPartObject) => {
     return void 0;
   }
   const classRest = classParts.join(CLASS_PART_SEPARATOR);
-  return classPartObject.validators.find(({
+  return (_a = classPartObject.validators.find(({
     validator
-  }) => validator(classRest))?.classGroupId;
+  }) => validator(classRest))) == null ? void 0 : _a.classGroupId;
 };
 const arbitraryPropertyRegex = /^\[(.+)\]$/;
 const getGroupIdForArbitraryProperty = (className) => {
   if (arbitraryPropertyRegex.test(className)) {
     const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)[1];
-    const property = arbitraryPropertyClassName?.substring(0, arbitraryPropertyClassName.indexOf(":"));
+    const property = arbitraryPropertyClassName == null ? void 0 : arbitraryPropertyClassName.substring(0, arbitraryPropertyClassName.indexOf(":"));
     if (property) {
       return "arbitrary.." + property;
     }
@@ -19054,7 +19103,7 @@ const _ErrorHandler = class _ErrorHandler {
   static logError(code, error, context) {
     const errorInfo = {
       code,
-      message: error?.message || String(error),
+      message: (error == null ? void 0 : error.message) || String(error),
       originalError: error,
       context,
       timestamp: Date.now(),
@@ -19117,7 +19166,7 @@ const _ErrorHandler = class _ErrorHandler {
     if (error instanceof AppError) {
       return error.message;
     }
-    if (error?.code) {
+    if (error == null ? void 0 : error.code) {
       switch (error.code) {
         case "CONNECTION_FAILED":
           return "Failed to connect to YouTube. Please check your internet connection and try again.";
@@ -19135,7 +19184,7 @@ const _ErrorHandler = class _ErrorHandler {
           return error.message || "An unexpected error occurred. Please try again.";
       }
     }
-    return error?.message || "An unexpected error occurred. Please try again.";
+    return (error == null ? void 0 : error.message) || "An unexpected error occurred. Please try again.";
   }
   // Check if error is recoverable
   static isRecoverableError(error) {
@@ -19148,7 +19197,7 @@ const _ErrorHandler = class _ErrorHandler {
     if (error instanceof AppError) {
       return recoverableCodes.includes(error.code);
     }
-    if (error?.name === "NetworkError" || error?.name === "TimeoutError") {
+    if ((error == null ? void 0 : error.name) === "NetworkError" || (error == null ? void 0 : error.name) === "TimeoutError") {
       return true;
     }
     return false;
@@ -19164,7 +19213,7 @@ const _ErrorHandler = class _ErrorHandler {
       if (mediumCodes.includes(error.code)) return "medium";
       return "low";
     }
-    if (error?.name === "TypeError" || error?.name === "ReferenceError") {
+    if ((error == null ? void 0 : error.name) === "TypeError" || (error == null ? void 0 : error.name) === "ReferenceError") {
       return "high";
     }
     return "medium";
@@ -19254,10 +19303,13 @@ function appReducer(state, action) {
         saveStateToStorage(updatedRecordingState);
         return updatedRecordingState;
       case "REMOVE_RECORDING":
+        console.log("REMOVE_RECORDING action received with id:", action.payload);
+        console.log("Current recordings before removal:", state.recordings.map((r2) => ({ id: r2.id, title: r2.title })));
         const removedRecordingState = {
           ...state,
           recordings: state.recordings.filter((recording) => recording.id !== action.payload)
         };
+        console.log("Recordings after removal:", removedRecordingState.recordings.map((r2) => ({ id: r2.id, title: r2.title })));
         saveStateToStorage(removedRecordingState);
         return removedRecordingState;
       case "SET_LOADING":
@@ -19318,26 +19370,30 @@ function AppProvider({ children }) {
   const refreshRecordings = React.useCallback(async () => {
     try {
       dispatch2({ type: "SET_LOADING", payload: true });
-      const { metadata: metadata2 } = await __vitePreload(async () => {
-        const { metadata: metadata3 } = await Promise.resolve().then(() => client);
-        return { metadata: metadata3 };
-      }, true ? [] : void 0);
-      const recordingsResponse = await metadata2.list({});
-      if (recordingsResponse.recordings) {
-        const recordings = recordingsResponse.recordings.map((rec) => ({
-          id: rec.id,
-          title: rec.title,
-          youtubeVideoId: rec.youtube_video_id,
-          youtubeLink: rec.youtube_link,
-          thumbnail: rec.thumbnail_url,
-          duration: rec.duration * 1e3,
-          // Convert seconds to milliseconds
-          createdAt: new Date(rec.created_at),
-          privacy: rec.privacy,
-          uploadStatus: "completed"
-          // All recordings from backend are synced
-        }));
-        dispatch2({ type: "LOAD_STATE", payload: { recordings } });
+      try {
+        const { metadata } = await __vitePreload(async () => {
+          const { metadata: metadata2 } = await import("./client-Ct5oOSl9.js");
+          return { metadata: metadata2 };
+        }, true ? [] : void 0);
+        const recordingsResponse = await metadata.list({});
+        if (recordingsResponse.recordings) {
+          const recordings = recordingsResponse.recordings.map((rec) => ({
+            id: rec.id,
+            title: rec.title,
+            youtubeVideoId: rec.youtube_video_id,
+            youtubeLink: rec.youtube_link,
+            thumbnail: rec.thumbnail_url,
+            duration: rec.duration * 1e3,
+            // Convert seconds to milliseconds
+            createdAt: new Date(rec.created_at),
+            privacy: rec.privacy,
+            uploadStatus: "completed"
+            // All recordings from backend are synced
+          }));
+          dispatch2({ type: "LOAD_STATE", payload: { recordings } });
+        }
+      } catch (backendError) {
+        console.warn("Backend not available, using local storage only:", backendError);
       }
     } catch (error) {
       console.error("Failed to refresh recordings:", error);
@@ -19352,11 +19408,11 @@ function AppProvider({ children }) {
       try {
         dispatch2({ type: "SET_LOADING", payload: true });
         try {
-          const { metadata: metadata2 } = await __vitePreload(async () => {
-            const { metadata: metadata3 } = await Promise.resolve().then(() => client);
-            return { metadata: metadata3 };
-          }, true ? void 0 : void 0);
-          const recordingsResponse = await metadata2.list({});
+          const { metadata } = await __vitePreload(async () => {
+            const { metadata: metadata2 } = await import("./client-Ct5oOSl9.js");
+            return { metadata: metadata2 };
+          }, true ? [] : void 0);
+          const recordingsResponse = await metadata.list({});
           if (recordingsResponse.recordings) {
             const recordings = recordingsResponse.recordings.map((rec) => ({
               id: rec.id,
@@ -19395,6 +19451,8 @@ function AppProvider({ children }) {
               ErrorHandler.logError("STATE_PARSE_ERROR", error);
               localStorage.removeItem("recordlane-app-state");
             }
+          } else {
+            dispatch2({ type: "LOAD_STATE", payload: { recordings: [] } });
           }
         }
       } catch (error) {
@@ -19433,13 +19491,13 @@ class RetryService {
       backoffMultiplier: 2,
       maxDelay: 1e4,
       shouldRetry: (error) => {
-        if (error?.name === "NetworkError" || error?.name === "TypeError") {
+        if ((error == null ? void 0 : error.name) === "NetworkError" || (error == null ? void 0 : error.name) === "TypeError") {
           return true;
         }
-        if (error?.status >= 500 && error?.status < 600) {
+        if ((error == null ? void 0 : error.status) >= 500 && (error == null ? void 0 : error.status) < 600) {
           return true;
         }
-        if (error?.status === 429) {
+        if ((error == null ? void 0 : error.status) === 429) {
           return true;
         }
         return false;
@@ -19467,7 +19525,7 @@ class RetryService {
           throw error;
         }
         ErrorHandler.logError("RETRY_ATTEMPT", `Retrying operation (attempt ${attempt + 1}/${config.maxRetries})`, {
-          error: error?.message || String(error),
+          error: (error == null ? void 0 : error.message) || String(error),
           delay
         });
         if (config.onRetry) {
@@ -19484,7 +19542,7 @@ class RetryService {
       }
     }
     ErrorHandler.logError("RETRY_EXHAUSTED", `Operation failed after ${config.maxRetries} retries`, {
-      lastError: lastError?.message || String(lastError)
+      lastError: (lastError == null ? void 0 : lastError.message) || String(lastError)
     });
     throw lastError;
   }
@@ -19569,9 +19627,7 @@ class RetryService {
   }
 }
 const YOUTUBE_SCOPES = [
-  "https://www.googleapis.com/auth/youtube.upload",
-  "https://www.googleapis.com/auth/youtube.force-ssl",
-  "https://www.googleapis.com/auth/youtube.readonly",
+  "https://www.googleapis.com/auth/youtube",
   "https://www.googleapis.com/auth/userinfo.email",
   "https://www.googleapis.com/auth/userinfo.profile"
 ].join(" ");
@@ -20369,507 +20425,7 @@ const _GlobalCacheManager = class _GlobalCacheManager {
 };
 _GlobalCacheManager.instances = /* @__PURE__ */ new Map();
 let GlobalCacheManager = _GlobalCacheManager;
-const BROWSER = typeof globalThis === "object" && "window" in globalThis;
-class Client {
-  /**
-   * Creates a Client for calling the public and authenticated APIs of your Encore application.
-   *
-   * @param target  The target which the client should be configured to use. See Local and Environment for options.
-   * @param options Options for the client
-   */
-  constructor(target, options) {
-    this.target = target;
-    this.options = options ?? {};
-    const base = new BaseClient(this.target, this.options);
-    this.analytics = new analytics.ServiceClient(base);
-    this.auth = new auth.ServiceClient(base);
-    this.health = new health.ServiceClient(base);
-    this.metadata = new metadata.ServiceClient(base);
-  }
-  /**
-   * Creates a new Encore client with the given client options set.
-   *
-   * @param options Client options to set. They are merged with existing options.
-   **/
-  with(options) {
-    return new Client(this.target, {
-      ...this.options,
-      ...options
-    });
-  }
-}
-var analytics;
-((analytics2) => {
-  class ServiceClient {
-    constructor(baseClient) {
-      this.baseClient = baseClient;
-      this.getStats = this.getStats.bind(this);
-      this.trackEvent = this.trackEvent.bind(this);
-    }
-    /**
-     * Retrieves anonymous usage statistics for the application.
-     */
-    async getStats(params) {
-      const query = makeRecord({
-        days: params.days === void 0 ? void 0 : String(params.days)
-      });
-      const resp = await this.baseClient.callTypedAPI(`/analytics/stats`, { query, method: "GET", body: void 0 });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Tracks an analytics event for privacy-respecting usage insights.
-     */
-    async trackEvent(params) {
-      const resp = await this.baseClient.callTypedAPI(`/analytics/events`, { method: "POST", body: JSON.stringify(params) });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-  }
-  analytics2.ServiceClient = ServiceClient;
-})(analytics || (analytics = {}));
-var auth;
-((auth2) => {
-  class ServiceClient {
-    constructor(baseClient) {
-      this.baseClient = baseClient;
-      this.exchangeCode = this.exchangeCode.bind(this);
-      this.getConfig = this.getConfig.bind(this);
-      this.refreshToken = this.refreshToken.bind(this);
-    }
-    /**
-     * Exchanges an authorization code for an access token.
-     */
-    async exchangeCode(params) {
-      const resp = await this.baseClient.callTypedAPI(`/auth/google/exchange-code`, { method: "POST", body: JSON.stringify(params) });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Retrieves the public configuration for the auth service.
-     */
-    async getConfig() {
-      const resp = await this.baseClient.callTypedAPI(`/auth/config`, { method: "GET", body: void 0 });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Refreshes an access token using a refresh token.
-     */
-    async refreshToken(params) {
-      const resp = await this.baseClient.callTypedAPI(`/auth/google/refresh-token`, { method: "POST", body: JSON.stringify(params) });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-  }
-  auth2.ServiceClient = ServiceClient;
-})(auth || (auth = {}));
-var health;
-((health2) => {
-  class ServiceClient {
-    constructor(baseClient) {
-      this.baseClient = baseClient;
-      this.check = this.check.bind(this);
-    }
-    /**
-     * Returns the health status of the RecordLane backend services.
-     */
-    async check() {
-      const resp = await this.baseClient.callTypedAPI(`/health`, { method: "GET", body: void 0 });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-  }
-  health2.ServiceClient = ServiceClient;
-})(health || (health = {}));
-var metadata;
-((metadata2) => {
-  class ServiceClient {
-    constructor(baseClient) {
-      this.baseClient = baseClient;
-      this.create = this.create.bind(this);
-      this.deleteRecording = this.deleteRecording.bind(this);
-      this.get = this.get.bind(this);
-      this.list = this.list.bind(this);
-      this.update = this.update.bind(this);
-    }
-    /**
-     * Creates a new recording metadata entry.
-     */
-    async create(params) {
-      const resp = await this.baseClient.callTypedAPI(`/recordings`, { method: "POST", body: JSON.stringify(params) });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Deletes a recording metadata entry.
-     */
-    async deleteRecording(params) {
-      await this.baseClient.callTypedAPI(`/recordings/${encodeURIComponent(params.id)}`, { method: "DELETE", body: void 0 });
-    }
-    /**
-     * Retrieves a recording by its ID.
-     */
-    async get(params) {
-      const resp = await this.baseClient.callTypedAPI(`/recordings/${encodeURIComponent(params.id)}`, { method: "GET", body: void 0 });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Retrieves all recordings, ordered by creation date (latest first).
-     */
-    async list(params) {
-      const query = makeRecord({
-        limit: params.limit === void 0 ? void 0 : String(params.limit),
-        offset: params.offset === void 0 ? void 0 : String(params.offset),
-        search: params.search
-      });
-      const resp = await this.baseClient.callTypedAPI(`/recordings`, { query, method: "GET", body: void 0 });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-    /**
-     * Updates a recording's metadata.
-     */
-    async update(params) {
-      const body = {
-        privacy: params.privacy,
-        thumbnailUrl: params.thumbnailUrl,
-        title: params.title
-      };
-      const resp = await this.baseClient.callTypedAPI(`/recordings/${encodeURIComponent(params.id)}`, { method: "PUT", body: JSON.stringify(body) });
-      return JSON.parse(await resp.text(), dateReviver);
-    }
-  }
-  metadata2.ServiceClient = ServiceClient;
-})(metadata || (metadata = {}));
-function dateReviver(key, value) {
-  if (typeof value === "string" && value.length >= 10 && value.charCodeAt(0) >= 48 && // '0'
-  value.charCodeAt(0) <= 57) {
-    const parsedDate = new Date(value);
-    if (!isNaN(parsedDate.getTime())) {
-      return parsedDate;
-    }
-  }
-  return value;
-}
-function encodeQuery(parts) {
-  const pairs = [];
-  for (const key in parts) {
-    const val = Array.isArray(parts[key]) ? parts[key] : [parts[key]];
-    for (const v of val) {
-      pairs.push(`${key}=${encodeURIComponent(v)}`);
-    }
-  }
-  return pairs.join("&");
-}
-function makeRecord(record) {
-  for (const key in record) {
-    if (record[key] === void 0) {
-      delete record[key];
-    }
-  }
-  return record;
-}
-function encodeWebSocketHeaders(headers) {
-  const base64encoded = btoa(JSON.stringify(headers)).replaceAll("=", "").replaceAll("+", "-").replaceAll("/", "_");
-  return "encore.dev.headers." + base64encoded;
-}
-class WebSocketConnection {
-  constructor(url, headers) {
-    this.hasUpdateHandlers = [];
-    let protocols = ["encore-ws"];
-    if (headers) {
-      protocols.push(encodeWebSocketHeaders(headers));
-    }
-    this.ws = new WebSocket(url, protocols);
-    this.on("error", () => {
-      this.resolveHasUpdateHandlers();
-    });
-    this.on("close", () => {
-      this.resolveHasUpdateHandlers();
-    });
-  }
-  resolveHasUpdateHandlers() {
-    const handlers = this.hasUpdateHandlers;
-    this.hasUpdateHandlers = [];
-    for (const handler of handlers) {
-      handler();
-    }
-  }
-  async hasUpdate() {
-    await new Promise((resolve) => {
-      this.hasUpdateHandlers.push(() => resolve(null));
-    });
-  }
-  on(type, handler) {
-    this.ws.addEventListener(type, handler);
-  }
-  off(type, handler) {
-    this.ws.removeEventListener(type, handler);
-  }
-  close() {
-    this.ws.close();
-  }
-}
-class StreamInOut {
-  constructor(url, headers) {
-    this.buffer = [];
-    this.socket = new WebSocketConnection(url, headers);
-    this.socket.on("message", (event) => {
-      this.buffer.push(JSON.parse(event.data, dateReviver));
-      this.socket.resolveHasUpdateHandlers();
-    });
-  }
-  close() {
-    this.socket.close();
-  }
-  async send(msg) {
-    if (this.socket.ws.readyState === WebSocket.CONNECTING) {
-      await new Promise((resolve) => {
-        this.socket.ws.addEventListener("open", resolve, { once: true });
-      });
-    }
-    return this.socket.ws.send(JSON.stringify(msg));
-  }
-  async next() {
-    for await (const next of this) return next;
-    return void 0;
-  }
-  async *[Symbol.asyncIterator]() {
-    while (true) {
-      if (this.buffer.length > 0) {
-        yield this.buffer.shift();
-      } else {
-        if (this.socket.ws.readyState === WebSocket.CLOSED) return;
-        await this.socket.hasUpdate();
-      }
-    }
-  }
-}
-class StreamIn {
-  constructor(url, headers) {
-    this.buffer = [];
-    this.socket = new WebSocketConnection(url, headers);
-    this.socket.on("message", (event) => {
-      this.buffer.push(JSON.parse(event.data, dateReviver));
-      this.socket.resolveHasUpdateHandlers();
-    });
-  }
-  close() {
-    this.socket.close();
-  }
-  async next() {
-    for await (const next of this) return next;
-    return void 0;
-  }
-  async *[Symbol.asyncIterator]() {
-    while (true) {
-      if (this.buffer.length > 0) {
-        yield this.buffer.shift();
-      } else {
-        if (this.socket.ws.readyState === WebSocket.CLOSED) return;
-        await this.socket.hasUpdate();
-      }
-    }
-  }
-}
-class StreamOut {
-  constructor(url, headers) {
-    let responseResolver;
-    this.responseValue = new Promise((resolve) => responseResolver = resolve);
-    this.socket = new WebSocketConnection(url, headers);
-    this.socket.on("message", (event) => {
-      responseResolver(JSON.parse(event.data, dateReviver));
-    });
-  }
-  async response() {
-    return this.responseValue;
-  }
-  close() {
-    this.socket.close();
-  }
-  async send(msg) {
-    if (this.socket.ws.readyState === WebSocket.CONNECTING) {
-      await new Promise((resolve) => {
-        this.socket.ws.addEventListener("open", resolve, { once: true });
-      });
-    }
-    return this.socket.ws.send(JSON.stringify(msg));
-  }
-}
-const boundFetch = fetch.bind(void 0);
-class BaseClient {
-  constructor(baseURL, options) {
-    this.baseURL = baseURL;
-    this.headers = {};
-    if (!BROWSER) {
-      this.headers["User-Agent"] = "-Generated-TS-Client (Encore/1.49.3)";
-    }
-    this.requestInit = options.requestInit ?? {};
-    if (options.fetcher !== void 0) {
-      this.fetcher = options.fetcher;
-    } else {
-      this.fetcher = boundFetch;
-    }
-  }
-  async getAuthData() {
-    return void 0;
-  }
-  // createStreamInOut sets up a stream to a streaming API endpoint.
-  async createStreamInOut(path, params) {
-    let { query, headers } = params ?? {};
-    const authData = await this.getAuthData();
-    if (authData) {
-      if (authData.query) {
-        query = { ...query, ...authData.query };
-      }
-      if (authData.headers) {
-        headers = { ...headers, ...authData.headers };
-      }
-    }
-    const queryString = query ? "?" + encodeQuery(query) : "";
-    return new StreamInOut(this.baseURL + path + queryString, headers);
-  }
-  // createStreamIn sets up a stream to a streaming API endpoint.
-  async createStreamIn(path, params) {
-    let { query, headers } = params ?? {};
-    const authData = await this.getAuthData();
-    if (authData) {
-      if (authData.query) {
-        query = { ...query, ...authData.query };
-      }
-      if (authData.headers) {
-        headers = { ...headers, ...authData.headers };
-      }
-    }
-    const queryString = query ? "?" + encodeQuery(query) : "";
-    return new StreamIn(this.baseURL + path + queryString, headers);
-  }
-  // createStreamOut sets up a stream to a streaming API endpoint.
-  async createStreamOut(path, params) {
-    let { query, headers } = params ?? {};
-    const authData = await this.getAuthData();
-    if (authData) {
-      if (authData.query) {
-        query = { ...query, ...authData.query };
-      }
-      if (authData.headers) {
-        headers = { ...headers, ...authData.headers };
-      }
-    }
-    const queryString = query ? "?" + encodeQuery(query) : "";
-    return new StreamOut(this.baseURL + path + queryString, headers);
-  }
-  // callTypedAPI makes an API call, defaulting content type to "application/json"
-  async callTypedAPI(path, params) {
-    return this.callAPI(path, {
-      ...params,
-      headers: { "Content-Type": "application/json", ...params?.headers }
-    });
-  }
-  // callAPI is used by each generated API method to actually make the request
-  async callAPI(path, params) {
-    let { query, headers, ...rest } = params ?? {};
-    const init = {
-      ...this.requestInit,
-      ...rest
-    };
-    init.headers = { ...this.headers, ...init.headers, ...headers };
-    const authData = await this.getAuthData();
-    if (authData) {
-      if (authData.query) {
-        query = { ...query, ...authData.query };
-      }
-      if (authData.headers) {
-        init.headers = { ...init.headers, ...authData.headers };
-      }
-    }
-    const queryString = query ? "?" + encodeQuery(query) : "";
-    const response = await this.fetcher(this.baseURL + path + queryString, init);
-    if (!response.ok) {
-      let body = { code: "unknown", message: `request failed: status ${response.status}` };
-      try {
-        const text = await response.text();
-        try {
-          const jsonBody = JSON.parse(text);
-          if (isAPIErrorResponse(jsonBody)) {
-            body = jsonBody;
-          } else {
-            body.message += ": " + JSON.stringify(jsonBody);
-          }
-        } catch {
-          body.message += ": " + text;
-        }
-      } catch (e) {
-        body.message += ": " + String(e);
-      }
-      throw new APIError(response.status, body);
-    }
-    return response;
-  }
-}
-function isAPIErrorResponse(err) {
-  return err !== void 0 && err !== null && isErrCode(err.code) && typeof err.message === "string" && (err.details === void 0 || err.details === null || typeof err.details === "object");
-}
-function isErrCode(code) {
-  return code !== void 0 && Object.values(ErrCode).includes(code);
-}
-class APIError extends Error {
-  constructor(status, response) {
-    super(response.message);
-    Object.defineProperty(this, "name", {
-      value: "APIError",
-      enumerable: false,
-      configurable: true
-    });
-    if (Object.setPrototypeOf == void 0) {
-      this.__proto__ = APIError.prototype;
-    } else {
-      Object.setPrototypeOf(this, APIError.prototype);
-    }
-    if (Error.captureStackTrace !== void 0) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-    this.status = status;
-    this.code = response.code;
-    this.details = response.details;
-  }
-}
-var ErrCode = /* @__PURE__ */ ((ErrCode2) => {
-  ErrCode2["OK"] = "ok";
-  ErrCode2["Canceled"] = "canceled";
-  ErrCode2["Unknown"] = "unknown";
-  ErrCode2["InvalidArgument"] = "invalid_argument";
-  ErrCode2["DeadlineExceeded"] = "deadline_exceeded";
-  ErrCode2["NotFound"] = "not_found";
-  ErrCode2["AlreadyExists"] = "already_exists";
-  ErrCode2["PermissionDenied"] = "permission_denied";
-  ErrCode2["ResourceExhausted"] = "resource_exhausted";
-  ErrCode2["FailedPrecondition"] = "failed_precondition";
-  ErrCode2["Aborted"] = "aborted";
-  ErrCode2["OutOfRange"] = "out_of_range";
-  ErrCode2["Unimplemented"] = "unimplemented";
-  ErrCode2["Internal"] = "internal";
-  ErrCode2["Unavailable"] = "unavailable";
-  ErrCode2["DataLoss"] = "data_loss";
-  ErrCode2["Unauthenticated"] = "unauthenticated";
-  return ErrCode2;
-})(ErrCode || {});
-const backend = new Client("http://localhost:4000", { requestInit: { credentials: "include" } });
-const client = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  APIError,
-  Client,
-  ErrCode,
-  StreamIn,
-  StreamInOut,
-  StreamOut,
-  get analytics() {
-    return analytics;
-  },
-  get auth() {
-    return auth;
-  },
-  default: backend,
-  get health() {
-    return health;
-  },
-  get metadata() {
-    return metadata;
-  }
-}, Symbol.toStringTag, { value: "Module" }));
+let backend = null;
 const _RealYouTubeService = class _RealYouTubeService {
   static initialize() {
     if (this.initializationPromise) {
@@ -20882,6 +20438,10 @@ const _RealYouTubeService = class _RealYouTubeService {
   }
   static async loadOAuthConfig() {
     try {
+      if (!backend) {
+        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        backend = backendModule.default;
+      }
       const config = await backend.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
@@ -20954,10 +20514,11 @@ const _RealYouTubeService = class _RealYouTubeService {
     }
   }
   static async connect() {
+    var _a;
     await this.initialize();
     try {
       await this.cache.delete("connection-status");
-      if (!this.oauthConfig?.clientId) {
+      if (!((_a = this.oauthConfig) == null ? void 0 : _a.clientId)) {
         throw new Error("OAuth configuration not available from backend");
       }
       const codeVerifier = this.generateCodeVerifier();
@@ -21006,7 +20567,7 @@ const _RealYouTubeService = class _RealYouTubeService {
     await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
-      if (!tokenData?.accessToken) {
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
         throw ErrorHandler.createError("AUTH_REQUIRED", ERROR_MESSAGES.DRIVE_NOT_CONNECTED);
       }
       const isValid = await this.validateToken(tokenData.accessToken);
@@ -21025,34 +20586,59 @@ const _RealYouTubeService = class _RealYouTubeService {
     }
   }
   static async deleteVideo(videoId) {
+    console.log("RealYouTubeService.deleteVideo called with videoId:", videoId);
     await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
-      if (!tokenData?.accessToken) {
+      console.log("Token data available:", !!(tokenData == null ? void 0 : tokenData.accessToken));
+      if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
         throw ErrorHandler.createError("AUTH_REQUIRED", "Authentication required");
       }
+      console.log("Validating token...");
       const isValid = await this.validateToken(tokenData.accessToken);
+      console.log("Token is valid:", isValid);
       if (!isValid) {
+        console.log("Token invalid, attempting refresh...");
         const refreshed = await this.refreshAccessToken();
+        console.log("Token refresh successful:", refreshed);
         if (!refreshed) {
           throw ErrorHandler.createError("AUTH_REQUIRED", "Authentication required");
         }
       }
-      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}`, {
+      const deleteUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}`;
+      console.log("Making DELETE request to:", deleteUrl);
+      const response = await fetch(deleteUrl, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${tokenData.accessToken}`
         }
       });
+      console.log("Delete response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to delete video: ${errorText}`);
+        console.error("Delete failed with response:", errorText);
+        let errorMessage = "Failed to delete video from YouTube";
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            if (errorData.error.code === 403) {
+              errorMessage = "Permission denied. You may not have permission to delete this video.";
+            } else if (errorData.error.code === 404) {
+              errorMessage = "Video not found. It may have already been deleted.";
+            } else if (errorData.error.message) {
+              errorMessage = errorData.error.message;
+            }
+          }
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
+        }
+        throw new Error(errorMessage);
       }
       console.log("Video deleted successfully from YouTube:", videoId);
     } catch (error) {
       console.error("Failed to delete video from YouTube:", error);
       ErrorHandler.logError("youtube-delete", error, { videoId });
-      throw ErrorHandler.createError("DELETE_FAILED", "Failed to delete video from YouTube", error);
+      throw ErrorHandler.createError("DELETE_FAILED", error.message || "Failed to delete video from YouTube", error);
     }
   }
   // PKCE Helper Methods
@@ -21073,7 +20659,8 @@ const _RealYouTubeService = class _RealYouTubeService {
     return btoa(String.fromCharCode.apply(null, Array.from(array))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
   static buildAuthUrl(codeChallenge, state) {
-    if (!this.oauthConfig?.clientId) {
+    var _a;
+    if (!((_a = this.oauthConfig) == null ? void 0 : _a.clientId)) {
       throw new Error("OAuth configuration not available");
     }
     const params = new URLSearchParams({
@@ -21156,6 +20743,10 @@ const _RealYouTubeService = class _RealYouTubeService {
   }
   static async exchangeCodeForToken(code, codeVerifier) {
     try {
+      if (!backend) {
+        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        backend = backendModule.default;
+      }
       const result = await backend.auth.exchangeCode({
         code,
         codeVerifier,
@@ -21171,8 +20762,12 @@ const _RealYouTubeService = class _RealYouTubeService {
     await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
-      if (!tokenData?.refreshToken) {
+      if (!(tokenData == null ? void 0 : tokenData.refreshToken)) {
         return false;
+      }
+      if (!backend) {
+        const backendModule = await __vitePreload(() => import("./client-Ct5oOSl9.js"), true ? [] : void 0);
+        backend = backendModule.default;
       }
       const result = await backend.auth.refreshToken({
         refreshToken: tokenData.refreshToken
@@ -21230,10 +20825,10 @@ const _RealYouTubeService = class _RealYouTubeService {
   }
   static async performYouTubeUpload(blob, title, privacyStatus, onProgress) {
     const tokenData = this.getStoredTokenData();
-    if (!tokenData?.accessToken) {
+    if (!(tokenData == null ? void 0 : tokenData.accessToken)) {
       throw new Error("No access token available");
     }
-    const metadata2 = {
+    const metadata = {
       snippet: {
         title,
         description: `Recorded with RecordLane - ${(/* @__PURE__ */ new Date()).toISOString()}`,
@@ -21251,7 +20846,7 @@ const _RealYouTubeService = class _RealYouTubeService {
         "Authorization": `Bearer ${tokenData.accessToken}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(metadata2)
+      body: JSON.stringify(metadata)
     });
     if (!initResponse.ok) {
       const errorText = await initResponse.text();
@@ -21583,7 +21178,7 @@ const _FrontendYouTubeService = class _FrontendYouTubeService {
   static async refreshAccessToken() {
     try {
       const tokenData = this.getStoredTokenData();
-      if (!tokenData?.refresh_token) {
+      if (!(tokenData == null ? void 0 : tokenData.refresh_token)) {
         return false;
       }
       const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -21712,6 +21307,7 @@ function YouTubeProvider({ children }) {
     }
   }, []);
   const connectYouTube = reactExports.useCallback(async () => {
+    var _a, _b;
     setIsConnecting(true);
     setConnectionError(null);
     try {
@@ -21721,7 +21317,7 @@ function YouTubeProvider({ children }) {
         try {
           result = await RealYouTubeService.connect();
         } catch (error) {
-          if (error.message?.includes("backend configuration") || error.message?.includes("OAuth configuration")) {
+          if (((_a = error.message) == null ? void 0 : _a.includes("backend configuration")) || ((_b = error.message) == null ? void 0 : _b.includes("OAuth configuration"))) {
             setConnectionError("Backend server is not running. Please start the backend server to enable YouTube integration.");
             toast2({
               title: "Backend Required",
@@ -21875,6 +21471,11 @@ class RecordingService {
     this.retryAttempts = 0;
     this.maxRetries = 3;
     this.startTime = 0;
+    this.onScreenShareEnded = null;
+    this.screenShareCheckInterval = null;
+  }
+  setScreenShareEndedCallback(callback) {
+    this.onScreenShareEnded = callback;
   }
   async startRecording(options) {
     try {
@@ -22210,10 +21811,38 @@ class RecordingService {
         this.mediaRecorder = null;
       }
       this.isRecording = false;
+      this.onScreenShareEnded = null;
+      this.stopScreenShareMonitoring();
       console.log("Cleanup completed");
     } catch (error) {
       console.error("Error during cleanup:", error);
       ErrorHandler.logError("recording-cleanup", error);
+    }
+  }
+  startScreenShareMonitoring() {
+    if (this.screenShareCheckInterval) {
+      clearInterval(this.screenShareCheckInterval);
+    }
+    this.screenShareCheckInterval = setInterval(() => {
+      if (this.screenStream && this.isRecording) {
+        const videoTracks = this.screenStream.getVideoTracks();
+        const audioTracks = this.screenStream.getAudioTracks();
+        const hasActiveVideoTrack = videoTracks.some((track) => track.readyState === "live");
+        audioTracks.some((track) => track.readyState === "live");
+        if (videoTracks.length > 0 && !hasActiveVideoTrack) {
+          console.log("Screen sharing detected as ended via monitoring (video track inactive)");
+          if (this.onScreenShareEnded) {
+            this.onScreenShareEnded();
+          }
+          this.stopScreenShareMonitoring();
+        }
+      }
+    }, 2e3);
+  }
+  stopScreenShareMonitoring() {
+    if (this.screenShareCheckInterval) {
+      clearInterval(this.screenShareCheckInterval);
+      this.screenShareCheckInterval = null;
     }
   }
   checkBrowserSupport() {
@@ -22232,6 +21861,7 @@ class RecordingService {
     }
   }
   async getScreenStream(options) {
+    var _a, _b;
     try {
       console.log("Requesting screen stream...");
       const constraints = {
@@ -22246,11 +21876,34 @@ class RecordingService {
       console.log("Screen stream obtained:", {
         videoTracks: this.screenStream.getVideoTracks().length,
         audioTracks: this.screenStream.getAudioTracks().length,
-        resolution: `${this.screenStream.getVideoTracks()[0]?.getSettings().width}x${this.screenStream.getVideoTracks()[0]?.getSettings().height}`
+        resolution: `${(_a = this.screenStream.getVideoTracks()[0]) == null ? void 0 : _a.getSettings().width}x${(_b = this.screenStream.getVideoTracks()[0]) == null ? void 0 : _b.getSettings().height}`
       });
-      this.screenStream.getVideoTracks()[0].onended = () => {
-        console.log("Screen sharing stopped by user");
+      this.screenStream.getVideoTracks().forEach((track, index) => {
+        track.onended = () => {
+          console.log(`Screen sharing video track ${index} ended by user`);
+          if (this.onScreenShareEnded && this.isRecording) {
+            console.log("Calling screen share ended callback...");
+            this.onScreenShareEnded();
+          }
+        };
+      });
+      this.screenStream.getAudioTracks().forEach((track, index) => {
+        track.onended = () => {
+          console.log(`Screen sharing audio track ${index} ended by user`);
+          if (this.onScreenShareEnded && this.isRecording) {
+            console.log("Calling screen share ended callback...");
+            this.onScreenShareEnded();
+          }
+        };
+      });
+      this.screenStream.onremovetrack = (event) => {
+        console.log("Track removed from screen stream:", event.track.kind);
+        if (this.onScreenShareEnded && this.isRecording) {
+          console.log("Calling screen share ended callback due to track removal...");
+          this.onScreenShareEnded();
+        }
       };
+      this.startScreenShareMonitoring();
     } catch (error) {
       console.error("Failed to get screen stream:", error);
       if (error.name === "NotAllowedError") {
@@ -22264,6 +21917,7 @@ class RecordingService {
     }
   }
   async getCameraStream(options) {
+    var _a, _b;
     try {
       console.log("Requesting camera stream...");
       const constraints = {
@@ -22279,7 +21933,7 @@ class RecordingService {
       console.log("Camera stream obtained:", {
         videoTracks: this.cameraStream.getVideoTracks().length,
         audioTracks: this.cameraStream.getAudioTracks().length,
-        resolution: `${this.cameraStream.getVideoTracks()[0]?.getSettings().width}x${this.cameraStream.getVideoTracks()[0]?.getSettings().height}`
+        resolution: `${(_a = this.cameraStream.getVideoTracks()[0]) == null ? void 0 : _a.getSettings().width}x${(_b = this.cameraStream.getVideoTracks()[0]) == null ? void 0 : _b.getSettings().height}`
       });
     } catch (error) {
       console.error("Failed to get camera stream:", error);
@@ -22294,6 +21948,7 @@ class RecordingService {
     }
   }
   async getMicrophoneStream(options) {
+    var _a;
     try {
       console.log("Requesting microphone stream...");
       this.microphoneStream = await navigator.mediaDevices.getUserMedia({
@@ -22308,7 +21963,7 @@ class RecordingService {
       });
       console.log("Microphone stream obtained:", {
         audioTracks: this.microphoneStream.getAudioTracks().length,
-        settings: this.microphoneStream.getAudioTracks()[0]?.getSettings()
+        settings: (_a = this.microphoneStream.getAudioTracks()[0]) == null ? void 0 : _a.getSettings()
       });
     } catch (error) {
       console.error("Failed to get microphone stream:", error);
@@ -22476,7 +22131,6 @@ function RecordingProvider({ children }) {
   const [options, setOptions] = reactExports.useState({
     mode: "screen",
     highlightClicks: appState.settings.highlightClicksDefault,
-    enableDrawing: false,
     systemAudio: true,
     microphone: false,
     resolution: appState.settings.defaultResolution,
@@ -22485,6 +22139,27 @@ function RecordingProvider({ children }) {
   const recordingServiceRef = reactExports.useRef(null);
   const intervalRef = reactExports.useRef(null);
   const { toast: toast2 } = useToast();
+  const hideRecordingNotification = reactExports.useCallback(() => {
+    const notification = document.getElementById("recording-notification");
+    if (notification) {
+      notification.remove();
+    }
+    delete window.stopRecordingFromNotification;
+  }, []);
+  const showRecordingNotification = reactExports.useCallback(() => {
+    hideRecordingNotification();
+    const notification = document.createElement("div");
+    notification.className = "recording-notification";
+    notification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: recording-pulse 1.5s ease-in-out infinite;"></div>
+        <span>Recording in progress...</span>
+        <button onclick="window.stopRecordingFromNotification()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
+      </div>
+    `;
+    notification.id = "recording-notification";
+    document.body.appendChild(notification);
+  }, [hideRecordingNotification]);
   const startTimer = reactExports.useCallback(() => {
     const startTime = Date.now();
     intervalRef.current = setInterval(() => {
@@ -22608,6 +22283,38 @@ function RecordingProvider({ children }) {
       return false;
     }
   }, [toast2]);
+  const stopRecording = reactExports.useCallback(async () => {
+    if (recordingServiceRef.current && (state === "recording" || state === "paused")) {
+      try {
+        const blob = await recordingServiceRef.current.stopRecording();
+        if (!blob || blob.size === 0) {
+          throw new Error("Recording failed: No data recorded");
+        }
+        setRecordedBlob(blob);
+        setState("stopped");
+        stopTimer();
+        document.body.removeAttribute("data-recording");
+        hideRecordingNotification();
+        toast2({
+          title: "Recording Stopped",
+          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`
+        });
+      } catch (error) {
+        console.error("Failed to stop recording:", error);
+        setState("idle");
+        document.body.removeAttribute("data-recording");
+        hideRecordingNotification();
+        toast2({
+          title: "Stop Failed",
+          description: "Failed to save recording. Please try recording again.",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [state, stopTimer, hideRecordingNotification, toast2]);
+  React.useEffect(() => {
+    window.stopRecordingFromNotification = stopRecording;
+  }, [stopRecording]);
   const startRecording = reactExports.useCallback(async (recordingOptions) => {
     try {
       setState("starting");
@@ -22632,9 +22339,15 @@ function RecordingProvider({ children }) {
         }
       }
       recordingServiceRef.current = new RecordingService();
+      recordingServiceRef.current.setScreenShareEndedCallback(() => {
+        console.log("Screen sharing ended by user, stopping recording...");
+        stopRecording();
+      });
       await recordingServiceRef.current.startRecording(recordingOptions);
       setState("recording");
       startTimer();
+      document.body.setAttribute("data-recording", "true");
+      showRecordingNotification();
       toast2({
         title: "Recording Started",
         description: "Your recording has started successfully"
@@ -22704,31 +22417,6 @@ function RecordingProvider({ children }) {
       });
     }
   }, [state, startTimer, toast2]);
-  const stopRecording = reactExports.useCallback(async () => {
-    if (recordingServiceRef.current && (state === "recording" || state === "paused")) {
-      try {
-        const blob = await recordingServiceRef.current.stopRecording();
-        if (!blob || blob.size === 0) {
-          throw new Error("Recording failed: No data recorded");
-        }
-        setRecordedBlob(blob);
-        setState("stopped");
-        stopTimer();
-        toast2({
-          title: "Recording Stopped",
-          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`
-        });
-      } catch (error) {
-        console.error("Failed to stop recording:", error);
-        setState("idle");
-        toast2({
-          title: "Stop Failed",
-          description: "Failed to save recording. Please try recording again.",
-          variant: "destructive"
-        });
-      }
-    }
-  }, [state, stopTimer, toast2]);
   const deleteRecording = reactExports.useCallback(() => {
     if (recordingServiceRef.current) {
       recordingServiceRef.current.cleanup();
@@ -22744,7 +22432,9 @@ function RecordingProvider({ children }) {
     setState("idle");
     setDuration(0);
     stopTimer();
-  }, [recordedBlob, stopTimer]);
+    document.body.removeAttribute("data-recording");
+    hideRecordingNotification();
+  }, [recordedBlob, stopTimer, hideRecordingNotification]);
   const restartRecording = reactExports.useCallback(async () => {
     deleteRecording();
     setTimeout(() => {
@@ -23012,12 +22702,13 @@ class ErrorBoundary extends reactExports.Component {
       }
     };
     this.handleDownloadErrorReport = () => {
+      var _a, _b, _c;
       try {
         const errorReport = {
           error: {
-            name: this.state.error?.name,
-            message: this.state.error?.message,
-            stack: this.state.error?.stack
+            name: (_a = this.state.error) == null ? void 0 : _a.name,
+            message: (_b = this.state.error) == null ? void 0 : _b.message,
+            stack: (_c = this.state.error) == null ? void 0 : _c.stack
           },
           errorInfo: this.state.errorInfo,
           errorId: this.state.errorId,
@@ -23077,16 +22768,17 @@ class ErrorBoundary extends reactExports.Component {
       return ErrorHandler.getErrorSeverity(this.state.error);
     };
     this.getErrorSuggestions = () => {
+      var _a, _b, _c;
       const suggestions = [];
       if (this.state.connectionStatus === "offline") {
         suggestions.push("Check your internet connection");
         suggestions.push("Try connecting to a different network");
       }
-      if (this.state.error?.name === "ChunkLoadError") {
+      if (((_a = this.state.error) == null ? void 0 : _a.name) === "ChunkLoadError") {
         suggestions.push("Clear your browser cache");
         suggestions.push("Disable browser extensions temporarily");
       }
-      if (this.state.error?.message?.includes("Google")) {
+      if ((_c = (_b = this.state.error) == null ? void 0 : _b.message) == null ? void 0 : _c.includes("Google")) {
         suggestions.push("Check if Google services are accessible");
         suggestions.push("Try signing out and back into your Google account");
       }
@@ -23304,9 +22996,9 @@ function LoadingSpinner({ text, size = "md", className }) {
     text && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-muted-foreground", children: text })
   ] });
 }
-const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-CuhKtEi2.js"), true ? __vite__mapDeps([0,1,2,3]) : void 0));
-const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BjyzpDFZ.js"), true ? __vite__mapDeps([4,3,5,2]) : void 0));
-const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-CLOcVpY-.js"), true ? __vite__mapDeps([6,1,2,5]) : void 0));
+const AppShell = reactExports.lazy(() => __vitePreload(() => import("./AppShell-d1eR4-R3.js"), true ? __vite__mapDeps([0,1,2,3,4]) : void 0));
+const YouTubeSetupPage = reactExports.lazy(() => __vitePreload(() => import("./YouTubeSetupPage-BlurffMP.js"), true ? __vite__mapDeps([5,3,6,2]) : void 0));
+const VideoSharePage = reactExports.lazy(() => __vitePreload(() => import("./VideoSharePage-D0nMx8OX.js"), true ? __vite__mapDeps([7,1,2,6]) : void 0));
 function AppLoadingFallback() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-background flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-primary rounded-full" }) }),
@@ -23384,33 +23076,32 @@ ReactDOM$1.createRoot(document.getElementById("root")).render(
   /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) })
 );
 export {
-  realYouTubeService as $,
-  WifiOff as A,
+  withErrorBoundary as A,
   Button as B,
-  CacheService as C,
+  Clock as C,
   DismissableLayer as D,
-  ErrorHandler as E,
-  withErrorBoundary as F,
-  withPerformanceMonitoring as G,
-  Download as H,
-  backend as I,
-  Card as J,
-  CardHeader as K,
+  withPerformanceMonitoring as E,
+  Download as F,
+  ErrorHandler as G,
+  Card as H,
+  CardHeader as I,
+  CardTitle as J,
+  CardContent as K,
   LoadingSpinner as L,
   Monitor as M,
-  CardTitle as N,
-  CardContent as O,
+  Routes as N,
+  Route as O,
   Primitive as P,
-  Routes as Q,
+  useParams as Q,
   RefreshCw as R,
-  Route as S,
+  React$1 as S,
   TriangleAlert as T,
-  useParams as U,
+  CacheService as U,
   VISUALLY_HIDDEN_STYLES as V,
   Wifi as W,
   X,
-  React$1 as Y,
-  createContext2 as Z,
+  createContext2 as Y,
+  realYouTubeService as Z,
   __vitePreload as _,
   createContextScope as a,
   Presence as b,
@@ -23436,6 +23127,6 @@ export {
   useYouTube as v,
   useNavigate as w,
   LoaderCircle as x,
-  Clock as y,
-  Badge as z
+  Badge as y,
+  WifiOff as z
 };
