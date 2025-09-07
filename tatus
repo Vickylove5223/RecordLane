@@ -1,0 +1,3 @@
+[33mdc69862[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Complete merge and fix ReferenceError in RecordingContext
+[33m1961de6[m Fix ReferenceError: Cannot access 'hideRecordingNotification' before initialization
+[33mcf67e07[m GitHub: Add comprehensive landing page sections and imp...

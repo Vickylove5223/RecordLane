@@ -91,11 +91,11 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     notification.id = 'recording-notification';
     document.body.appendChild(notification);
     
-    // Add global function for the stop button
+    // Add global function for the stop button - will be set when stopRecording is defined
     (window as any).stopRecordingFromNotification = () => {
-      stopRecording();
+      // This will be updated when stopRecording is available
     };
-  }, [hideRecordingNotification, stopRecording]);
+  }, [hideRecordingNotification]);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
@@ -406,7 +406,12 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
         });
       }
     }
-  }, [state, stopTimer, toast]);
+  }, [state, stopTimer, hideRecordingNotification, toast]);
+
+  // Update the global stop function when stopRecording is available
+  React.useEffect(() => {
+    (window as any).stopRecordingFromNotification = stopRecording;
+  }, [stopRecording]);
 
   const deleteRecording = useCallback(() => {
     if (recordingServiceRef.current) {
