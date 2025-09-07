@@ -37,19 +37,6 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
   
   const retryService = new RetryService();
 
-  // Check for persistent tokens on mount
-  useEffect(() => {
-    const initializeConnection = async () => {
-      try {
-        await checkConnection();
-      } catch (error) {
-        console.error('Failed to initialize YouTube connection:', error);
-      }
-    };
-
-    initializeConnection();
-  }, [checkConnection]);
-
   const checkConnection = useCallback(async () => {
     try {
       setConnectionError(null);
@@ -92,6 +79,19 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       setConnectionError('Failed to check connection status');
     }
   }, []);
+
+  // Check for persistent tokens on mount
+  useEffect(() => {
+    const initializeConnection = async () => {
+      try {
+        await checkConnection();
+      } catch (error) {
+        console.error('Failed to initialize YouTube connection:', error);
+      }
+    };
+
+    initializeConnection();
+  }, [checkConnection]);
 
   const connectYouTube = useCallback(async () => {
     setIsConnecting(true);
@@ -247,10 +247,6 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       await checkConnection();
     }
   }, [connectionError, connectYouTube, checkConnection]);
-
-  React.useEffect(() => {
-    checkConnection();
-  }, [checkConnection]);
 
   return (
     <YouTubeContext.Provider value={{
