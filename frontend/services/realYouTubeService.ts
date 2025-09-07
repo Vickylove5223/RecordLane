@@ -57,9 +57,9 @@ export class RealYouTubeService {
 
   private static async loadOAuthConfig() {
     try {
-      // Dynamically import backend client
+      // Dynamically import Supabase client
       if (!backend) {
-        const backendModule = await import('~backend/client');
+        const backendModule = await import('../supabaseClient');
         backend = backendModule.default;
       }
       
@@ -455,7 +455,7 @@ export class RealYouTubeService {
     try {
       // Ensure backend is loaded
       if (!backend) {
-        const backendModule = await import('~backend/client');
+        const backendModule = await import('../supabaseClient');
         backend = backendModule.default;
       }
       
@@ -482,7 +482,7 @@ export class RealYouTubeService {
 
       // Ensure backend is loaded
       if (!backend) {
-        const backendModule = await import('~backend/client');
+        const backendModule = await import('../supabaseClient');
         backend = backendModule.default;
       }
 

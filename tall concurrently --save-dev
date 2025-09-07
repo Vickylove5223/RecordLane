@@ -1,0 +1,80 @@
+[33mcommit 3f8c9571a7b0869e1b206dc4d60d5226a91799d2[m
+Author: Vickylove5223 <ifeoluwa5223@gmail.com>
+Date:   Sun Sep 7 16:46:50 2025 +0100
+
+    Complete migration from Encore.ts to Supabase with OAuth integration
+    
+    - Migrated entire backend from Encore.ts to Supabase Edge Functions
+    - Implemented Google YouTube OAuth authentication with Supabase
+    - Created database tables (recordings, events) with RLS policies
+    - Deployed Supabase Edge Functions for auth, recordings, analytics, and health
+    - Updated frontend to use Supabase services instead of Encore backend
+    - Fixed OAuth configuration and removed backend server error messages
+    - Added comprehensive setup guides and deployment scripts
+    - Implemented proper error handling and user feedback
+    - All APIs now working: health, recordings, analytics, auth
+    - YouTube integration fully functional with OAuth flow
+
+ .cursor/mcp.json                                   |   19 [32m+[m
+ MIGRATION_GUIDE.md                                 |  197 [32m++[m
+ OAUTH_SETUP_GUIDE.md                               |  140 [32m+[m
+ README-SUPABASE.md                                 |  226 [32m++[m
+ SETUP_GUIDE.md                                     |  127 [32m+[m
+ add-policies-only.sql                              |   42 [32m+[m
+ add-user-tokens-table.sql                          |   39 [32m+[m
+ backend/analytics/get_stats.ts                     |    2 [32m+[m[31m-[m
+ backend/auth/exchange_code.ts                      |    4 [32m+[m[31m-[m
+ backend/auth/refresh_token.ts                      |    4 [32m+[m[31m-[m
+ backend/metadata/list.ts                           |    2 [32m+[m[31m-[m
+ backend/tsconfig.tsbuildinfo                       |    2 [32m+[m[31m-[m
+ complete-setup.bat                                 |   59 [32m+[m
+ create-tables-basic.sql                            |   23 [32m+[m
+ create-tables-robust.sql                           |  118 [32m+[m
+ create-tables-simple.sql                           |   51 [32m+[m
+ create-tables.sql                                  |   77 [32m+[m
+ deploy-supabase.bat                                |   56 [32m+[m
+ frontend/App-debug.tsx                             |  107 [32m+[m
+ frontend/App-lightweight.tsx                       |   63 [32m+[m
+ frontend/App-original.tsx                          |  171 [32m+[m
+ frontend/App.tsx                                   |  166 [32m+[m[31m-[m
+ frontend/bun.lock                                  |  502 [32m+++[m
+ frontend/client.ts                                 |  979 [31m------[m
+ frontend/components/layout/MainPanel.tsx           |    1 [31m-[m
+ frontend/contexts/AppContext-lightweight.tsx       |  155 [32m+[m
+ frontend/contexts/AppContext.tsx                   |  106 [32m+[m[31m-[m
+ frontend/contexts/RecordingContext-lightweight.tsx |  160 [32m+[m
+ frontend/contexts/YouTubeContext-lightweight.tsx   |  149 [32m+[m
+ frontend/contexts/YouTubeContext.tsx               |   91 [32m+[m[31m-[m
+ frontend/lib/supabase.ts                           |   37 [32m+[m
+ frontend/package-lock.json                         | 3615 [32m++++++++++++++++++++[m
+ frontend/package.json                              |    1 [32m+[m
+ frontend/services/persistentTokenService.ts        |  182 [32m+[m
+ frontend/services/realYouTubeService.ts            |   34 [32m+[m[31m-[m
+ frontend/services/supabaseService.ts               |  158 [32m+[m
+ frontend/services/tokenService.ts                  |    4 [32m+[m[31m-[m
+ frontend/src/config/production.ts                  |   13 [32m+[m
+ frontend/src/config/supabase.ts                    |   17 [32m+[m
+ frontend/test-api.html                             |   58 [32m+[m
+ frontend/test-oauth.html                           |  103 [32m+[m
+ frontend/vite.config.ts                            |    2 [31m-[m
+ package-lock.json                                  | 2377 [31m-------------[m
+ package.json                                       |   28 [32m+[m[31m-[m
+ setup-database.sql                                 |   59 [32m+[m
+ setup-supabase.bat                                 |   78 [32m+[m
+ start-app.bat                                      |   49 [32m+[m
+ start-frontend-only.bat                            |   48 [32m+[m
+ start-lightweight.bat                              |   56 [32m+[m
+ start-production.bat                               |   46 [32m+[m
+ start-supabase.bat                                 |   36 [32m+[m
+ supabase/config.toml                               |  297 [32m++[m
+ supabase/functions/analytics/index.ts              |  163 [32m+[m
+ supabase/functions/auth/index.ts                   |  176 [32m+[m
+ supabase/functions/health/index.ts                 |  112 [32m+[m
+ supabase/functions/recordings/index.ts             |  164 [32m+[m
+ .../20240101000001_create_recordings_table.sql     |   40 [32m+[m
+ .../20240101000002_create_events_table.sql         |   36 [32m+[m
+ .../20250107000001_create_recordings_table.sql     |   40 [32m+[m
+ .../20250107000002_create_events_table.sql         |   36 [32m+[m
+ test-api.bat                                       |   26 [32m+[m
+ test-oauth-simple.html                             |   48 [32m+[m
+ 62 files changed, 8340 insertions(+), 3637 deletions(-)

@@ -1,4 +1,4 @@
-import backend from '~backend/client';
+import { supabase } from '../lib/supabase';
 import { ErrorHandler } from '../utils/errorHandler';
 
 export interface TokenData {
@@ -163,24 +163,27 @@ export class TokenService {
 
       console.log('Refreshing access token...');
       
-      const response = await backend.auth.refreshToken({
-        refreshToken: tokenData.refreshToken,
-      });
+      // Supabase handles token refresh automatically
+      const { data: { session }, error } = await supabase.auth.refreshSession();
+      
+      if (error || !session) {
+        throw new Error('Failed to refresh session');
+      }
       
       // Store the new tokens
       this.storeTokens({
-        access_token: response.access_token,
-        refresh_token: tokenData.refreshToken, // Keep existing refresh token
-        expires_in: response.expires_in,
-        token_type: response.token_type,
-        scope: response.scope,
-        id_token: response.id_token,
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_in: session.expires_in || 3600,
+        token_type: 'Bearer',
+        scope: '',
+        id_token: session.user?.id,
       });
       
       console.log('Token refresh successful');
-      this.notifyRefreshListeners(true, response.access_token);
+      this.notifyRefreshListeners(true, session.access_token);
       
-      return response.access_token;
+      return session.access_token;
     } catch (error) {
       console.error('Token refresh failed:', error);
       ErrorHandler.logError('token-refresh', error);

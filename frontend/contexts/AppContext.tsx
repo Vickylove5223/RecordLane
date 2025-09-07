@@ -205,9 +205,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      // Try to load recordings from backend, but fallback gracefully if it fails
+      // Try to load recordings from Supabase backend, but fallback gracefully if it fails
       try {
-        const { metadata } = await import('~backend/client');
+        const { metadata } = await import('../supabaseClient');
         const recordingsResponse = await metadata.list({});
         
         if (recordingsResponse.recordings) {
@@ -243,9 +243,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Load recordings from backend metadata service
+        // Load recordings from Supabase backend metadata service
         try {
-          const { metadata } = await import('~backend/client');
+          const { metadata } = await import('../supabaseClient');
           const recordingsResponse = await metadata.list({});
           
           if (recordingsResponse.recordings) {

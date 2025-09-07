@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-RfuAlLGG.js","assets/index-xjloquWF.css"])))=>i.map(i=>d[i]);
-import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as Clock, y as Badge, W as Wifi, z as WifiOff, _ as __vitePreload, X, A as withErrorBoundary, E as withPerformanceMonitoring, R as RefreshCw, F as Download, V as VISUALLY_HIDDEN_STYLES, G as ErrorHandler, H as Card, I as CardHeader, J as CardTitle, K as CardContent, N as Routes, O as Route } from "./index-RfuAlLGG.js";
-import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-DM62Dz3G.js";
-import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-C2byWZMx.js";
-import { E as ExternalLink } from "./external-link-CvUBn76S.js";
-import backend from "./client-Ct5oOSl9.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-Bw6xhQI4.js","assets/index-OnCZvb9u.css"])))=>i.map(i=>d[i]);
+import { c as createLucideIcon, r as reactExports, u as useComposedRefs, j as jsxRuntimeExports, a as createContextScope, P as Primitive, b as Presence, d as composeEventHandlers, e as useCallbackRef, f as useLayoutEffect2, g as cn, h as requireReact, i as useControllableState, k as reactDomExports, l as createCollection, m as Portal$2, n as createSlot, D as DismissableLayer, o as composeRefs, p as dispatchDiscreteCustomEvent, q as useRecording, s as useApp, t as useToast, B as Button, L as LoadingSpinner, T as TriangleAlert, M as Monitor, v as useYouTube, w as useNavigate, x as LoaderCircle, C as Clock, y as Badge, W as Wifi, z as WifiOff, _ as __vitePreload, X, A as withErrorBoundary, E as withPerformanceMonitoring, R as RefreshCw, F as Download, V as VISUALLY_HIDDEN_STYLES, G as ErrorHandler, H as Card, I as CardHeader, J as CardTitle, K as CardContent, N as Routes, O as Route } from "./index-Bw6xhQI4.js";
+import { u as useId, h as hideOthers, a as useFocusGuards, R as ReactRemoveScroll, F as FocusScope, Y as YouTubeCommentsService, C as Calendar, f as formatDistanceToNow, b as Check, c as Copy, T as Trash2, M as MessageCircle, S as Send, H as Heart, D as DeleteConfirmationModal, d as Dialog, e as DialogContent, g as DialogHeader, i as DialogTitle, j as DialogDescription } from "./DeleteConfirmationModal-Deo0390E.js";
+import { S as Settings, M as ModernCard, G as GridCard, C as Cloud } from "./modern-card-DvsgR42d.js";
+import { E as ExternalLink } from "./external-link-DU7XJA3r.js";
+import { supabase } from "./supabase-aC0e6cYW.js";
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -5642,7 +5642,7 @@ function VideoPreviewPage({ recording, onClose }) {
       if (recording.youtubeVideoId) {
         console.log("Deleting from YouTube with videoId:", recording.youtubeVideoId);
         const { RealYouTubeService } = await __vitePreload(async () => {
-          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-RfuAlLGG.js").then((n) => n.Z);
+          const { RealYouTubeService: RealYouTubeService2 } = await import("./index-Bw6xhQI4.js").then((n) => n.a0);
           return { RealYouTubeService: RealYouTubeService2 };
         }, true ? __vite__mapDeps([0,1]) : void 0);
         await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
@@ -9452,6 +9452,7 @@ const _TokenService = class _TokenService {
     }
   }
   static async _performTokenRefresh() {
+    var _a;
     try {
       const tokenData = this.getStoredTokenData();
       if (!(tokenData == null ? void 0 : tokenData.refreshToken)) {
@@ -9461,21 +9462,21 @@ const _TokenService = class _TokenService {
         return null;
       }
       console.log("Refreshing access token...");
-      const response = await backend.auth.refreshToken({
-        refreshToken: tokenData.refreshToken
-      });
+      const { data: { session }, error } = await supabase.auth.refreshSession();
+      if (error || !session) {
+        throw new Error("Failed to refresh session");
+      }
       this.storeTokens({
-        access_token: response.access_token,
-        refresh_token: tokenData.refreshToken,
-        // Keep existing refresh token
-        expires_in: response.expires_in,
-        token_type: response.token_type,
-        scope: response.scope,
-        id_token: response.id_token
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_in: session.expires_in || 3600,
+        token_type: "Bearer",
+        scope: "",
+        id_token: (_a = session.user) == null ? void 0 : _a.id
       });
       console.log("Token refresh successful");
-      this.notifyRefreshListeners(true, response.access_token);
-      return response.access_token;
+      this.notifyRefreshListeners(true, session.access_token);
+      return session.access_token;
     } catch (error) {
       console.error("Token refresh failed:", error);
       ErrorHandler.logError("token-refresh", error);
