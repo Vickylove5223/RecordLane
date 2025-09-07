@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Testing Supabase API</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE_URL = 'https://yoccwqyrxdymrfqjpwef.supabase.co/functions/v1';
+        
+        async function testAPI() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (healthResponse.ok) {
+                    const healthData = await healthResponse.json();
+                    results.innerHTML += `<p>✅ Health API: ${healthData.status}</p>`;
+                } else {
+                    results.innerHTML += `<p>❌ Health API: ${healthResponse.status} ${healthResponse.statusText}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<p>❌ Health API Error: ${error.message}</p>`;
+            }
+            
+            try {
+                // Test recordings endpoint
+                const recordingsResponse = await fetch(`${API_BASE_URL}/recordings`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (recordingsResponse.ok) {
+                    const recordingsData = await recordingsResponse.json();
+                    results.innerHTML += `<p>✅ Recordings API: ${recordingsData.total} recordings</p>`;
+                } else {
+                    results.innerHTML += `<p>❌ Recordings API: ${recordingsResponse.status} ${recordingsResponse.statusText}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<p>❌ Recordings API Error: ${error.message}</p>`;
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

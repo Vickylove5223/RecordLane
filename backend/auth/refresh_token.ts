@@ -18,7 +18,7 @@ const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 // Refreshes an access token using a refresh token.
 export const refreshToken = api<RefreshTokenRequest, RefreshTokenResponse>(
   { expose: true, method: "POST", path: "/auth/google/refresh-token" },
-  async (req) => {
+  async (req): Promise<RefreshTokenResponse> => {
     const tokenData = new URLSearchParams({
       client_id: googleClientID(),
       client_secret: googleClientSecret(),
@@ -45,7 +45,7 @@ export const refreshToken = api<RefreshTokenRequest, RefreshTokenResponse>(
       throw APIError.unauthenticated(`Token refresh failed: ${errorText}`);
     }
 
-    const tokenResponse = await response.json();
+    const tokenResponse = await response.json() as RefreshTokenResponse;
     return tokenResponse;
   }
 );

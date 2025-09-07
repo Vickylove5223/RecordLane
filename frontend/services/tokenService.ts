@@ -1,4 +1,4 @@
-import backend from '~backend/client';
+import { AuthService } from './supabaseService';
 import { ErrorHandler } from '../utils/errorHandler';
 
 export interface TokenData {
@@ -163,7 +163,7 @@ export class TokenService {
 
       console.log('Refreshing access token...');
       
-      const response = await backend.auth.refreshToken({
+      const response = await AuthService.refreshToken({
         refreshToken: tokenData.refreshToken,
       });
       

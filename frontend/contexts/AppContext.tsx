@@ -205,20 +205,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
-      // Try to load recordings from backend, but fallback gracefully if it fails
+      // Try to load recordings from Supabase, but fallback gracefully if it fails
       try {
-        const { metadata } = await import('~backend/client');
-        const recordingsResponse = await metadata.list({});
+        const { MetadataService } = await import('../services/supabaseService');
+        const recordingsResponse = await MetadataService.list({});
         
         if (recordingsResponse.recordings) {
           const recordings = recordingsResponse.recordings.map((rec: any) => ({
             id: rec.id,
             title: rec.title,
-            youtubeVideoId: rec.youtube_video_id,
-            youtubeLink: rec.youtube_link,
-            thumbnail: rec.thumbnail_url,
+            youtubeVideoId: rec.youtubeVideoId,
+            youtubeLink: rec.youtubeLink,
+            thumbnail: rec.thumbnailUrl,
             duration: rec.duration * 1000, // Convert seconds to milliseconds
-            createdAt: new Date(rec.created_at),
+            createdAt: new Date(rec.createdAt),
             privacy: rec.privacy,
             uploadStatus: 'completed' as const, // All recordings from backend are synced
           }));
@@ -226,7 +226,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'LOAD_STATE', payload: { recordings } });
         }
       } catch (backendError) {
-        console.warn('Backend not available, using local storage only:', backendError);
+        console.warn('Supabase backend not available, using local storage only:', backendError);
         // Don't set error state, just use local storage
       }
     } catch (error) {
@@ -240,67 +240,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   React.useEffect(() => {
     const loadState = async () => {
-      try {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        
-        // Load recordings from backend metadata service
+      // Load from local storage immediately for instant startup
+      const savedState = localStorage.getItem('recordlane-app-state');
+      if (savedState) {
         try {
-          const { metadata } = await import('~backend/client');
-          const recordingsResponse = await metadata.list({});
+          const parsed = JSON.parse(savedState);
+          if (parsed.recordings) {
+            // Filter to only show synced recordings from local storage
+            const syncedRecordings = parsed.recordings.filter((rec: any) => 
+              rec.uploadStatus === 'completed' && rec.youtubeLink
+            );
+            parsed.recordings = syncedRecordings.map((rec: any) => ({
+              ...rec,
+              createdAt: new Date(rec.createdAt),
+            }));
+          }
+          // Ensure onboarded state is maintained
+          parsed.isOnboarded = true;
+          dispatch({ type: 'LOAD_STATE', payload: parsed });
+        } catch (error) {
+          console.error('Failed to parse saved state:', error);
+          ErrorHandler.logError('STATE_PARSE_ERROR', error);
+          localStorage.removeItem('recordlane-app-state');
+        }
+      } else {
+        // If no saved state, initialize with empty recordings
+        dispatch({ type: 'LOAD_STATE', payload: { recordings: [], isOnboarded: true } });
+      }
+      
+      // Then try to sync with Supabase in the background (non-blocking)
+      setTimeout(async () => {
+        try {
+          const { MetadataService } = await import('../services/supabaseService');
+          const recordingsResponse = await MetadataService.list({});
           
-          if (recordingsResponse.recordings) {
+          if (recordingsResponse.recordings && recordingsResponse.recordings.length > 0) {
             const recordings = recordingsResponse.recordings.map((rec: any) => ({
               id: rec.id,
               title: rec.title,
-              youtubeVideoId: rec.youtube_video_id,
-              youtubeLink: rec.youtube_link,
-              thumbnail: rec.thumbnail_url,
+              youtubeVideoId: rec.youtubeVideoId,
+              youtubeLink: rec.youtubeLink,
+              thumbnail: rec.thumbnailUrl,
               duration: rec.duration * 1000, // Convert seconds to milliseconds
-              createdAt: new Date(rec.created_at),
+              createdAt: new Date(rec.createdAt),
               privacy: rec.privacy,
-              uploadStatus: 'completed' as const, // All recordings from backend are synced
+              uploadStatus: 'completed' as const,
             }));
             
             dispatch({ type: 'LOAD_STATE', payload: { recordings } });
+            console.log('✅ Synced recordings from Supabase');
           }
         } catch (backendError) {
-          console.warn('Failed to load recordings from backend, falling back to local storage:', backendError);
-          
-          // Fallback to local storage
-          const savedState = localStorage.getItem('recordlane-app-state');
-          if (savedState) {
-            try {
-              const parsed = JSON.parse(savedState);
-              if (parsed.recordings) {
-                // Filter to only show synced recordings from local storage
-                const syncedRecordings = parsed.recordings.filter((rec: any) => 
-                  rec.uploadStatus === 'completed' && rec.youtubeLink
-                );
-                parsed.recordings = syncedRecordings.map((rec: any) => ({
-                  ...rec,
-                  createdAt: new Date(rec.createdAt),
-                }));
-              }
-              // Ensure onboarded state is maintained to avoid requiring data saving
-              parsed.isOnboarded = true;
-              dispatch({ type: 'LOAD_STATE', payload: parsed });
-            } catch (error) {
-              console.error('Failed to parse saved state:', error);
-              ErrorHandler.logError('STATE_PARSE_ERROR', error);
-              localStorage.removeItem('recordlane-app-state');
-            }
-          } else {
-            // If no saved state, just initialize with empty recordings
-            dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
-          }
+          console.warn('Supabase sync failed (non-blocking):', backendError);
+          // Don't show error to user, just log it
         }
-      } catch (error) {
-        console.error('Failed to load app state:', error);
-        ErrorHandler.logError('STATE_LOAD_ERROR', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load application state' });
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
+      }, 1000); // Wait 1 second before trying to sync
     };
 
     loadState();

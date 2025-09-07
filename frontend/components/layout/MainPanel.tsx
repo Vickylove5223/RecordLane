@@ -9,7 +9,6 @@ import { useYouTube } from '../../contexts/YouTubeContext';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { withErrorBoundary } from '../ErrorBoundary';
-import { withPerformanceMonitoring } from '../../utils/performanceMonitor';
 import { formatDistanceToNow } from 'date-fns';
 import VideoModal from './VideoModal';
 import RecordingPanel from '../recording/RecordingPanel';

@@ -34,7 +34,7 @@ export const getStats = api<GetStatsRequest, UsageStats>(
 
       const allRecordings = await metadata.list({ limit: 1000 }); // Get more for duration calc
       totalDuration = allRecordings.recordings.reduce(
-        (sum, r) => sum + r.duration,
+        (sum: number, r: any) => sum + r.duration,
         0
       );
     } catch (metadataError) {

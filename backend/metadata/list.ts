@@ -56,7 +56,7 @@ export const list = api<ListRecordingsRequest, ListRecordingsResponse>(
     }
     
     const countResult = await db.queryRow<{ count: string }>(
-      countQuery,
+      countQuery as any,
       ...params
     );
     const total = parseInt(countResult?.count || "0");

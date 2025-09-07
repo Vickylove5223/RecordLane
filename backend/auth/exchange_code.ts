@@ -21,7 +21,7 @@ const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 // Exchanges an authorization code for an access token.
 export const exchangeCode = api<ExchangeCodeRequest, TokenResponse>(
   { expose: true, method: "POST", path: "/auth/google/exchange-code" },
-  async (req) => {
+  async (req): Promise<TokenResponse> => {
     const tokenData = new URLSearchParams({
       client_id: googleClientID(),
       client_secret: googleClientSecret(),
@@ -50,7 +50,7 @@ export const exchangeCode = api<ExchangeCodeRequest, TokenResponse>(
       throw APIError.invalidArgument(`Token exchange failed: ${errorText}`);
     }
 
-    const tokenResponse = await response.json();
+    const tokenResponse = await response.json() as TokenResponse;
     return tokenResponse;
   }
 );
