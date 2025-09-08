@@ -243,28 +243,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Load recordings from Supabase backend metadata service
+        // Load recordings from local storage only (temporarily disabled Supabase to prevent infinite loops)
         try {
-          const { metadata } = await import('../supabaseClient');
-          const recordingsResponse = await metadata.list({});
-          
-          if (recordingsResponse.recordings) {
-            const recordings = recordingsResponse.recordings.map((rec: any) => ({
-              id: rec.id,
-              title: rec.title,
-              youtubeVideoId: rec.youtube_video_id,
-              youtubeLink: rec.youtube_link,
-              thumbnail: rec.thumbnail_url,
-              duration: rec.duration * 1000, // Convert seconds to milliseconds
-              createdAt: new Date(rec.created_at),
-              privacy: rec.privacy,
-              uploadStatus: 'completed' as const, // All recordings from backend are synced
-            }));
-            
-            dispatch({ type: 'LOAD_STATE', payload: { recordings } });
-          }
-        } catch (backendError) {
-          console.warn('Failed to load recordings from backend, falling back to local storage:', backendError);
+          console.log('Loading recordings from local storage...');
           
           // Fallback to local storage
           const savedState = localStorage.getItem('recordlane-app-state');
@@ -293,6 +274,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             // If no saved state, just initialize with empty recordings
             dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
           }
+        } catch (localError) {
+          console.warn('Failed to load recordings from local storage:', localError);
+          // Initialize with empty state if local storage fails
+          dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
         }
       } catch (error) {
         console.error('Failed to load app state:', error);

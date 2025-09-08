@@ -127,10 +127,10 @@ const MainPanelComponent = () => {
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="text-center pt-16 sm:pt-20 lg:pt-24 mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
             Cancel your Loom, Tella, etc Subscription for RecordLane
           </h1>
-          <p className="text-[20px] text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-[24px] text-gray-600 max-w-3xl mx-auto mb-8">
             An open-source Loom alternative that's truly totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks.
           </p>
         </div>
@@ -286,6 +286,9 @@ const MainPanelComponent = () => {
                 </p>
                 <p>
                   But here's the thing - I only use it occasionally. I kept finding myself wanting to subscribe to Loom, but then I'd think "what if I don't use it this month?" and end up not subscribing at all. I might not even use more than once or twice in a month.
+                </p>
+                <p>
+                  Other open-source Loom alternatives out there don't provide an easy way to use by non-technical people, as users still have to pay a subscription fee due to video hosting, which is proper. And not everyone out there wants to self-host a video tool they use once in a while - at least not me.
                 </p>
                 <p>
                   It broke my heart to keep missing out on such a brilliant product just because I couldn't justify $8-16/month for something I might not use regularly. So I decided to create RecordLane - a free alternative that syncs with YouTube, so I can have that same ease of use without the subscription pressure.

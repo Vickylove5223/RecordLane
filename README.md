@@ -56,9 +56,6 @@ Once you have RecordLane running (see "How to Run" section below):
 3. **Start Recording**: Click the floating record button
 4. **Review & Share**: Edit your recording and get an instant share link
 
-## Demo
-
-*Demo video will be provided here*
 
 ## 🚀 How to Run
 

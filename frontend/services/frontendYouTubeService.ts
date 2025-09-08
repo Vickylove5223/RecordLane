@@ -112,6 +112,34 @@ export class FrontendYouTubeService {
     this.connectionListeners.forEach(listener => listener(false));
   }
 
+  static async deleteVideo(videoId: string): Promise<void> {
+    console.log('FrontendYouTubeService.deleteVideo called with videoId:', videoId);
+    const tokenData = this.getStoredTokenData();
+    if (!tokenData) {
+      throw new Error('Not connected to YouTube');
+    }
+
+    try {
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete video: ${errorText}`);
+      }
+
+      console.log('Successfully deleted video from YouTube');
+    } catch (error) {
+      console.error('Failed to delete video from YouTube:', error);
+      throw error;
+    }
+  }
+
   static async uploadVideo(
     file: Blob, 
     title: string, 
