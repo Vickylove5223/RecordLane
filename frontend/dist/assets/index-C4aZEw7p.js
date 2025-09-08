@@ -15841,11 +15841,35 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$P = [
+const __iconNode$R = [
   ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
   ["path", { d: "M19 12H5", key: "x3x0zl" }]
 ];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$P);
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$R);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$Q = [
+  ["path", { d: "M5 12h14", key: "1ays0h" }],
+  ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
+];
+const ArrowRight = createLucideIcon("arrow-right", __iconNode$Q);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$P = [
+  ["path", { d: "M8 2v4", key: "1cmpym" }],
+  ["path", { d: "M16 2v4", key: "4m81vk" }],
+  ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
+  ["path", { d: "M3 10h18", key: "8toen8" }]
+];
+const Calendar = createLucideIcon("calendar", __iconNode$P);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -15853,30 +15877,6 @@ const ArrowLeft = createLucideIcon("arrow-left", __iconNode$P);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$O = [
-  ["path", { d: "M5 12h14", key: "1ays0h" }],
-  ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
-];
-const ArrowRight = createLucideIcon("arrow-right", __iconNode$O);
-/**
- * @license lucide-react v0.484.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$N = [
-  ["path", { d: "M8 2v4", key: "1cmpym" }],
-  ["path", { d: "M16 2v4", key: "4m81vk" }],
-  ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
-  ["path", { d: "M3 10h18", key: "8toen8" }]
-];
-const Calendar = createLucideIcon("calendar", __iconNode$N);
-/**
- * @license lucide-react v0.484.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$M = [
   [
     "path",
     {
@@ -15886,23 +15886,39 @@ const __iconNode$M = [
   ],
   ["circle", { cx: "12", cy: "13", r: "3", key: "1vg3eu" }]
 ];
-const Camera = createLucideIcon("camera", __iconNode$M);
+const Camera = createLucideIcon("camera", __iconNode$O);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$L = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$L);
+const __iconNode$N = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$N);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$K = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$K);
+const __iconNode$M = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$M);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$L = [["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]];
+const ChevronLeft = createLucideIcon("chevron-left", __iconNode$L);
+/**
+ * @license lucide-react v0.484.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$K = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+const ChevronRight = createLucideIcon("chevron-right", __iconNode$K);
 /**
  * @license lucide-react v0.484.0 - ISC
  *
@@ -19946,7 +19962,7 @@ function AppProvider({ children }) {
       dispatch2({ type: "SET_LOADING", payload: true });
       try {
         const { metadata } = await __vitePreload(async () => {
-          const { metadata: metadata2 } = await import("./supabaseClient-DTBCragW.js");
+          const { metadata: metadata2 } = await import("./supabaseClient-DxebL-Ac.js");
           return { metadata: metadata2 };
         }, true ? [] : void 0);
         const recordingsResponse = await metadata.list({});
@@ -19983,7 +19999,7 @@ function AppProvider({ children }) {
         dispatch2({ type: "SET_LOADING", payload: true });
         try {
           const { metadata } = await __vitePreload(async () => {
-            const { metadata: metadata2 } = await import("./supabaseClient-DTBCragW.js");
+            const { metadata: metadata2 } = await import("./supabaseClient-DxebL-Ac.js");
             return { metadata: metadata2 };
           }, true ? [] : void 0);
           const recordingsResponse = await metadata.list({});
@@ -20625,7 +20641,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   static async loadOAuthConfig() {
     try {
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./supabaseClient-DTBCragW.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-DxebL-Ac.js"), true ? [] : void 0);
         backend = backendModule.default;
       }
       const config = await backend.auth.getConfig();
@@ -20930,7 +20946,7 @@ const _RealYouTubeService = class _RealYouTubeService {
   static async exchangeCodeForToken(code, codeVerifier) {
     try {
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./supabaseClient-DTBCragW.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-DxebL-Ac.js"), true ? [] : void 0);
         backend = backendModule.default;
       }
       const result = await backend.auth.exchangeCode({
@@ -20952,7 +20968,7 @@ const _RealYouTubeService = class _RealYouTubeService {
         return false;
       }
       if (!backend) {
-        const backendModule = await __vitePreload(() => import("./supabaseClient-DTBCragW.js"), true ? [] : void 0);
+        const backendModule = await __vitePreload(() => import("./supabaseClient-DxebL-Ac.js"), true ? [] : void 0);
         backend = backendModule.default;
       }
       const result = await backend.auth.refreshToken({
@@ -29145,12 +29161,12 @@ if (shouldShowDeprecationWarning()) {
   console.warn(`⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217`);
 }
 const supabaseConfig = {
-  url: void 0,
-  anonKey: void 0
+  url: "https://yoccwqyrxdymrfqjpwef.supabase.co",
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvY2N3cXlyeGR5bXJmcWpwd2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMDU3NzQsImV4cCI6MjA3Mjc4MTc3NH0.A-UU51XVrGN-r9OLNrF3ASf9LZXCTy3bXN0pcM9zCno"
 };
 {
-  throw new Error(
-    "Missing required Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file."
+  console.warn(
+    "⚠️ Using default Supabase credentials. For production, create a .env.local file with:\nVITE_SUPABASE_URL=your_supabase_url\nVITE_SUPABASE_ANON_KEY=your_supabase_anon_key"
   );
 }
 const supabase = createClient(supabaseConfig.url, supabaseConfig.anonKey);
@@ -36981,6 +36997,93 @@ function ModernCard({
     }
   );
 }
+function TestimonialCarousel({
+  testimonials,
+  autoPlay = true,
+  autoPlayInterval = 5e3
+}) {
+  const [currentIndex, setCurrentIndex] = reactExports.useState(0);
+  reactExports.useEffect(() => {
+    if (!autoPlay || testimonials.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(
+        (prevIndex) => prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+      );
+    }, autoPlayInterval);
+    return () => clearInterval(interval);
+  }, [autoPlay, autoPlayInterval, testimonials.length]);
+  const goToPrevious = () => {
+    setCurrentIndex(currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1);
+  };
+  const goToNext = () => {
+    setCurrentIndex(currentIndex === testimonials.length - 1 ? 0 : currentIndex + 1);
+  };
+  const goToSlide = (index2) => {
+    setCurrentIndex(index2);
+  };
+  if (testimonials.length === 0) return null;
+  const currentTestimonial = testimonials[currentIndex];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative max-w-4xl mx-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { className: "bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 shadow-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { className: "p-8 sm:p-12", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("blockquote", { className: "text-center mb-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg sm:text-xl text-gray-700 leading-relaxed italic mb-6", children: [
+          '"',
+          currentTestimonial.content,
+          '"'
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-4 mb-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-gray-900", children: currentTestimonial.subreddit })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-500", children: "•" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-500", children: currentTestimonial.timeAgo })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "a",
+        {
+          href: currentTestimonial.redditUrl,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "inline-block text-sm text-gray-600 hover:text-orange-600 transition-colors border-b border-gray-300 hover:border-orange-400 pb-1",
+          children: "View on Reddit"
+        }
+      ) })
+    ] }) }),
+    testimonials.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-1/2 -translate-y-1/2 -left-4 sm:-left-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "outline",
+          size: "icon",
+          onClick: goToPrevious,
+          className: "w-10 h-10 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronLeft, { className: "w-5 h-5" })
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "outline",
+          size: "icon",
+          onClick: goToNext,
+          className: "w-10 h-10 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronRight, { className: "w-5 h-5" })
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center space-x-2 mt-8", children: testimonials.map((_, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => goToSlide(index2),
+          className: `w-3 h-3 rounded-full transition-all duration-300 ${index2 === currentIndex ? "bg-gradient-to-r from-blue-500 to-purple-600 scale-125" : "bg-gray-300 hover:bg-gray-400"}`,
+          "aria-label": `Go to testimonial ${index2 + 1}`
+        },
+        index2
+      )) })
+    ] })
+  ] });
+}
 const minutesInMonth = 43200;
 const minutesInDay = 1440;
 const constructFromSymbol = Symbol.for("constructDateFrom");
@@ -39061,6 +39164,36 @@ function RecordingPanel() {
     }
   );
 }
+const testimonialData = [
+  {
+    id: "1",
+    content: "Looking for a free alternative to Loom for screen recording. Loom's pricing is getting out of hand and I need something that respects privacy...",
+    subreddit: "r/startups",
+    timeAgo: "2 days ago",
+    redditUrl: "https://www.reddit.com/r/startups/comments/1a2b3c4/loom_alternatives_that_are_free_and_privacy_focused/"
+  },
+  {
+    id: "2",
+    content: "Loom's free tier is too limited and their paid plans are expensive. Need something open source or free for my startup...",
+    subreddit: "r/entrepreneur",
+    timeAgo: "1 week ago",
+    redditUrl: "https://www.reddit.com/r/entrepreneur/comments/1a1b2c3/any_good_free_alternatives_to_loom_for_screen_recording/"
+  },
+  {
+    id: "3",
+    content: "Our team needs a self-hosted solution for screen recording. Loom doesn't offer self-hosting and we need full control over our data...",
+    subreddit: "r/webdev",
+    timeAgo: "2 weeks ago",
+    redditUrl: "https://www.reddit.com/r/webdev/comments/1a0b1c2/self_hosted_loom_alternative_for_team_screen_recording/"
+  },
+  {
+    id: "4",
+    content: "Looking for a privacy-focused screen recording tool. Loom's privacy policy is concerning and I need something that doesn't track or collect user data...",
+    subreddit: "r/privacy",
+    timeAgo: "3 weeks ago",
+    redditUrl: "https://www.reddit.com/r/privacy/comments/19z0a1b/loom_alternative_that_doesnt_collect_data_or_track_users/"
+  }
+];
 const RecordingCard = reactExports.memo(({ recording, onClick }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(ModernCard, { variant: "layered", className: "p-6", onClick, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden", children: [
     recording.thumbnail ? /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -39128,8 +39261,8 @@ function MainPanelComponent() {
     (recordingState === "recording" || recordingState === "paused") && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed top-16 sm:top-20 left-2 sm:left-4 lg:left-8 z-50", children: /* @__PURE__ */ jsxRuntimeExports.jsx(RecordingPanel, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12 mt-16 sm:mt-20", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4", children: "Welcome to RecordLane." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4", children: "An open-source Loom alternative that's truely totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks." })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4", children: "Cancel your Loom, Tella, etc. Subscriptions for RecordLane" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4", style: { fontSize: "18px" }, children: "An open-source Loom alternative that's truly totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks." })
       ] }),
       (() => {
         const syncedRecordings = state.recordings.filter(
@@ -39172,112 +39305,14 @@ function MainPanelComponent() {
         ] });
       })(),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "The Problem We're Solving" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "Users are desperately looking for free, privacy-focused alternatives to Loom" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/startups" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "2 days ago" })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: "https://www.reddit.com/r/startups/comments/1a2b3c4/loom_alternatives_that_are_free_and_privacy_focused/",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "hover:text-blue-600 transition-colors",
-                  children: "Loom alternatives that are free and privacy-focused?"
-                }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Looking for a free alternative to Loom for screen recording. Loom's pricing is getting out of hand and I need something that respects privacy..."` }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 47 upvotes" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 23 comments" })
-              ] })
-            ] })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/entrepreneur" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "1 week ago" })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: "https://www.reddit.com/r/entrepreneur/comments/1a1b2c3/any_good_free_alternatives_to_loom_for_screen_recording/",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "hover:text-blue-600 transition-colors",
-                  children: "Any good free alternatives to Loom for screen recording?"
-                }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Loom's free tier is too limited and their paid plans are expensive. Need something open source or free for my startup..."` }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 89 upvotes" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 34 comments" })
-              ] })
-            ] })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/webdev" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "2 weeks ago" })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: "https://www.reddit.com/r/webdev/comments/1a0b1c2/self_hosted_loom_alternative_for_team_screen_recording/",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "hover:text-blue-600 transition-colors",
-                  children: "Self-hosted Loom alternative for team screen recording?"
-                }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Our team needs a self-hosted solution for screen recording. Loom doesn't offer self-hosting and we need full control over our data..."` }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 156 upvotes" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 67 comments" })
-              ] })
-            ] })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-white text-xs font-bold", children: "r" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-gray-900", children: "r/privacy" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "•" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "3 weeks ago" })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-gray-900 mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: "https://www.reddit.com/r/privacy/comments/19z0a1b/loom_alternative_that_doesnt_collect_data_or_track_users/",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "hover:text-blue-600 transition-colors",
-                  children: "Loom alternative that doesn't collect data or track users?"
-                }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mb-2", children: `"Looking for a privacy-focused screen recording tool. Loom's privacy policy is concerning and I need something that doesn't track or collect user data..."` }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4 text-xs text-gray-500", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "👍 203 upvotes" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "💬 89 comments" })
-              ] })
-            ] })
-          ] }) })
-        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          TestimonialCarousel,
+          {
+            testimonials: testimonialData,
+            autoPlay: true,
+            autoPlayInterval: 6e3
+          }
+        ),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mt-8", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-500 mb-4", children: "These are real Reddit posts from users desperately seeking alternatives to Loom" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 bg-red-50 border border-red-200 rounded-full px-4 py-2 text-sm", children: [
@@ -39294,85 +39329,110 @@ function MainPanelComponent() {
           /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Why Choose RecordLane?" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-gray-600 max-w-2xl mx-auto", children: "See how RecordLane compares to other screen recording solutions" })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-6xl mx-auto overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white rounded-lg shadow-sm border overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "bg-gray-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-left text-sm font-semibold text-gray-900", children: "Feature" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-green-600 font-bold", children: "RecordLane" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-gray-500", children: "(You are here)" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-6 gap-4 p-6", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-left", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-bold text-gray-900", children: "Features" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600", children: "Compare key features" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-4 shadow-lg", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold", children: "RecordLane" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs opacity-90", children: "You are here" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full", children: "BEST" })
             ] }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Loom" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "OBS Studio" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Screencastify" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-sm font-semibold text-gray-900", children: "Camtasia" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gray-100 rounded-lg p-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-semibold text-gray-800", children: "Loom" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: "$8-16/mo" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gray-100 rounded-lg p-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-semibold text-gray-800", children: "OBS Studio" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: "Free" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gray-100 rounded-lg p-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-semibold text-gray-800", children: "Screencastify" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: "$3-7/mo" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gray-100 rounded-lg p-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-semibold text-gray-800", children: "Camtasia" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: "$299" })
+            ] }) })
           ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("tbody", { className: "divide-y divide-gray-200", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Price" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Free Forever" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$8-16/month" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "Free" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$3-7/month" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$299 one-time" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Privacy" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Privacy First" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Data Collection" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Google Drive" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Ease of Use" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ One-Click Recording" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Complex Setup" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Moderate" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Cloud Storage" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ YouTube Integration" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Built-in" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Google Drive" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Sharing" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Instant Links" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Instant" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Limited" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Open Source" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Fully Open Source" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Open Source" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Self-Hosting" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Full Control" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Web-Based" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Works Anywhere" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Web App" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Chrome Extension" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "min-w-full divide-y divide-gray-200", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "bg-gray-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Feature" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider", children: "RecordLane" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Loom" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Screencastify" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Camtasia" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("tbody", { className: "divide-y divide-gray-200", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Price" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Free Forever" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$8-16/month" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "Free" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$3-7/month" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "$299 one-time" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Privacy" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Privacy First" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Data Collection" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Google Drive" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Ease of Use" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ One-Click Recording" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Complex Setup" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Easy" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Moderate" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Cloud Storage" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ YouTube Integration" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Built-in" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Google Drive" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual Upload" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Sharing" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Instant Links" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Instant" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Limited" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Manual" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Open Source" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Fully Open Source" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Open Source" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Proprietary" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Self-Hosting" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Full Control" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Local Only" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Not Available" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "bg-gray-50", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-sm font-medium text-gray-900", children: "Web-Based" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800", children: "✅ Works Anywhere" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "✅ Web App" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "⚠️ Chrome Extension" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-4 py-3 text-center text-sm text-gray-600", children: "❌ Desktop Only" })
+              ] })
             ] })
-          ] })
-        ] }) }) })
+          ] }) })
+        ] }) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
@@ -39447,6 +39507,37 @@ function MainPanelComponent() {
           ] })
         ] })
       ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-4xl mx-auto px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 sm:p-12 border border-blue-100", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent", children: "Why I Created RecordLane" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto rounded-full" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "prose prose-lg max-w-none text-gray-700 leading-relaxed", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-6", children: [
+            "Hi, I'm ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-blue-700", children: "Ifeoluwa Ajetomobi" }),
+            ", and I created RecordLane because I absolutely love Loom and the incredible ease they provide for recording and sharing videos with clients and teammates."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-6", children: [
+            "However, there was always one problem: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-blue-700", children: "I only use screen recording occasionally" }),
+            ". Sometimes it's just once a month, sometimes even less frequently. I found myself in a frustrating situation where I couldn't justify paying for a Loom subscription when I didn't even know if I'd use it that month."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg mb-6", children: "The idea of paying monthly for something I might use once or twice was simply not sustainable for me. But I still needed that same ease of recording and sharing videos when the moment called for it." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-6", children: [
+            "So I decided to create ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-blue-700", children: "RecordLane" }),
+            " - an easy-to-use alternative that gives you the same convenience as Loom, but with one key difference: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-blue-700", children: "it's completely free" }),
+            ". By syncing directly with YouTube, you get unlimited storage without any monthly fees, hidden costs, or usage limits."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg mb-0", children: [
+            "Now I can record and share videos whenever I need to, without worrying about subscription costs or usage limits. And I wanted to share this solution with others who face the same dilemma - ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-blue-700", children: "you shouldn't have to pay monthly for something you only use occasionally" }),
+            "."
+          ] })
+        ] })
+      ] }) }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 sm:mt-20 mb-12 sm:mb-16", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-8 sm:mb-12", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent", children: "Frequently Asked Questions" }),

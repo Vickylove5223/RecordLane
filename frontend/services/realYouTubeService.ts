@@ -157,7 +157,10 @@ export class RealYouTubeService {
       await this.cache.delete('connection-status');
       
       if (!this.oauthConfig?.clientId) {
-        throw new Error('OAuth configuration not available from backend');
+        throw new Error(
+          'Google OAuth not configured. Please set GOOGLE_CLIENT_ID in your Supabase Edge Function environment variables. ' +
+          'Go to your Supabase project > Edge Functions > Environment Variables and add GOOGLE_CLIENT_ID.'
+        );
       }
 
       // Generate PKCE parameters

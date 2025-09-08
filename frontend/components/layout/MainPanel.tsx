@@ -7,67 +7,69 @@ import { Video, AlertTriangle, Play, ExternalLink, Clock, FileVideo, Upload, Sha
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { withErrorBoundary } from '../ErrorBoundary';
+import { TestimonialCarousel } from '../ui/testimonial-carousel';
+import { ComparisonTable } from '../ui/comparison-table';
 import { formatDistanceToNow } from 'date-fns';
 import VideoModal from './VideoModal';
 import RecordingPanel from '../recording/RecordingPanel';
 
+// Testimonial data for the carousel
+const testimonialData = [
+  {
+    id: '1',
+    content: "Looking for a free alternative to Loom for screen recording. Loom's pricing is getting out of hand and I need something that respects privacy...",
+    subreddit: 'r/startups',
+    timeAgo: '2 days ago',
+    redditUrl: 'https://www.reddit.com/r/startups/comments/1a2b3c4/loom_alternatives_that_are_free_and_privacy_focused/'
+  },
+  {
+    id: '2',
+    content: "Loom's free tier is too limited and their paid plans are expensive. Need something open source or free for my startup...",
+    subreddit: 'r/entrepreneur',
+    timeAgo: '1 week ago',
+    redditUrl: 'https://www.reddit.com/r/entrepreneur/comments/1a1b2c3/any_good_free_alternatives_to_loom_for_screen_recording/'
+  },
+  {
+    id: '3',
+    content: "Our team needs a self-hosted solution for screen recording. Loom doesn't offer self-hosting and we need full control over our data...",
+    subreddit: 'r/webdev',
+    timeAgo: '2 weeks ago',
+    redditUrl: 'https://www.reddit.com/r/webdev/comments/1a0b1c2/self_hosted_loom_alternative_for_team_screen_recording/'
+  },
+  {
+    id: '4',
+    content: "Looking for a privacy-focused screen recording tool. Loom's privacy policy is concerning and I need something that doesn't track or collect user data...",
+    subreddit: 'r/privacy',
+    timeAgo: '3 weeks ago',
+    redditUrl: 'https://www.reddit.com/r/privacy/comments/19z0a1b/loom_alternative_that_doesnt_collect_data_or_track_users/'
+  }
+];
+
 const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: () => void }) => (
   <ModernCard variant="layered" className="p-6" onClick={onClick}>
     <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
-      {recording.thumbnail ? (
-        <img
-          src={recording.thumbnail}
-          alt={recording.title}
-          className="w-full h-full object-cover rounded-lg"
-          loading="lazy"
-        />
-      ) : (
-        <div className="flex flex-col items-center space-y-2">
-          <Video className="h-8 w-8 text-gray-400" />
-          <span className="text-xs text-gray-500">No Preview</span>
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-blue-500/20"></div>
+      <div className="relative z-10 flex items-center justify-center">
+        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+          <Play className="h-8 w-8 text-red-600 ml-1" />
         </div>
-      )}
-      {/* Play overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-        <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-100 transition-opacity duration-200">
-          <Play className="h-6 w-6 text-gray-800 ml-1" />
-        </div>
+      </div>
+      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+        {Math.round(recording.duration || 0)}s
       </div>
     </div>
-    
-    <div className="space-y-3">
-      <h3 className="font-semibold text-gray-900 truncate text-lg">{recording.title}</h3>
-      
-      <div className="flex items-center justify-between text-sm text-gray-600">
-        <div className="flex items-center space-x-2">
-          <Clock className="h-4 w-4" />
-          <span>{formatDuration(recording.duration)}</span>
-        </div>
-        <span className="text-xs">{formatDistanceToNow(new Date(recording.createdAt), { addSuffix: true })}</span>
-      </div>
-      
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-        <div className="flex items-center space-x-2">
-          {recording.uploadStatus === 'completed' && recording.youtubeLink && (
-            <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-              <Upload className="h-3 w-3 mr-1" />
-              <span>Synced</span>
-            </div>
-          )}
-        </div>
-        {recording.youtubeLink && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-gray-100"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(recording.youtubeLink, '_blank');
-            }}
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-        )}
+    <div className="space-y-2">
+      <h3 className="font-semibold text-gray-900 truncate">
+        {recording.title || 'Untitled Recording'}
+      </h3>
+      <p className="text-sm text-gray-600">
+        {formatDistanceToNow(new Date(recording.created_at), { addSuffix: true })}
+      </p>
+      <div className="flex items-center gap-2 text-xs text-gray-500">
+        <Clock className="h-3 w-3" />
+        <span>{recording.duration || 0}s</span>
+        <FileVideo className="h-3 w-3 ml-2" />
+        <span>{Math.round((recording.file_size || 0) / 1024 / 1024)}MB</span>
       </div>
     </div>
   </ModernCard>
@@ -75,238 +77,67 @@ const RecordingCard = memo(({ recording, onClick }: { recording: any; onClick: (
 
 RecordingCard.displayName = 'RecordingCard';
 
-function formatDuration(ms: number) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
-
-function MainPanelComponent() {
-  const { state, refreshRecordings } = useApp();
-  const { state: recordingState } = useRecording();
-  const [selectedRecording, setSelectedRecording] = useState(null);
+const MainPanelComponent = () => {
+  const { recordings = [], isLoading = false, error = null } = useApp();
+  const { isRecording = false, startRecording, stopRecording } = useRecording();
+  const [selectedRecording, setSelectedRecording] = useState<any>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const handleRecordingClick = (recording: any) => {
     setSelectedRecording(recording);
+    setShowVideoModal(true);
   };
 
   const handleCloseModal = () => {
+    setShowVideoModal(false);
     setSelectedRecording(null);
   };
 
-  return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white min-h-screen">
-      {/* Recording Panel - Always at the top when recording */}
-      {(recordingState === 'recording' || recordingState === 'paused') && (
-        <div className="fixed top-16 sm:top-20 left-2 sm:left-4 lg:left-8 z-50">
-          <RecordingPanel />
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <RecordingSkeleton key={i} />
+            ))}
+          </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Failed to Load Recordings</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
-        <div className="text-center mb-8 sm:mb-12 mt-16 sm:mt-20">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-4">
-            Welcome to RecordLane.
+        <div className="text-center pt-16 sm:pt-20 lg:pt-24 mb-12 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Cancel your Loom, Tella, etc Subscription for RecordLane
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-            An open-source Loom alternative that's truely totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks.
+          <p className="text-[20px] text-gray-600 max-w-3xl mx-auto mb-8">
+            An open-source Loom alternative that's truly totally free. Record, share, and store videos without paying forever. Forget storage limits, hidden costs, and privacy risks.
           </p>
-
         </div>
 
-        {/* Recent Activity - Only show synced recordings */}
-        {(() => {
-          const syncedRecordings = state.recordings.filter(recording => 
-            recording.uploadStatus === 'completed' && recording.youtubeLink
-          );
-          return syncedRecordings.length > 0 && (
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
-                <h2 className="text-xl sm:text-2xl font-semibold">Your Synced Recordings</h2>
-                <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-4">
-                  <div className="text-sm text-muted-foreground">
-                    {syncedRecordings.length} recording{syncedRecordings.length !== 1 ? 's' : ''}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={refreshRecordings}
-                    disabled={state.isLoading}
-                    className="h-8 text-xs sm:text-sm"
-                  >
-                    <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${state.isLoading ? 'animate-spin' : ''}`} />
-                    <span className="hidden sm:inline">Refresh</span>
-                    <span className="sm:hidden">↻</span>
-                  </Button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {syncedRecordings.map((recording) => (
-                  <RecordingCard 
-                    key={recording.id} 
-                    recording={recording} 
-                    onClick={() => handleRecordingClick(recording)}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Problem Section - Reddit Posts */}
-        <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              The Problem We're Solving
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Users are desperately looking for free, privacy-focused alternatives to Loom
-            </p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto space-y-4">
-            <div className="p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">r</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">r/startups</span>
-                    <span className="text-xs text-gray-500">•</span>
-                    <span className="text-xs text-gray-500">2 days ago</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    <a 
-                      href="https://www.reddit.com/r/startups/comments/1a2b3c4/loom_alternatives_that_are_free_and_privacy_focused/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      Loom alternatives that are free and privacy-focused?
-                    </a>
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "Looking for a free alternative to Loom for screen recording. Loom's pricing is getting out of hand and I need something that respects privacy..."
-                  </p>
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>👍 47 upvotes</span>
-                    <span>💬 23 comments</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">r</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">r/entrepreneur</span>
-                    <span className="text-xs text-gray-500">•</span>
-                    <span className="text-xs text-gray-500">1 week ago</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    <a 
-                      href="https://www.reddit.com/r/entrepreneur/comments/1a1b2c3/any_good_free_alternatives_to_loom_for_screen_recording/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      Any good free alternatives to Loom for screen recording?
-                    </a>
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "Loom's free tier is too limited and their paid plans are expensive. Need something open source or free for my startup..."
-                  </p>
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>👍 89 upvotes</span>
-                    <span>💬 34 comments</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">r</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">r/webdev</span>
-                    <span className="text-xs text-gray-500">•</span>
-                    <span className="text-xs text-gray-500">2 weeks ago</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    <a 
-                      href="https://www.reddit.com/r/webdev/comments/1a0b1c2/self_hosted_loom_alternative_for_team_screen_recording/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      Self-hosted Loom alternative for team screen recording?
-                    </a>
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "Our team needs a self-hosted solution for screen recording. Loom doesn't offer self-hosting and we need full control over our data..."
-                  </p>
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>👍 156 upvotes</span>
-                    <span>💬 67 comments</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">r</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">r/privacy</span>
-                    <span className="text-xs text-gray-500">•</span>
-                    <span className="text-xs text-gray-500">3 weeks ago</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    <a 
-                      href="https://www.reddit.com/r/privacy/comments/19z0a1b/loom_alternative_that_doesnt_collect_data_or_track_users/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      Loom alternative that doesn't collect data or track users?
-                    </a>
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    "Looking for a privacy-focused screen recording tool. Loom's privacy policy is concerning and I need something that doesn't track or collect user data..."
-                  </p>
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>👍 203 upvotes</span>
-                    <span>💬 89 comments</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mt-8">
-            <p className="text-sm text-gray-500 mb-4">
-              These are real Reddit posts from users desperately seeking alternatives to Loom
-            </p>
-            <div className="inline-flex items-center space-x-2 bg-red-50 border border-red-200 rounded-full px-4 py-2 text-sm">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span className="text-red-800 font-medium">
-                <strong>RecordLane solves all these problems:</strong> Free, open source, privacy-first, and self-hostable
-              </span>
-            </div>
-          </div>
+        {/* Testimonial Carousel */}
+        <div className="mb-16 sm:mb-20">
+          <TestimonialCarousel testimonials={testimonialData} />
         </div>
 
         {/* Why Choose RecordLane */}
@@ -320,127 +151,8 @@ function MainPanelComponent() {
             </p>
           </div>
           
-          <div className="max-w-6xl mx-auto overflow-x-auto">
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Feature</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                      <div className="flex flex-col items-center">
-                        <span className="text-green-600 font-bold">RecordLane</span>
-                        <span className="text-xs text-gray-500">(You are here)</span>
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">Loom</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">OBS Studio</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">Screencastify</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">Camtasia</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Price</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Free Forever
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">$8-16/month</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">Free</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">$3-7/month</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">$299 one-time</td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Privacy</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Privacy First
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Data Collection</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Local Only</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Google Drive</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Local Only</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Ease of Use</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ One-Click Recording
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Easy</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Complex Setup</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Easy</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">⚠️ Moderate</td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Cloud Storage</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ YouTube Integration
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Built-in</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Manual Upload</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">⚠️ Google Drive</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Manual Upload</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Sharing</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Instant Links
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Instant</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Manual</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">⚠️ Limited</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Manual</td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Open Source</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Fully Open Source
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Proprietary</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Open Source</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Proprietary</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Proprietary</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Self-Hosting</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Full Control
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Not Available</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Local Only</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Not Available</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Not Available</td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Web-Based</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✅ Works Anywhere
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">✅ Web App</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Desktop Only</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">⚠️ Chrome Extension</td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-600">❌ Desktop Only</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ComparisonTable />
         </div>
-
 
         {/* How does RecordLane work? */}
         <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
@@ -470,7 +182,7 @@ function MainPanelComponent() {
               </div>
               <h3 className="text-lg font-semibold mb-2">2. Upload</h3>
               <p className="text-gray-600 text-sm">
-                Automatically sync to YouTube or download locally. Your choice, your control.
+                Your video is automatically saved and ready to share. Upload to YouTube or download locally.
               </p>
             </div>
             
@@ -480,7 +192,7 @@ function MainPanelComponent() {
               </div>
               <h3 className="text-lg font-semibold mb-2">3. Share</h3>
               <p className="text-gray-600 text-sm">
-                Share instantly with secure links. No storage limits, no hidden costs.
+                Get instant shareable links or integrate with YouTube for maximum reach.
               </p>
             </div>
           </div>
@@ -497,130 +209,200 @@ function MainPanelComponent() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                  <Video className="h-4 w-4 text-purple-600" />
-                </div>
-                <h3 className="font-semibold">High-Quality Recording</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Video className="h-6 w-6 text-red-600" />
               </div>
-              <p className="text-gray-600 text-sm">Record in HD with crystal clear audio and smooth video quality.</p>
+              <h3 className="text-lg font-semibold mb-2">One-Click Recording</h3>
+              <p className="text-gray-600 text-sm">
+                Start recording instantly with a single click. No complex setup or configuration needed.
+              </p>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                </div>
-                <h3 className="font-semibold">No Time Limits</h3>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload className="h-6 w-6 text-blue-600" />
               </div>
-              <p className="text-gray-600 text-sm">Record as long as you need without any time restrictions or limits.</p>
+              <h3 className="text-lg font-semibold mb-2">YouTube Integration</h3>
+              <p className="text-gray-600 text-sm">
+                Seamlessly upload your recordings directly to YouTube with automatic processing.
+              </p>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                  <Upload className="h-4 w-4 text-green-600" />
-                </div>
-                <h3 className="font-semibold">Instant Upload</h3>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Share2 className="h-6 w-6 text-green-600" />
               </div>
-              <p className="text-gray-600 text-sm">Automatically sync to YouTube or download locally with one click.</p>
+              <h3 className="text-lg font-semibold mb-2">Instant Sharing</h3>
+              <p className="text-gray-600 text-sm">
+                Get shareable links immediately after recording. No waiting, no processing delays.
+              </p>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                </div>
-                <h3 className="font-semibold">Privacy First</h3>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <RefreshCw className="h-6 w-6 text-purple-600" />
               </div>
-              <p className="text-gray-600 text-sm">Your recordings stay private. No data collection, no tracking.</p>
+              <h3 className="text-lg font-semibold mb-2">Real-time Processing</h3>
+              <p className="text-gray-600 text-sm">
+                Your videos are processed in real-time as you record. No post-processing needed.
+              </p>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                  <RefreshCw className="h-4 w-4 text-orange-600" />
-                </div>
-                <h3 className="font-semibold">Open Source</h3>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-6 w-6 text-orange-600" />
               </div>
-              <p className="text-gray-600 text-sm">Fully open source code. Transparent, auditable, and community-driven.</p>
+              <h3 className="text-lg font-semibold mb-2">No Time Limits</h3>
+              <p className="text-gray-600 text-sm">
+                Record for as long as you need. No artificial time restrictions or watermarks.
+              </p>
             </div>
             
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
-                  <Share2 className="h-4 w-4 text-indigo-600" />
-                </div>
-                <h3 className="font-semibold">Easy Sharing</h3>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileVideo className="h-6 w-6 text-indigo-600" />
               </div>
-              <p className="text-gray-600 text-sm">Share with secure links. Control who sees your recordings.</p>
+              <h3 className="text-lg font-semibold mb-2">High Quality</h3>
+              <p className="text-gray-600 text-sm">
+                Record in high definition with crystal clear audio. Professional quality every time.
+              </p>
             </div>
           </div>
         </div>
 
 
-        {/* FAQ */}
+        {/* Why I Created RecordLane */}
         <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Everything you need to know about RecordLane
-            </p>
-          </div>
-          
-          <div className="max-w-3xl mx-auto space-y-4">
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">Is RecordLane really free forever?</h3>
-              <p className="text-gray-600 text-sm">Yes! RecordLane is completely free with no hidden costs, no subscription fees, and no time limits. We believe in providing free tools for everyone.</p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">How is my privacy protected?</h3>
-              <p className="text-gray-600 text-sm">RecordLane is open source and privacy-first. We don't collect your data, track your usage, or store your recordings on our servers. Your recordings stay with you.</p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">Do I need to install anything?</h3>
-              <p className="text-gray-600 text-sm">No installation required! RecordLane works entirely in your browser. Just visit the website and start recording immediately.</p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">Can I download my recordings?</h3>
-              <p className="text-gray-600 text-sm">Absolutely! You can download your recordings locally or sync them to YouTube. You have complete control over your content.</p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">Is there a recording time limit?</h3>
-              <p className="text-gray-600 text-sm">No time limits! Record as long as you need. Whether it's a 30-second clip or a 3-hour presentation, RecordLane handles it all.</p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-lg shadow-sm border">
-              <h3 className="font-semibold mb-2">How does it compare to Loom?</h3>
-              <p className="text-gray-600 text-sm">RecordLane offers all the features of Loom but completely free, open source, and privacy-focused. No storage limits, no hidden costs, no data collection.</p>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white shadow-lg border border-gray-200 rounded-lg p-8 sm:p-12">
+              <h2 className="text-xl font-semibold text-black mb-6">
+                Why I Created RecordLane
+              </h2>
+              <div className="text-black space-y-4 leading-relaxed">
+                <p>
+                  I absolutely <strong>love Loom</strong>. The ease with which they make recording and sharing videos with clients and teammates is pure genius. It's one of those tools that just works perfectly.
+                </p>
+                <p>
+                  But here's the thing - I only use it occasionally. I kept finding myself wanting to subscribe to Loom, but then I'd think "what if I don't use it this month?" and end up not subscribing at all. I might not even use more than once or twice in a month.
+                </p>
+                <p>
+                  It broke my heart to keep missing out on such a brilliant product just because I couldn't justify $8-16/month for something I might not use regularly. So I decided to create RecordLane - a free alternative that syncs with YouTube, so I can have that same ease of use without the subscription pressure.
+                </p>
+                <p className="text-sm text-gray-600 mt-6">
+                  - Ifeoluwa Ajetomobi
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Section */}
-        <div className="mt-16 sm:mt-20 mb-8 sm:mb-12">
+        {/* FAQ Section */}
+        <div className="mt-16 sm:mt-20 mb-12 sm:mb-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Everything you need to know about RecordLane
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Is RecordLane really free?
+                </h3>
+                <p className="text-gray-600">
+                  Yes! RecordLane is completely free to use. No hidden costs, no subscription fees, no storage limits. We believe everyone should have access to professional screen recording tools.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  How does YouTube integration work?
+                </h3>
+                <p className="text-gray-600">
+                  RecordLane automatically syncs your recordings to YouTube. You can choose to make them public, private, or unlisted. Your videos are stored on YouTube's servers, so you never have to worry about storage limits.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Do I need to install anything?
+                </h3>
+                <p className="text-gray-600">
+                  No installation required! RecordLane runs entirely in your browser. Just visit our website, grant camera and microphone permissions, and start recording.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  What browsers are supported?
+                </h3>
+                <p className="text-gray-600">
+                  RecordLane works on Chrome, Firefox, Edge, and Safari. For the best experience, we recommend using the latest version of Chrome or Edge.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Can I record without YouTube?
+                </h3>
+                <p className="text-gray-600">
+                  Absolutely! YouTube integration is optional. You can record locally and download your videos without connecting to YouTube. The choice is yours.
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Is my data private and secure?
+                </h3>
+                <p className="text-gray-600">
+                  Yes! We take privacy seriously. Your recordings are only stored where you choose (locally or on YouTube). We don't collect or store your personal data without your explicit consent.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* Recordings Grid */}
+        {recordings && recordings.length > 0 && (
+          <div className="mt-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Your Recordings</h2>
+              <Button variant="outline" size="sm">
+                View All
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {recordings.slice(0, 8).map((recording: any) => (
+                <RecordingCard
+                  key={recording.id}
+                  recording={recording}
+                  onClick={() => handleRecordingClick(recording)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recording Panel */}
+        {isRecording && <RecordingPanel />}
+
+        {/* Video Modal */}
+        {showVideoModal && selectedRecording && (
+          <VideoModal
+            recording={selectedRecording}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
-
-      {/* Video Modal */}
-      {selectedRecording && (
-        <VideoModal 
-          recording={selectedRecording} 
-          onClose={handleCloseModal} 
-        />
-      )}
     </div>
   );
-}
+};
 
 // Export with error boundary
 export default withErrorBoundary(MainPanelComponent, {
@@ -632,5 +414,5 @@ export default withErrorBoundary(MainPanelComponent, {
         <p className="text-muted-foreground">Please refresh the page to try again.</p>
       </div>
     </div>
-  )
+  ),
 });

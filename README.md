@@ -47,6 +47,15 @@ RecordLane replaces popular but expensive screen recording solutions:
 | **Active Development** | ✅ Active | ✅ Active | ✅ Active | ✅ Active | ⚠️ Limited |
 | **Community** | ✅ Growing | ✅ Large | ✅ Growing | ✅ Large | ⚠️ Small |
 
+## Getting Started
+
+Once you have RecordLane running (see "How to Run" section below):
+
+1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
+2. **Choose Recording Mode**: Select screen, camera, or both
+3. **Start Recording**: Click the floating record button
+4. **Review & Share**: Edit your recording and get an instant share link
+
 ## Demo
 
 *Demo video will be provided here*
@@ -141,15 +150,6 @@ npm run build
 - **Optimized Loading**: Lazy loading and intelligent caching
 - **Cross-browser Support**: Works on all modern browsers
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
-
-## Getting Started
-
-Once you have RecordLane running (see "How to Run" section above):
-
-1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
-2. **Choose Recording Mode**: Select screen, camera, or both
-3. **Start Recording**: Click the floating record button
-4. **Review & Share**: Edit your recording and get an instant share link
 
 ## Privacy & Security
 
@@ -255,27 +255,158 @@ RecordLane is built with:
 
 ### Google OAuth Setup
 
-RecordLane uses Google OAuth 2.0 for YouTube integration.
+RecordLane uses Google OAuth 2.0 for YouTube integration. Follow these detailed steps to set up Google OAuth for your application.
 
-1. **Create OAuth Credentials**
-   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
-   - Navigate to "APIs & Services" > "Credentials"
+#### Step 1: Create a Google Cloud Project
+
+1. **Navigate to Google Cloud Console**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Sign in with your Google account
+
+2. **Create a New Project**
+   - Click on the project dropdown at the top of the page
+   - Click "New Project"
+   - Enter a project name (e.g., "RecordLane App")
+   - Optionally, select an organization if you have one
+   - Click "Create"
+   - Wait for the project to be created and select it
+
+#### Step 2: Enable Required APIs
+
+1. **Navigate to APIs & Services**
+   - In the left sidebar, go to "APIs & Services" > "Library"
+
+2. **Enable YouTube Data API v3**
+   - Search for "YouTube Data API v3"
+   - Click on it and then click "Enable"
+   - Wait for the API to be enabled
+
+3. **Enable Google Identity Platform (Optional but Recommended)**
+   - Search for "Google Identity Platform"
+   - Click on it and then click "Enable"
+
+#### Step 3: Configure OAuth Consent Screen
+
+1. **Navigate to OAuth Consent Screen**
+   - Go to "APIs & Services" > "OAuth consent screen"
+
+2. **Choose User Type**
+   - Select **"External"** (allows any Google user to use your app)
+   - Click "Create"
+
+3. **Fill in App Information**
+   - **App name**: "RecordLane" (or your preferred name)
+   - **User support email**: Your email address
+   - **App logo**: Upload a logo (optional but recommended)
+   - **App domain**: 
+     - **Homepage URL**: `https://yourdomain.com` (for production) or `http://localhost:5173` (for development)
+     - **Privacy policy URL**: `https://yourdomain.com/privacy` (optional but recommended)
+     - **Terms of service URL**: `https://yourdomain.com/terms` (optional but recommended)
+   - **Authorized domains**: Add your domain (e.g., `yourdomain.com`) and `localhost` for development
+   - **Developer contact information**: Your email address
+   - Click "Save and Continue"
+
+4. **Configure Scopes**
+   - Click "Add or Remove Scopes"
+   - Add the following scopes:
+     - `openid` (for basic user identification)
+     - `https://www.googleapis.com/auth/userinfo.email` (for user email)
+     - `https://www.googleapis.com/auth/userinfo.profile` (for user profile)
+     - `https://www.googleapis.com/auth/youtube.upload` (for uploading videos to YouTube)
+     - `https://www.googleapis.com/auth/youtube` (for managing YouTube content)
+   - Click "Update" and then "Save and Continue"
+
+5. **Add Test Users (For Development)**
+   - If your app is in testing mode, add test users:
+   - Click "Add Users"
+   - Enter email addresses of users who will test the app
+   - Click "Save and Continue"
+
+6. **Review and Submit**
+   - Review all the information you've entered
+   - Click "Back to Dashboard"
+
+#### Step 4: Create OAuth 2.0 Credentials
+
+1. **Navigate to Credentials**
+   - Go to "APIs & Services" > "Credentials"
+
+2. **Create OAuth Client ID**
    - Click "Create Credentials" > "OAuth client ID"
    - Select **"Web application"** as the application type
    - Give it a name (e.g., "RecordLane Web Client")
 
-2. **Configure Authorized Redirect URIs**
-   - Add the following URIs:
-   - `http://localhost:5173/auth/callback` (for local development)
-   - `https://yourdomain.com/auth/callback` (for production)
+3. **Configure Authorized Origins and Redirects**
+   - **Authorized JavaScript origins**:
+     - `http://localhost:5173` (for local development)
+     - `https://yourdomain.com` (for production)
+   - **Authorized redirect URIs**:
+     - `http://localhost:5173/auth/callback` (for local development)
+     - `https://yourdomain.com/auth/callback` (for production)
+   - Click "Create"
 
-3. **Enable APIs**
-   - Go to "APIs & Services" > "Library"
-   - Search for and enable the **"YouTube Data API v3"**
+4. **Save Your Credentials**
+   - **Important**: Copy and save the **Client ID** and **Client Secret** immediately
+   - Store them securely - you won't be able to see the secret again
+   - You'll need these for your application configuration
 
-4. **Configure Supabase Auth**
+#### Step 5: Configure Your Application
+
+1. **Update Environment Variables**
+   - In your frontend directory, create or update `.env.local`:
+   ```bash
+   # Google OAuth Configuration
+   VITE_GOOGLE_CLIENT_ID=your_client_id_here
+   VITE_GOOGLE_CLIENT_SECRET=your_client_secret_here
+   ```
+
+2. **Update Supabase Configuration**
    - In your Supabase project, go to Authentication > Providers
-   - Enable Google provider and add your OAuth credentials
+   - Enable Google provider
+   - Add your Google OAuth credentials:
+     - **Client ID**: Your Google Client ID
+     - **Client Secret**: Your Google Client Secret
+   - Save the configuration
+
+#### Step 6: Domain Verification (For Production)
+
+1. **Verify Your Domain**
+   - Go to [Google Search Console](https://search.google.com/search-console/)
+   - Add your domain and follow the verification steps
+   - This may involve adding a DNS record or uploading an HTML file
+
+2. **Update OAuth Consent Screen**
+   - Return to your OAuth consent screen in Google Cloud Console
+   - Add your verified domain to authorized domains
+
+#### Step 7: Publish Your App (For Production)
+
+1. **Review App Status**
+   - In the OAuth consent screen, check that your app is ready for production
+   - Ensure all required information is filled out
+
+2. **Publish the App**
+   - Click "Publish App" to make it available to all users
+   - **Note**: This step is only needed when moving from testing to production
+
+#### Step 8: Testing Your Setup
+
+1. **Test Local Development**
+   - Start your development server
+   - Navigate to your app and try the Google OAuth flow
+   - Ensure users can successfully authenticate
+
+2. **Test Production (When Ready)**
+   - Deploy your app to production
+   - Test the OAuth flow with your production URLs
+   - Verify that videos can be uploaded to YouTube
+
+#### Troubleshooting Common Issues
+
+- **"This app isn't verified"**: This is normal for development. Users can click "Advanced" and "Go to [App Name] (unsafe)" to proceed
+- **Redirect URI mismatch**: Ensure your redirect URIs exactly match what you configured in Google Cloud Console
+- **Scope errors**: Make sure you've added all required scopes in the OAuth consent screen
+- **API not enabled**: Verify that YouTube Data API v3 is enabled in your project
 
 
 ## Enhanced Features

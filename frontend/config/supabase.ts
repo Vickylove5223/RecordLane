@@ -3,14 +3,16 @@
 // You can find these in your Supabase project dashboard under Settings > API
 
 export const supabaseConfig = {
-  url: import.meta.env.VITE_SUPABASE_URL,
-  anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY
+  url: import.meta.env.VITE_SUPABASE_URL || 'https://yoccwqyrxdymrfqjpwef.supabase.co',
+  anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvY2N3cXlyeGR5bXJmcWpwd2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMDU3NzQsImV4cCI6MjA3Mjc4MTc3NH0.A-UU51XVrGN-r9OLNrF3ASf9LZXCTy3bXN0pcM9zCno'
 }
 
 // Validate required environment variables
-if (!supabaseConfig.url || !supabaseConfig.anonKey) {
-  throw new Error(
-    'Missing required Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file.'
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.warn(
+    '⚠️ Using default Supabase credentials. For production, create a .env.local file with:\n' +
+    'VITE_SUPABASE_URL=your_supabase_url\n' +
+    'VITE_SUPABASE_ANON_KEY=your_supabase_anon_key'
   )
 }
 

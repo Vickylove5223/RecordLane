@@ -81,9 +81,39 @@ export class AuthServiceClient {
    * Retrieves the public configuration for the auth service.
    */
   public async getConfig(): Promise<{ googleClientId: string }> {
-    // Return a mock config for compatibility
-    return {
-      googleClientId: 'your-google-client-id' // This should be configured in Supabase
+    try {
+      // Call Supabase Edge Function to get OAuth config
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/get-oauth-config`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.supabaseKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get OAuth configuration');
+      }
+
+      const config = await response.json();
+      
+      if (!config.googleClientId) {
+        throw new Error(
+          'Google OAuth not configured. Please set GOOGLE_CLIENT_ID in Supabase Edge Function environment variables. ' +
+          'Go to your Supabase project > Edge Functions > Environment Variables and add GOOGLE_CLIENT_ID.'
+        );
+      }
+
+      return {
+        googleClientId: config.googleClientId
+      };
+    } catch (error) {
+      console.error('Failed to get OAuth config from Supabase:', error);
+      throw new Error(
+        'Failed to get OAuth configuration from Supabase. ' +
+        'Please ensure GOOGLE_CLIENT_ID is set in your Supabase Edge Function environment variables.'
+      );
     }
   }
 
