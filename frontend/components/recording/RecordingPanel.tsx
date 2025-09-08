@@ -5,6 +5,7 @@ import {
   Pause, 
   Play, 
   MousePointer, 
+  Pen, 
   Move
 } from 'lucide-react';
 import { useRecording } from '../../contexts/RecordingContext';
@@ -26,7 +27,7 @@ export default function RecordingPanel() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const { highlightClicks } = options;
+  const { enableDrawing, highlightClicks } = options;
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -41,6 +42,10 @@ export default function RecordingPanel() {
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     });
+  };
+
+  const toggleDrawingMode = () => {
+    updateOptions({ enableDrawing: !enableDrawing });
   };
 
   const toggleClickHighlights = () => {
@@ -79,7 +84,7 @@ export default function RecordingPanel() {
 
   return (
     <div
-      className="fixed z-50 bg-white rounded-full shadow-lg border border-gray-200 flex flex-col items-center space-y-1 sm:space-y-2 p-1 sm:p-2"
+      className="fixed z-50 bg-white rounded-full shadow-lg border border-gray-200 flex flex-col items-center space-y-2 p-2"
       style={{ 
         left: position.x, 
         top: position.y,
@@ -99,20 +104,20 @@ export default function RecordingPanel() {
           size="sm"
           variant="outline"
           onClick={pauseRecording}
-          className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full"
+          className="h-10 w-10 p-0 rounded-full"
           title="Pause Recording"
         >
-          <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Pause className="h-5 w-5" />
         </Button>
       ) : (
         <Button
           size="sm"
           variant="outline"
           onClick={resumeRecording}
-          className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full"
+          className="h-10 w-10 p-0 rounded-full"
           title="Resume Recording"
         >
-          <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Play className="h-5 w-5" />
         </Button>
       )}
 
@@ -120,21 +125,32 @@ export default function RecordingPanel() {
       <Button
         size="sm"
         onClick={stopRecording}
-        className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full bg-red-500 hover:bg-red-600"
+        className="h-10 w-10 p-0 rounded-full bg-red-500 hover:bg-red-600"
         title="Stop Recording"
       >
-        <Square className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+        <Square className="h-5 w-5 text-white" />
       </Button>
 
-      {/* Cursor Highlighting Toggle */}
+      {/* Drawing Mode Toggle */}
+      <Button
+        size="sm"
+        variant={enableDrawing ? "default" : "outline"}
+        onClick={toggleDrawingMode}
+        className="h-10 w-10 p-0 rounded-full"
+        title={enableDrawing ? "Disable Drawing" : "Enable Drawing"}
+      >
+        <Pen className={`h-5 w-5 ${enableDrawing ? 'text-white' : 'text-gray-600'}`} />
+      </Button>
+
+      {/* Click Highlights Toggle */}
       <Button
         size="sm"
         variant={highlightClicks ? "default" : "outline"}
         onClick={toggleClickHighlights}
-        className="h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full"
-        title={highlightClicks ? "Stop Cursor Highlighting" : "Start Cursor Highlighting"}
+        className="h-10 w-10 p-0 rounded-full"
+        title={highlightClicks ? "Disable Click Highlights" : "Enable Click Highlights"}
       >
-        <MousePointer className={`h-4 w-4 sm:h-5 sm:w-5 ${highlightClicks ? 'text-white' : 'text-gray-600'}`} />
+        <MousePointer className={`h-5 w-5 ${highlightClicks ? 'text-white' : 'text-gray-600'}`} />
       </Button>
     </div>
   );

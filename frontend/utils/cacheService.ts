@@ -1,4 +1,5 @@
 import { CACHE_CONFIG } from '../config';
+import { performanceMonitor } from './performanceMonitor';
 import { ErrorHandler } from './errorHandler';
 
 export interface CacheEntry<T = any> {
@@ -44,6 +45,7 @@ export class CacheService {
   private initializeMetrics(): void {
     // Load existing stats
     const stats = this.getStats();
+    performanceMonitor.recordCacheRequest(false); // Initialize
   }
 
   // Set cache entry with optimizations
@@ -89,6 +91,9 @@ export class CacheService {
       await this.evictIfNecessary(cacheData);
       
       localStorage.setItem(this.storageKey, JSON.stringify(cacheData));
+      
+      // Update metrics
+      performanceMonitor.recordCacheRequest(false);
     } catch (error) {
       ErrorHandler.logError('cache-set-error', error, { namespace: this.namespace, key });
       
@@ -107,6 +112,7 @@ export class CacheService {
       
       if (!entry) {
         this.missCount++;
+        performanceMonitor.recordCacheRequest(false);
         return null;
       }
 
@@ -114,6 +120,7 @@ export class CacheService {
       if (entry.version !== CACHE_CONFIG.version) {
         await this.delete(key);
         this.missCount++;
+        performanceMonitor.recordCacheRequest(false);
         return null;
       }
 
@@ -121,6 +128,7 @@ export class CacheService {
       if (Date.now() > entry.expirationTime) {
         await this.delete(key);
         this.missCount++;
+        performanceMonitor.recordCacheRequest(false);
         return null;
       }
 
@@ -136,6 +144,7 @@ export class CacheService {
           console.warn('Decompression failed:', decompressionError);
           await this.delete(key);
           this.missCount++;
+          performanceMonitor.recordCacheRequest(false);
           return null;
         }
       }
@@ -145,10 +154,12 @@ export class CacheService {
       localStorage.setItem(this.storageKey, JSON.stringify(cacheData));
 
       this.hitCount++;
+      performanceMonitor.recordCacheRequest(true);
       return entry;
     } catch (error) {
       ErrorHandler.logError('cache-get-error', error, { namespace: this.namespace, key });
       this.missCount++;
+      performanceMonitor.recordCacheRequest(false);
       return null;
     }
   }

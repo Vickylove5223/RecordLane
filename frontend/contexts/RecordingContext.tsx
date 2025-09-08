@@ -9,6 +9,7 @@ export type RecordingState = 'idle' | 'starting' | 'recording' | 'paused' | 'sto
 export interface RecordingOptions {
   mode: RecordingMode;
   highlightClicks: boolean;
+  enableDrawing: boolean;
   systemAudio: boolean;
   microphone: boolean;
   resolution: '480p' | '720p' | '1080p';
@@ -56,6 +57,7 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
   const [options, setOptions] = useState<RecordingOptions>({
     mode: 'screen',
     highlightClicks: appState.settings.highlightClicksDefault,
+    enableDrawing: false,
     systemAudio: true,
     microphone: false,
     resolution: appState.settings.defaultResolution,
@@ -65,42 +67,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
   const recordingServiceRef = useRef<RecordingService | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-
-  // Helper functions for recording notification
-  const hideRecordingNotification = useCallback(() => {
-    const notification = document.getElementById('recording-notification');
-    if (notification) {
-      notification.remove();
-    }
-    delete (window as any).stopRecordingFromNotification;
-  }, []);
-
-  const showRecordingNotification = useCallback(() => {
-    // Remove any existing notification
-    hideRecordingNotification();
-    
-    const notification = document.createElement('div');
-    notification.className = 'recording-notification';
-    notification.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: recording-pulse 1.5s ease-in-out infinite;"></div>
-        <span>Recording in progress...</span>
-        <button id="stop-recording-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Stop</button>
-      </div>
-    `;
-    notification.id = 'recording-notification';
-    document.body.appendChild(notification);
-    
-    // Add event listener to the stop button
-    const stopBtn = document.getElementById('stop-recording-btn');
-    if (stopBtn) {
-      stopBtn.addEventListener('click', () => {
-        if ((window as any).stopRecordingFromNotification) {
-          (window as any).stopRecordingFromNotification();
-        }
-      });
-    }
-  }, [hideRecordingNotification]);
 
   const startTimer = useCallback(() => {
     const startTime = Date.now();
@@ -250,49 +216,6 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const stopRecording = useCallback(async () => {
-    if (recordingServiceRef.current && (state === 'recording' || state === 'paused')) {
-      try {
-        const blob = await recordingServiceRef.current.stopRecording();
-        
-        if (!blob || blob.size === 0) {
-          throw new Error('Recording failed: No data recorded');
-        }
-        
-        setRecordedBlob(blob);
-        setState('stopped');
-        stopTimer();
-        
-        // Remove data attribute and hide notification
-        document.body.removeAttribute('data-recording');
-        hideRecordingNotification();
-        
-        toast({
-          title: "Recording Stopped",
-          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`,
-        });
-      } catch (error) {
-        console.error('Failed to stop recording:', error);
-        setState('idle');
-        
-        // Clean up even on error
-        document.body.removeAttribute('data-recording');
-        hideRecordingNotification();
-        
-        toast({
-          title: "Stop Failed",
-          description: "Failed to save recording. Please try recording again.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [state, stopTimer, hideRecordingNotification, toast]);
-
-  // Update the global stop function when stopRecording is available
-  React.useEffect(() => {
-    (window as any).stopRecordingFromNotification = stopRecording;
-  }, [stopRecording]);
-
   const startRecording = useCallback(async (recordingOptions: RecordingOptions) => {
     try {
       setState('starting');
@@ -325,22 +248,10 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
 
       recordingServiceRef.current = new RecordingService();
       
-      // Set callback for when screen sharing is stopped by user
-      recordingServiceRef.current.setScreenShareEndedCallback(() => {
-        console.log('Screen sharing ended by user, stopping recording...');
-        stopRecording();
-      });
-      
       await recordingServiceRef.current.startRecording(recordingOptions);
       
       setState('recording');
       startTimer();
-      
-      // Add data attribute to body for CSS styling
-      document.body.setAttribute('data-recording', 'true');
-      
-      // Show custom recording notification
-      showRecordingNotification();
       
       toast({
         title: "Recording Started",
@@ -418,6 +329,34 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     }
   }, [state, startTimer, toast]);
 
+  const stopRecording = useCallback(async () => {
+    if (recordingServiceRef.current && (state === 'recording' || state === 'paused')) {
+      try {
+        const blob = await recordingServiceRef.current.stopRecording();
+        
+        if (!blob || blob.size === 0) {
+          throw new Error('Recording failed: No data recorded');
+        }
+        
+        setRecordedBlob(blob);
+        setState('stopped');
+        stopTimer();
+        
+        toast({
+          title: "Recording Stopped",
+          description: `Recording saved successfully (${(blob.size / 1024 / 1024).toFixed(1)} MB)`,
+        });
+      } catch (error) {
+        console.error('Failed to stop recording:', error);
+        setState('idle');
+        toast({
+          title: "Stop Failed",
+          description: "Failed to save recording. Please try recording again.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [state, stopTimer, toast]);
 
   const deleteRecording = useCallback(() => {
     if (recordingServiceRef.current) {
@@ -437,11 +376,7 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     setState('idle');
     setDuration(0);
     stopTimer();
-    
-    // Clean up notification and data attribute
-    document.body.removeAttribute('data-recording');
-    hideRecordingNotification();
-  }, [recordedBlob, stopTimer, hideRecordingNotification]);
+  }, [recordedBlob, stopTimer]);
 
   const restartRecording = useCallback(async () => {
     deleteRecording();

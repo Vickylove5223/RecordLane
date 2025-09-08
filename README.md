@@ -1,6 +1,6 @@
 # RecordLane
 
-A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, Supabase backend, and YouTube API integration.
+A privacy-first, open-source screen recording application that stores all recordings directly in your YouTube channel. Built with React, TypeScript, and YouTube API integration.
 
 ## 🏆 Open Source Alternative
 
@@ -19,51 +19,32 @@ RecordLane replaces popular but expensive screen recording solutions:
 
 ### Why Choose RecordLane?
 
-- **Free Forever**: No subscription fees or usage limits
-- **Privacy First**: Videos go directly to your YouTube channel
-- **Web-Based**: Works in any modern browser, no downloads
-- **Cross-Platform**: Desktop, tablet, and mobile support
-- **Open Source**: Full transparency and community-driven development
-- **Modern Tech**: Built with latest web technologies
+- **💰 Free Forever**: No subscription fees or usage limits
+- **🔒 Privacy First**: Videos go directly to your YouTube channel
+- **🌐 Web-Based**: Works in any modern browser, no downloads
+- **📱 Cross-Platform**: Desktop, tablet, and mobile support
+- **🔧 Open Source**: Full transparency and community-driven development
+- **⚡ Modern Tech**: Built with latest web technologies
 
-## 📊 Open Source Loom Alternatives Comparison
+## 📸 Demo & Screenshots
 
-| Feature | RecordLane | [Snapify.it](https://snapify.it/) | Cap.so | OpenReplay | ScreenStudio |
-|---------|------------|-----------------------------------|--------|------------|--------------|
-| **Price** | 💰 Free | 💰 Free | 💰 Free | 💰 Free | 💰 Free |
-| **Privacy** | ✅ Your YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ✅ Local only |
-| **Open Source** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Cloud Integration** | ✅ YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ❌ None |
-| **Web-Based** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Web app | ❌ Desktop only |
-| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Camera Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes |
-| **Drawing Tools** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes |
-| **Click Highlights** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
-| **Video Editing** | ✅ Client-side | ✅ Basic | ✅ Basic | ❌ No | ✅ Basic |
-| **Auto Upload** | ✅ YouTube | ✅ Self-hosted | ✅ Self-hosted | ✅ Self-hosted | ❌ Manual |
-| **Share Links** | ✅ Instant | ✅ Instant | ✅ Instant | ✅ Self-hosted | ❌ Manual |
-| **Mobile Support** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
-| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐ Medium | ⭐⭐⭐ Medium | ⭐⭐⭐⭐⭐ Very Hard | ⭐⭐⭐ Medium |
-| **Active Development** | ✅ Active | ✅ Active | ✅ Active | ✅ Active | ⚠️ Limited |
-| **Community** | ✅ Growing | ✅ Large | ✅ Growing | ✅ Large | ⚠️ Small |
+> **Note**: Screenshots and demo video will be added here. This section will showcase:
+> - Main recording interface
+> - Recording modes (screen, camera, both)
+> - Drawing and annotation tools
+> - Video editing and trimming
+> - YouTube upload process
+> - Share modal and link generation
 
-## Getting Started
-
-Once you have RecordLane running (see "How to Run" section below):
-
-1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
-2. **Choose Recording Mode**: Select screen, camera, or both
-3. **Start Recording**: Click the floating record button
-4. **Review & Share**: Edit your recording and get an instant share link
-
+*[Screenshots coming soon]*
 
 ## 🚀 How to Run
 
 ### Prerequisites
 
 - **Node.js** (v18 or higher)
-- **npm** package manager
-- **Supabase** account for backend services
+- **Bun** package manager
+- **Encore CLI** for backend services
 - **Google Cloud Console** account for OAuth setup
 
 ### Quick Start
@@ -76,14 +57,23 @@ Once you have RecordLane running (see "How to Run" section below):
 
 2. **Install dependencies**
    ```bash
+   # Install root dependencies
+   bun install
+   
    # Install frontend dependencies
    cd frontend
    npm install
+   cd ..
    ```
 
-3. **Set up Supabase** (see Configuration section below)
+3. **Set up Google OAuth** (see Configuration section below)
 
-4. **Set up Google OAuth** (see Configuration section below)
+4. **Start the backend**
+   ```bash
+   cd backend
+   encore run
+   ```
+   The backend will be available at `http://localhost:4000`
 
 5. **Start the frontend**
    ```bash
@@ -92,61 +82,96 @@ Once you have RecordLane running (see "How to Run" section below):
    ```
    The frontend will be available at `http://localhost:5173`
 
+6. **Generate frontend client** (in backend directory)
+   ```bash
+   encore gen client --target leap
+   ```
+
 ### Production Deployment
 
-#### Option 1: Vercel/Netlify (Recommended)
+#### Option 1: Encore Cloud (Recommended)
 ```bash
-# Build the frontend
-cd frontend
-npm run build
+# Login to Encore Cloud
+encore auth login
 
-# Deploy to Vercel or Netlify
-# The app will connect to your Supabase backend
+# Add Encore remote
+git remote add encore encore://recordlane-app
+
+# Deploy
+git add -A .
+git commit -m "Deploy to production"
+git push encore
 ```
 
 #### Option 2: Self-Hosting
 ```bash
-# Build the frontend
-cd frontend
-npm run build
+# Build Docker image
+encore build docker
 
-# Serve the built files using any static file server
-# Configure environment variables for Supabase
+# Deploy using your preferred container orchestration
 ```
+
+## 📊 Competitive Comparison
+
+| Feature | RecordLane | Loom | Screencastify | Camtasia | OBS Studio |
+|---------|------------|------|---------------|----------|------------|
+| **Price** | 💰 Free | $8-16/month | $3-7/month | $299 one-time | 💰 Free |
+| **Privacy** | ✅ Your YouTube | ❌ Their servers | ❌ Their servers | ✅ Local only | ✅ Local only |
+| **Open Source** | ✅ Yes | ❌ No | ❌ No | ❌ No | ✅ Yes |
+| **Cloud Integration** | ✅ YouTube | ✅ Loom cloud | ✅ Google Drive | ❌ None | ❌ None |
+| **Web-Based** | ✅ Yes | ✅ Yes | ✅ Chrome only | ❌ Desktop only | ❌ Desktop only |
+| **Screen Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Camera Recording** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Drawing Tools** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Click Highlights** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Video Editing** | ✅ Client-side | ✅ Cloud | ❌ Limited | ✅ Advanced | ❌ No |
+| **Auto Upload** | ✅ YouTube | ✅ Loom | ✅ Google Drive | ❌ Manual | ❌ Manual |
+| **Share Links** | ✅ Instant | ✅ Instant | ✅ Instant | ❌ Manual | ❌ Manual |
+| **Mobile Support** | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No |
+| **Setup Complexity** | ⭐⭐ Easy | ⭐⭐⭐ Medium | ⭐⭐ Easy | ⭐⭐⭐⭐ Hard | ⭐⭐⭐⭐⭐ Very Hard |
 
 ## Features
 
-### Recording Modes
+### 🎥 Recording Modes
 - **Screen Only**: Capture your entire screen or specific windows
 - **Camera Only**: Record with your webcam for personal messages
 - **Screen + Camera**: Combine screen capture with picture-in-picture camera
 
-### Enhanced Recording
+### 🎨 Enhanced Recording
 - **Click Highlights**: Visual indicators when you click during recording
 - **Drawing Tools**: Draw annotations directly on screen during recording
 - **Pause/Resume**: Control your recording flow with pause and resume
 - **Real-time Preview**: See exactly what you're recording
 
-### YouTube Integration
+### ☁️ YouTube Integration
 - **Direct Storage**: All recordings saved directly to your YouTube channel
 - **Privacy First**: Videos never touch our servers
 - **Enhanced Token Management**: Automatic token refresh with robust error handling
 - **Persistent Auth**: Stay connected across browser sessions (device-specific)
 - **Automatic Upload**: Resume interrupted uploads seamlessly with retry logic
 
-### Editing & Sharing
+### ✂️ Editing & Sharing
 - **Client-side Trimming**: Cut your recordings before upload
 - **Instant Share Links**: Get shareable YouTube links
 - **Privacy Controls**: Set viewing permissions for each recording
 - **Reliable Uploads**: Enhanced retry mechanisms for upload reliability
 
-### Performance & Reliability
+### 🚀 Performance & Reliability
 - **Enhanced Error Recovery**: Comprehensive error handling with automatic retry logic
 - **Token Refresh**: Automatic authentication token refresh for uninterrupted sessions
 - **Connection Monitoring**: Real-time connection status with automatic reconnection
 - **Optimized Loading**: Lazy loading and intelligent caching
 - **Cross-browser Support**: Works on all modern browsers
 - **Responsive Design**: Perfect on desktop, tablet, and mobile
+
+## Getting Started
+
+Once you have RecordLane running (see "How to Run" section above):
+
+1. **Connect YouTube**: Authorize RecordLane to access your YouTube account
+2. **Choose Recording Mode**: Select screen, camera, or both
+3. **Start Recording**: Click the floating record button
+4. **Review & Share**: Edit your recording and get an instant share link
 
 ## Privacy & Security
 
@@ -166,245 +191,45 @@ npm run build
 
 RecordLane is built with:
 - React 18 with TypeScript
-- Supabase for backend services and database
 - YouTube API v3 with enhanced authentication
 - Web Media APIs (MediaRecorder, Screen Capture)
 - Tailwind CSS for styling
 - Vite for development and building
+- Encore.ts for backend services
 
 ## Configuration
 
-### Supabase Setup
+### OAuth Setup
 
-1. **Create a Supabase Project**
-   - Go to [Supabase](https://supabase.com/) and create a new project
-   - Note your project URL and anon key from Settings > API
+RecordLane uses a backend-proxied Google OAuth 2.0 flow for secure authentication.
 
-2. **Set up Database Tables**
-   - Run the SQL migrations in `supabase-migrations/` directory:
-   ```sql
-   -- Create recordings table
-   CREATE TABLE recordings (
-     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-     youtube_video_id TEXT UNIQUE NOT NULL,
-     title TEXT NOT NULL,
-     description TEXT,
-     duration INTEGER,
-     file_size BIGINT,
-     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
-   
-   -- Create events table
-   CREATE TABLE events (
-     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-     event_type TEXT NOT NULL,
-     event_data JSONB,
-     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
-   
-   -- Enable Row Level Security
-   ALTER TABLE recordings ENABLE ROW LEVEL SECURITY;
-   ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-   
-   -- Create policies
-   CREATE POLICY "Users can view own recordings" ON recordings
-     FOR SELECT USING (auth.uid() = user_id);
-   
-   CREATE POLICY "Users can insert own recordings" ON recordings
-     FOR INSERT WITH CHECK (auth.uid() = user_id);
-   
-   CREATE POLICY "Users can update own recordings" ON recordings
-     FOR UPDATE USING (auth.uid() = user_id);
-   
-   CREATE POLICY "Users can delete own recordings" ON recordings
-     FOR DELETE USING (auth.uid() = user_id);
-   
-   CREATE POLICY "Users can view own events" ON events
-     FOR SELECT USING (auth.uid() = user_id);
-   
-   CREATE POLICY "Users can insert own events" ON events
-     FOR INSERT WITH CHECK (auth.uid() = user_id);
-   ```
+### Google Cloud Console Configuration
 
-3. **Configure Environment Variables**
-   - Create `.env.local` in the frontend directory:
-   ```bash
-   # Supabase Configuration
-   VITE_SUPABASE_URL=https://your-project-id.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-key-here
-   ```
-   
-   - Or update `frontend/config/supabase.ts` directly:
-   ```typescript
-   export const supabaseConfig = {
-     url: 'https://your-project-id.supabase.co',
-     anonKey: 'your-anon-key-here'
-   }
-   ```
+1.  **Create OAuth Credentials**
+    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    - Navigate to "APIs & Services" > "Credentials".
+    - Click "Create Credentials" > "OAuth client ID".
+    - Select **"Web application"** as the application type.
+    - Give it a name (e.g., "RecordLane Web Client").
 
-4. **Enable Google OAuth in Supabase**
-   - Go to Authentication > Providers in your Supabase dashboard
-   - Enable Google provider
-   - Add your Google OAuth credentials (see Google OAuth Setup below)
+2.  **Configure Authorized Redirect URIs**
+    - Under "Authorized redirect URIs", add the following URIs. You will need to add the URI for your Leap development environment and any production URLs.
+    - `https://<your-app-url>.lp.dev/auth/callback`
+    - `http://localhost:8089/auth/callback` (for local development)
+    - `http://localhost:5173/auth/callback` (for Vite default port)
 
-### Google OAuth Setup
+3.  **Get Client ID and Secret**
+    - After creating the credential, you will be given a **Client ID** and a **Client Secret**.
 
-RecordLane uses Google OAuth 2.0 for YouTube integration. Follow these detailed steps to set up Google OAuth for your application.
+4.  **Set Encore Secrets**
+    - Go to the Infrastructure tab in your Leap application.
+    - Create two secrets:
+        - `GoogleClientID`: Paste your Client ID here.
+        - `GoogleClientSecret`: Paste your Client Secret here.
 
-#### Step 1: Create a Google Cloud Project
-
-1. **Navigate to Google Cloud Console**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Sign in with your Google account
-
-2. **Create a New Project**
-   - Click on the project dropdown at the top of the page
-   - Click "New Project"
-   - Enter a project name (e.g., "RecordLane App")
-   - Optionally, select an organization if you have one
-   - Click "Create"
-   - Wait for the project to be created and select it
-
-#### Step 2: Enable Required APIs
-
-1. **Navigate to APIs & Services**
-   - In the left sidebar, go to "APIs & Services" > "Library"
-
-2. **Enable YouTube Data API v3**
-   - Search for "YouTube Data API v3"
-   - Click on it and then click "Enable"
-   - Wait for the API to be enabled
-
-3. **Enable Google Identity Platform (Optional but Recommended)**
-   - Search for "Google Identity Platform"
-   - Click on it and then click "Enable"
-
-#### Step 3: Configure OAuth Consent Screen
-
-1. **Navigate to OAuth Consent Screen**
-   - Go to "APIs & Services" > "OAuth consent screen"
-
-2. **Choose User Type**
-   - Select **"External"** (allows any Google user to use your app)
-   - Click "Create"
-
-3. **Fill in App Information**
-   - **App name**: "RecordLane" (or your preferred name)
-   - **User support email**: Your email address
-   - **App logo**: Upload a logo (optional but recommended)
-   - **App domain**: 
-     - **Homepage URL**: `https://yourdomain.com` (for production) or `http://localhost:5173` (for development)
-     - **Privacy policy URL**: `https://yourdomain.com/privacy` (optional but recommended)
-     - **Terms of service URL**: `https://yourdomain.com/terms` (optional but recommended)
-   - **Authorized domains**: Add your domain (e.g., `yourdomain.com`) and `localhost` for development
-   - **Developer contact information**: Your email address
-   - Click "Save and Continue"
-
-4. **Configure Scopes**
-   - Click "Add or Remove Scopes"
-   - Add the following scopes:
-     - `openid` (for basic user identification)
-     - `https://www.googleapis.com/auth/userinfo.email` (for user email)
-     - `https://www.googleapis.com/auth/userinfo.profile` (for user profile)
-     - `https://www.googleapis.com/auth/youtube.upload` (for uploading videos to YouTube)
-     - `https://www.googleapis.com/auth/youtube` (for managing YouTube content)
-   - Click "Update" and then "Save and Continue"
-
-5. **Add Test Users (For Development)**
-   - If your app is in testing mode, add test users:
-   - Click "Add Users"
-   - Enter email addresses of users who will test the app
-   - Click "Save and Continue"
-
-6. **Review and Submit**
-   - Review all the information you've entered
-   - Click "Back to Dashboard"
-
-#### Step 4: Create OAuth 2.0 Credentials
-
-1. **Navigate to Credentials**
-   - Go to "APIs & Services" > "Credentials"
-
-2. **Create OAuth Client ID**
-   - Click "Create Credentials" > "OAuth client ID"
-   - Select **"Web application"** as the application type
-   - Give it a name (e.g., "RecordLane Web Client")
-
-3. **Configure Authorized Origins and Redirects**
-   - **Authorized JavaScript origins**:
-     - `http://localhost:5173` (for local development)
-     - `https://yourdomain.com` (for production)
-   - **Authorized redirect URIs**:
-     - `http://localhost:5173/auth/callback` (for local development)
-     - `https://yourdomain.com/auth/callback` (for production)
-   - Click "Create"
-
-4. **Save Your Credentials**
-   - **Important**: Copy and save the **Client ID** and **Client Secret** immediately
-   - Store them securely - you won't be able to see the secret again
-   - You'll need these for your application configuration
-
-#### Step 5: Configure Your Application
-
-1. **Update Environment Variables**
-   - In your frontend directory, create or update `.env.local`:
-   ```bash
-   # Google OAuth Configuration
-   VITE_GOOGLE_CLIENT_ID=your_client_id_here
-   VITE_GOOGLE_CLIENT_SECRET=your_client_secret_here
-   ```
-
-2. **Update Supabase Configuration**
-   - In your Supabase project, go to Authentication > Providers
-   - Enable Google provider
-   - Add your Google OAuth credentials:
-     - **Client ID**: Your Google Client ID
-     - **Client Secret**: Your Google Client Secret
-   - Save the configuration
-
-#### Step 6: Domain Verification (For Production)
-
-1. **Verify Your Domain**
-   - Go to [Google Search Console](https://search.google.com/search-console/)
-   - Add your domain and follow the verification steps
-   - This may involve adding a DNS record or uploading an HTML file
-
-2. **Update OAuth Consent Screen**
-   - Return to your OAuth consent screen in Google Cloud Console
-   - Add your verified domain to authorized domains
-
-#### Step 7: Publish Your App (For Production)
-
-1. **Review App Status**
-   - In the OAuth consent screen, check that your app is ready for production
-   - Ensure all required information is filled out
-
-2. **Publish the App**
-   - Click "Publish App" to make it available to all users
-   - **Note**: This step is only needed when moving from testing to production
-
-#### Step 8: Testing Your Setup
-
-1. **Test Local Development**
-   - Start your development server
-   - Navigate to your app and try the Google OAuth flow
-   - Ensure users can successfully authenticate
-
-2. **Test Production (When Ready)**
-   - Deploy your app to production
-   - Test the OAuth flow with your production URLs
-   - Verify that videos can be uploaded to YouTube
-
-#### Troubleshooting Common Issues
-
-- **"This app isn't verified"**: This is normal for development. Users can click "Advanced" and "Go to [App Name] (unsafe)" to proceed
-- **Redirect URI mismatch**: Ensure your redirect URIs exactly match what you configured in Google Cloud Console
-- **Scope errors**: Make sure you've added all required scopes in the OAuth consent screen
-- **API not enabled**: Verify that YouTube Data API v3 is enabled in your project
-
+5.  **Enable APIs**
+    - Go to "APIs & Services" > "Library".
+    - Search for and enable the **"YouTube Data API v3"**.
 
 ## Enhanced Features
 
@@ -426,15 +251,14 @@ RecordLane uses Google OAuth 2.0 for YouTube integration. Follow these detailed 
 - Performance monitoring and optimization suggestions
 - Memory usage optimization
 
-## Backend Services
+## API Endpoints
 
-RecordLane uses Supabase for backend services:
+RecordLane includes a backend service built with Encore.ts:
 
-- **Database**: PostgreSQL database for storing recording metadata
-- **Authentication**: Supabase Auth for user management and OAuth integration
-- **Real-time**: Real-time subscriptions for live updates
-- **Storage**: Optional file storage for temporary files
-- **API**: Auto-generated REST and GraphQL APIs
+- **Auth Service**: Manages secure OAuth 2.0 flow with Google.
+- **Metadata Service**: Manages recording metadata and listings
+- **Analytics Service**: Tracks usage statistics and performance metrics
+- **Health Service**: Monitors application health and service status
 
 ## License
 

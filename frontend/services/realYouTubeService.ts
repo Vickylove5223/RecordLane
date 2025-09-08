@@ -9,8 +9,7 @@ import {
   POPUP_CONFIG,
   DEV_CONFIG
 } from '../config';
-// Dynamic import to avoid build-time errors when backend is not available
-let backend: any = null;
+import backend from '~backend/client';
 
 export interface YouTubeConnection {
   isConnected: boolean;
@@ -57,12 +56,6 @@ export class RealYouTubeService {
 
   private static async loadOAuthConfig() {
     try {
-      // Dynamically import Supabase client
-      if (!backend) {
-        const backendModule = await import('../supabaseClient');
-        backend = backendModule.default;
-      }
-      
       const config = await backend.auth.getConfig();
       this.oauthConfig = {
         ...OAUTH_CONFIG,
@@ -104,7 +97,7 @@ export class RealYouTubeService {
     try {
       const cached = await this.cache.get('connection-status');
       if (cached && Date.now() - cached.timestamp < 60 * 1000) {
-        return cached.data as YouTubeConnection;
+        return cached.data;
       }
 
       // Check for stored tokens
@@ -157,10 +150,7 @@ export class RealYouTubeService {
       await this.cache.delete('connection-status');
       
       if (!this.oauthConfig?.clientId) {
-        throw new Error(
-          'Google OAuth not configured. Please set GOOGLE_CLIENT_ID in your Supabase Edge Function environment variables. ' +
-          'Go to your Supabase project > Edge Functions > Environment Variables and add GOOGLE_CLIENT_ID.'
-        );
+        throw new Error('OAuth configuration not available from backend');
       }
 
       // Generate PKCE parameters
@@ -260,68 +250,40 @@ export class RealYouTubeService {
   }
 
   static async deleteVideo(videoId: string): Promise<void> {
-    console.log('RealYouTubeService.deleteVideo called with videoId:', videoId);
     await this.initialize();
     try {
       const tokenData = this.getStoredTokenData();
-      console.log('Token data available:', !!tokenData?.accessToken);
       if (!tokenData?.accessToken) {
         throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
       }
 
       // Validate token
-      console.log('Validating token...');
       const isValid = await this.validateToken(tokenData.accessToken);
-      console.log('Token is valid:', isValid);
       if (!isValid) {
-        console.log('Token invalid, attempting refresh...');
         const refreshed = await this.refreshAccessToken();
-        console.log('Token refresh successful:', refreshed);
         if (!refreshed) {
           throw ErrorHandler.createError('AUTH_REQUIRED', 'Authentication required');
         }
       }
 
       // Delete from YouTube
-      const deleteUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}`;
-      console.log('Making DELETE request to:', deleteUrl);
-      const response = await fetch(deleteUrl, {
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${tokenData.accessToken}`,
         },
       });
 
-      console.log('Delete response status:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Delete failed with response:', errorText);
-        
-        // Parse error response for better error messages
-        let errorMessage = 'Failed to delete video from YouTube';
-        try {
-          const errorData = JSON.parse(errorText);
-          if (errorData.error) {
-            if (errorData.error.code === 403) {
-              errorMessage = 'Permission denied. You may not have permission to delete this video.';
-            } else if (errorData.error.code === 404) {
-              errorMessage = 'Video not found. It may have already been deleted.';
-            } else if (errorData.error.message) {
-              errorMessage = errorData.error.message;
-            }
-          }
-        } catch (parseError) {
-          console.error('Failed to parse error response:', parseError);
-        }
-        
-        throw new Error(errorMessage);
+        throw new Error(`Failed to delete video: ${errorText}`);
       }
 
       console.log('Video deleted successfully from YouTube:', videoId);
     } catch (error) {
       console.error('Failed to delete video from YouTube:', error);
       ErrorHandler.logError('youtube-delete', error, { videoId });
-      throw ErrorHandler.createError('DELETE_FAILED', (error as Error).message || 'Failed to delete video from YouTube', error);
+      throw ErrorHandler.createError('DELETE_FAILED', 'Failed to delete video from YouTube', error);
     }
   }
 
@@ -446,7 +408,7 @@ export class RealYouTubeService {
           // Don't try to access popup.location.href to avoid COOP errors
           // The OAuth flow will be handled entirely via postMessage from the callback page
         } catch (error) {
-          if ((error as Error).name !== 'SecurityError') {
+          if (error.name !== 'SecurityError') {
             console.warn('Unexpected error during popup polling:', error);
           }
         }
@@ -456,12 +418,6 @@ export class RealYouTubeService {
 
   private static async exchangeCodeForToken(code: string, codeVerifier: string): Promise<TokenData> {
     try {
-      // Ensure backend is loaded
-      if (!backend) {
-        const backendModule = await import('../supabaseClient');
-        backend = backendModule.default;
-      }
-      
       const result = await backend.auth.exchangeCode({
         code,
         codeVerifier,
@@ -481,12 +437,6 @@ export class RealYouTubeService {
       const tokenData = this.getStoredTokenData();
       if (!tokenData?.refreshToken) {
         return false;
-      }
-
-      // Ensure backend is loaded
-      if (!backend) {
-        const backendModule = await import('../supabaseClient');
-        backend = backendModule.default;
       }
 
       const result = await backend.auth.refreshToken({
@@ -513,7 +463,7 @@ export class RealYouTubeService {
 
   private static async validateToken(accessToken: string): Promise<boolean> {
     try {
-      const response = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo', {
+      const response = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

@@ -38,15 +38,15 @@ export default function TopNav() {
       <div className="flex items-center space-x-6">
         {/* Setup and Settings Menu - Before Record Button */}
         <div className="flex items-center space-x-4">
-          {/* Self Hosting Link - GitHub Repository */}
-          <a
-            href="https://github.com/Vickylove5223/RecordLane"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-black hover:text-black/80 text-sm font-medium transition-colors"
-          >
-            Self Hosting
-          </a>
+          {/* YouTube Setup Link - Show when not configured */}
+          {!isYouTubeConfigured() && (
+            <button
+              onClick={() => navigate('/youtube-setup')}
+              className="text-black hover:text-black/80 text-sm font-medium transition-colors"
+            >
+              Setup Guide
+            </button>
+          )}
 
           {/* Settings Link */}
           <button

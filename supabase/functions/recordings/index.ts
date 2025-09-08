@@ -2,10 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:5173',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Max-Age': '86400',
 }
 
 interface Recording {
@@ -33,8 +31,7 @@ interface ListRecordingsResponse {
 }
 
 function generateId(): string {
-  // Generate a cryptographically secure UUID v4
-  return crypto.randomUUID();
+  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 }
 
 serve(async (req) => {
@@ -104,44 +101,8 @@ serve(async (req) => {
       const body = await req.json()
       const { title, youtubeVideoId, youtubeLink, duration, privacy, thumbnailUrl } = body
 
-      // Input validation
-      if (!title || typeof title !== 'string' || title.trim().length === 0 || title.length > 500) {
-        return new Response(JSON.stringify({ error: 'Invalid title: must be a non-empty string with max 500 characters' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        })
-      }
-
-      if (!youtubeVideoId || typeof youtubeVideoId !== 'string' || youtubeVideoId.trim().length === 0) {
-        return new Response(JSON.stringify({ error: 'Invalid YouTube video ID' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        })
-      }
-
-      if (!youtubeLink || typeof youtubeLink !== 'string' || !youtubeLink.startsWith('https://')) {
-        return new Response(JSON.stringify({ error: 'Invalid YouTube link: must be a valid HTTPS URL' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        })
-      }
-
-      if (typeof duration !== 'number' || duration < 0 || duration > 86400) { // Max 24 hours
-        return new Response(JSON.stringify({ error: 'Invalid duration: must be a number between 0 and 86400 seconds' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        })
-      }
-
-      if (!privacy || !['private', 'unlisted', 'public'].includes(privacy)) {
-        return new Response(JSON.stringify({ error: 'Invalid privacy setting: must be private, unlisted, or public' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        })
-      }
-
-      if (thumbnailUrl && (typeof thumbnailUrl !== 'string' || !thumbnailUrl.startsWith('https://'))) {
-        return new Response(JSON.stringify({ error: 'Invalid thumbnail URL: must be a valid HTTPS URL' }), {
+      if (!title || !youtubeVideoId || !youtubeLink || duration === undefined || !privacy) {
+        return new Response(JSON.stringify({ error: 'Missing required fields' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
         })
