@@ -23,7 +23,8 @@ export const OAUTH_CONFIG = {
 
 // Check if YouTube is configured
 export const isYouTubeConfigured = (): boolean => {
-  return !!(import.meta.env.VITE_GOOGLE_CLIENT_ID || OAUTH_CONFIG.clientId);
+  // Always return true since we'll check with the Supabase backend
+  return true;
 };
 
 // Environment-specific configuration - RecordLane URLs

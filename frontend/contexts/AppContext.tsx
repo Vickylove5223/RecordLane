@@ -243,9 +243,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Load recordings from local storage only (temporarily disabled Supabase to prevent infinite loops)
+        // Load recordings from Supabase backend
         try {
-          console.log('Loading recordings from local storage...');
+          console.log('Loading recordings from Supabase...');
+          
+          // Import Supabase client
+          const { supabase } = await import('../lib/supabase');
+          
+          // Load recordings from Supabase
+          const { data: recordings, error } = await supabase
+            .from('recordings')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (error) {
+            console.error('Failed to load recordings from Supabase:', error);
+            throw error;
+          }
+          
+          // Transform recordings to match expected format
+          const transformedRecordings = (recordings || []).map((rec: any) => ({
+            id: rec.id,
+            title: rec.title,
+            youtubeVideoId: rec.youtube_video_id,
+            youtubeLink: rec.youtube_link,
+            thumbnail: rec.thumbnail_url,
+            duration: rec.duration * 1000, // Convert seconds to milliseconds
+            createdAt: new Date(rec.created_at),
+            privacy: rec.privacy,
+            uploadStatus: 'completed' as const,
+          }));
+          
+          dispatch({ type: 'LOAD_STATE', payload: { 
+            recordings: transformedRecordings,
+            isOnboarded: true 
+          }});
+          
+          console.log(`✅ Loaded ${transformedRecordings.length} recordings from Supabase`);
+        } catch (supabaseError) {
+          console.warn('Failed to load recordings from Supabase, falling back to local storage:', supabaseError);
           
           // Fallback to local storage
           const savedState = localStorage.getItem('recordlane-app-state');
@@ -253,7 +289,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             try {
               const parsed = JSON.parse(savedState);
               if (parsed.recordings) {
-                // Filter to only show synced recordings from local storage
                 const syncedRecordings = parsed.recordings.filter((rec: any) => 
                   rec.uploadStatus === 'completed' && rec.youtubeLink
                 );
@@ -262,22 +297,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
                   createdAt: new Date(rec.createdAt),
                 }));
               }
-              // Ensure onboarded state is maintained to avoid requiring data saving
               parsed.isOnboarded = true;
               dispatch({ type: 'LOAD_STATE', payload: parsed });
-            } catch (error) {
-              console.error('Failed to parse saved state:', error);
-              ErrorHandler.logError('STATE_PARSE_ERROR', error);
-              localStorage.removeItem('recordlane-app-state');
+            } catch (parseError) {
+              console.error('Failed to parse saved state:', parseError);
+              dispatch({ type: 'LOAD_STATE', payload: { recordings: [], isOnboarded: true } });
             }
           } else {
-            // If no saved state, just initialize with empty recordings
-            dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
+            dispatch({ type: 'LOAD_STATE', payload: { recordings: [], isOnboarded: true } });
           }
-        } catch (localError) {
-          console.warn('Failed to load recordings from local storage:', localError);
-          // Initialize with empty state if local storage fails
-          dispatch({ type: 'LOAD_STATE', payload: { recordings: [] } });
         }
       } catch (error) {
         console.error('Failed to load app state:', error);

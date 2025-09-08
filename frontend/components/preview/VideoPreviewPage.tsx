@@ -263,8 +263,8 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     try {
       if (recording.youtubeVideoId) {
         console.log('Deleting from YouTube with videoId:', recording.youtubeVideoId);
-        const { FrontendYouTubeService } = await import('../../services/frontendYouTubeService');
-        await FrontendYouTubeService.deleteVideo(recording.youtubeVideoId);
+        const { SupabaseYouTubeService } = await import('../../services/supabaseYouTubeService');
+        await SupabaseYouTubeService.deleteVideo(recording.youtubeVideoId);
         console.log('Successfully deleted from YouTube');
       } else {
         console.log('No YouTube video ID found, skipping YouTube deletion');

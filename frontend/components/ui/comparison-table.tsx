@@ -2,18 +2,18 @@ import React from 'react';
 
 export function ComparisonTable() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6">
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden overflow-x-auto">
         {/* Table Header */}
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4">
             <div className="text-left">
               <h3 className="text-lg font-bold text-gray-900">Features</h3>
               <p className="text-sm text-gray-600">Compare key features</p>
             </div>
             <div className="text-center relative">
-              <div className="bg-gray-100 rounded-xl p-4">
-                <div className="text-lg font-bold text-green-600">RecordLane</div>
+              <div className="bg-gray-100 rounded-xl p-2 sm:p-3">
+                <div className="text-base font-bold text-green-600">RecordLane</div>
                 <div className="text-xs text-black">You are here</div>
                 <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">
                   BEST
@@ -21,32 +21,32 @@ export function ComparisonTable() {
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-800">Loom</div>
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="text-base font-semibold text-gray-800">Loom</div>
                 <div className="text-xs text-gray-500">$8-16/mo</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-800">Snapify.it</div>
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="text-base font-semibold text-gray-800">Snapify.it</div>
                 <div className="text-xs text-gray-500">$9-19/mo</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-800">Cap.so</div>
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="text-base font-semibold text-gray-800">Cap.so</div>
                 <div className="text-xs text-gray-500">$8-16/mo</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-800">ScreenStudio</div>
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="text-base font-semibold text-gray-800">ScreenStudio</div>
                 <div className="text-xs text-gray-500">$12-24/mo</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="text-lg font-semibold text-gray-800">Tella</div>
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="text-base font-semibold text-gray-800">Tella</div>
                 <div className="text-xs text-gray-500">$10-20/mo</div>
               </div>
             </div>
@@ -56,10 +56,10 @@ export function ComparisonTable() {
         {/* Table Body */}
         <div className="divide-y divide-gray-100">
           {/* Price Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Pricing</div>
+                <div className="font-semibold text-black text-lg">Pricing</div>
                 <div className="text-sm text-gray-600">Cost to use</div>
               </div>
             </div>
@@ -87,10 +87,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Privacy Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors bg-gray-50/50">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors bg-gray-50/50">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Privacy</div>
+                <div className="font-semibold text-black text-lg">Privacy</div>
                 <div className="text-sm text-gray-600">Data protection</div>
               </div>
             </div>
@@ -121,10 +121,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Ease of Use Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Ease of Use</div>
+                <div className="font-semibold text-black text-lg">Ease of Use</div>
                 <div className="text-sm text-gray-600">Learning curve</div>
               </div>
             </div>
@@ -155,10 +155,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Cloud Storage Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors bg-gray-50/50">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors bg-gray-50/50">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Cloud Storage</div>
+                <div className="font-semibold text-black text-lg">Cloud Storage</div>
                 <div className="text-sm text-gray-600">Online storage</div>
               </div>
             </div>
@@ -189,10 +189,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Open Source Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Open Source</div>
+                <div className="font-semibold text-black text-lg">Open Source</div>
                 <div className="text-sm text-gray-600">Code transparency</div>
               </div>
             </div>
@@ -223,10 +223,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Self-Hosting Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors bg-gray-50/50">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors bg-gray-50/50">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Self-Hosting</div>
+                <div className="font-semibold text-black text-lg">Self-Hosting</div>
                 <div className="text-sm text-gray-600">Full control</div>
               </div>
             </div>
@@ -257,10 +257,10 @@ export function ComparisonTable() {
           </div>
 
           {/* Web-Based Row */}
-          <div className="grid grid-cols-6 gap-4 p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-6 gap-2 p-2 sm:p-4 hover:bg-gray-50 transition-colors">
             <div className="flex items-center">
               <div>
-                <div className="font-semibold text-black text-xl">Web-Based</div>
+                <div className="font-semibold text-black text-lg">Web-Based</div>
                 <div className="text-sm text-gray-600">Browser access</div>
               </div>
             </div>
@@ -291,24 +291,6 @@ export function ComparisonTable() {
           </div>
         </div>
 
-        {/* Table Footer */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-t border-green-200 p-6">
-          <div className="text-center">
-            <div className="text-lg font-bold text-gray-900 mb-2">Ready to make the switch?</div>
-            <div className="text-sm text-gray-600 mb-4">Join thousands of users who've already canceled their expensive subscriptions</div>
-            <div className="flex flex-wrap text-left gap-3">
-              <div className="bg-white px-4 py-2 rounded-full text-sm font-semibold text-gray-700 border border-gray-200">
-                💰 Save $100+ per year
-              </div>
-              <div className="bg-white px-4 py-2 rounded-full text-sm font-semibold text-gray-700 border border-gray-200">
-                🔒 Privacy guaranteed
-              </div>
-              <div className="bg-white px-4 py-2 rounded-full text-sm font-semibold text-gray-700 border border-gray-200">
-                🚀 No setup required
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

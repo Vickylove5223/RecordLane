@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ModernCard, DocumentCard, LayeredCardStack, GridCard } from '@/components/ui/modern-card';
 import { RecordingSkeleton } from '@/components/ui/loading-skeleton';
-import { Video, AlertTriangle, Play, ExternalLink, Clock, FileVideo, Upload, Share2, RefreshCw } from 'lucide-react';
+import { Video, AlertTriangle, Play, ExternalLink, Clock, FileVideo, Upload, Share2, RefreshCw, Settings } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { useRecording } from '../../contexts/RecordingContext';
 import { withErrorBoundary } from '../ErrorBoundary';
@@ -161,28 +161,28 @@ const MainPanelComponent = () => {
               How does RecordLane work?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              RecordLane makes screen recording simple, secure, and completely free. Here's how it works:
+              RecordLane makes screen recording simple, secure, and completely free. Connect to YouTube, record with advanced features, and sync everything automatically. Here's how it works:
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Video className="h-6 w-6 text-red-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Settings className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">1. Record</h3>
+              <h3 className="text-lg font-semibold mb-2">1. Connect YouTube</h3>
               <p className="text-gray-600 text-sm">
-                Click record and capture your screen with audio. No downloads, no installations needed.
+                Go to the settings page and connect your YouTube account. This enables automatic uploads and secure storage.
               </p>
             </div>
             
             <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Video className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">2. Upload</h3>
+              <h3 className="text-lg font-semibold mb-2">2. Start Recording</h3>
               <p className="text-gray-600 text-sm">
-                Your video is automatically saved and ready to share. Upload to YouTube or download locally.
+                Click the record button in the header, select your options (screen, camera, or both), and start recording. Use pause, stop, and highlighting features as needed.
               </p>
             </div>
             
@@ -190,9 +190,9 @@ const MainPanelComponent = () => {
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Share2 className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">3. Share</h3>
+              <h3 className="text-lg font-semibold mb-2">3. Sync & Share</h3>
               <p className="text-gray-600 text-sm">
-                Get instant shareable links or integrate with YouTube for maximum reach.
+                Your video automatically syncs to YouTube. Share instantly, enable comments, download locally, or get direct links. Full control over your content.
               </p>
             </div>
           </div>

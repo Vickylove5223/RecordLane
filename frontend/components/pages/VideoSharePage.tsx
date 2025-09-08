@@ -120,8 +120,8 @@ export default function VideoSharePage() {
     try {
       // Delete from YouTube if synced
       if (recording.youtubeVideoId) {
-        const { FrontendYouTubeService } = await import('../../services/frontendYouTubeService');
-        await FrontendYouTubeService.deleteVideo(recording.youtubeVideoId);
+        const { SupabaseYouTubeService } = await import('../../services/supabaseYouTubeService');
+        await SupabaseYouTubeService.deleteVideo(recording.youtubeVideoId);
       }
 
       // Remove from local state

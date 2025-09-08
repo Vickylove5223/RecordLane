@@ -8,12 +8,13 @@ export const supabaseConfig = {
 }
 
 // Validate required environment variables
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn(
-    '⚠️ Using default Supabase credentials. For production, create a .env.local file with:\n' +
-    'VITE_SUPABASE_URL=your_supabase_url\n' +
-    'VITE_SUPABASE_ANON_KEY=your_supabase_anon_key'
-  )
+const hasCustomCredentials = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+const isUsingDefaults = !hasCustomCredentials;
+
+if (isUsingDefaults) {
+  console.log('✅ Using Supabase credentials for RecordLane project');
+} else {
+  console.log('✅ Using custom Supabase credentials from environment variables');
 }
 
 // TODO: Replace with your actual Supabase credentials
