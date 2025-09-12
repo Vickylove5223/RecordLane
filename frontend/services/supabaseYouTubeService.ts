@@ -7,6 +7,7 @@ import {
   getRedirectUri,
   POPUP_CONFIG
 } from '../config';
+import { SUPABASE_CONFIG } from '@/src/config/supabase';
 
 export interface YouTubeConnection {
   isConnected: boolean;
@@ -32,6 +33,17 @@ export class SupabaseYouTubeService {
   private static cache = new Map<string, any>();
   private static retryService = new RetryService();
   private static connectionListeners: Array<(connected: boolean) => void> = [];
+
+  private static getApiBase(): string {
+    try {
+      const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      if (isLocal) return '/api';
+      const functionsBase = `${SUPABASE_CONFIG.url.replace(/\/$/, '')}/functions/v1`;
+      return functionsBase;
+    } catch {
+      return '/api';
+    }
+  }
 
   static addConnectionListener(listener: (connected: boolean) => void): () => void {
     this.connectionListeners.push(listener);
@@ -82,7 +94,7 @@ export class SupabaseYouTubeService {
   static async connect(): Promise<{ userEmail: string }> {
     try {
       // Get OAuth config from Supabase Edge Function
-      const configResponse = await fetch('/api/auth/config');
+      const configResponse = await fetch(`${this.getApiBase()}/auth/config`);
       if (!configResponse.ok) {
         throw new Error('Failed to get OAuth configuration from backend');
       }
@@ -216,7 +228,7 @@ export class SupabaseYouTubeService {
         return false;
       }
 
-      const response = await fetch('/api/auth/google/refresh-token', {
+      const response = await fetch(`${this.getApiBase()}/auth/google/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,7 +271,7 @@ export class SupabaseYouTubeService {
   }
 
   private static async exchangeCodeForTokenViaBackend(code: string, codeVerifier: string): Promise<TokenData> {
-    const response = await fetch('/api/auth/google/exchange-code', {
+    const response = await fetch(`${this.getApiBase()}/auth/google/exchange-code`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

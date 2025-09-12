@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 // Configuration for the RecordLane application
 
 // YouTube API Configuration
@@ -34,17 +35,8 @@ export const getRedirectUri = (): string => {
   }
   
   const origin = window.location.origin;
-  const hostname = window.location.hostname;
-  
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${origin}/auth/callback`;
-  }
-  
-  if (hostname.includes('.dev') || hostname.includes('.local')) {
-    return `${origin}/auth/callback`;
-  }
-  
-  return 'https://recordlane.com/auth/callback';
+  // Always use the current origin so OAuth redirect URIs match in all environments
+  return `${origin}/auth/callback`;
 };
 
 // Popup configuration for OAuth
