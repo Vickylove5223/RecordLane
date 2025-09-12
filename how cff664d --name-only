@@ -1,5 +1,0 @@
-[33mc23accd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Add push-updates.ps1 script
-[33mcff664d[m fix: Improve Supabase integration and remove warnings
-[33meb2e17e[m Optimize comparison table layout for better fit
-[33m0d955c5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m GitHub: Update .gitignore to exclude sensitive environm...
-[33m77fc138[m Update .gitignore to exclude sensitive environment files
