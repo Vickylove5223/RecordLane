@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { ErrorHandler } from '../utils/errorHandler';
 import { RetryService } from '../utils/retryService';
 import { useToast } from '@/components/ui/use-toast';
-import { SupabaseYouTubeService } from '../services/supabaseYouTubeService';
-import { PersistentTokenService } from '../services/persistentTokenService';
+import { RealYouTubeService } from '../services/realYouTubeService';
+import { FrontendYouTubeService } from '../services/frontendYouTubeService';
 import { DEV_CONFIG, isYouTubeConfigured } from '../config';
 
 // Real YouTube context with backend integration
@@ -36,55 +36,33 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
   
   const retryService = new RetryService();
 
-  // Check for persistent tokens on mount
-  useEffect(() => {
-    const initializeConnection = async () => {
-      try {
-        setConnectionError(null);
-        console.log('Initializing YouTube connection...');
-        
-        // Simple check - just set as not connected initially
-        setIsConnected(false);
-        setUserEmail(null);
-        setConnectionError('Not Connected to YouTube');
-        
-        console.log('YouTube connection initialized (not connected)');
-      } catch (error) {
-        console.error('Failed to initialize YouTube connection:', error);
-        setIsConnected(false);
-        setUserEmail(null);
-        setConnectionError('Failed to check connection status');
-      }
-    };
-
-    initializeConnection();
-  }, []);
-
   const checkConnection = useCallback(async () => {
     try {
       setConnectionError(null);
       
-      // First check if we have persistent tokens
-      const hasValidTokens = await PersistentTokenService.hasValidTokens();
-      if (hasValidTokens) {
-        // Try to get user email from stored tokens
-        const email = await PersistentTokenService.getUserEmail();
-        if (email) {
-          setIsConnected(true);
-          setUserEmail(email);
-          console.log('✅ YouTube connection restored from persistent tokens');
+      // Choose service based on configuration
+      let connection;
+      if (isYouTubeConfigured()) {
+        // Use frontend service if YouTube is configured with environment variables
+        connection = await FrontendYouTubeService.checkConnection();
+      } else {
+        // Use backend service by default
+        try {
+          connection = await RealYouTubeService.checkConnection();
+        } catch (error) {
+          // If backend fails, show configuration message
+          setConnectionError('Backend server is not running. Please start the backend server to enable YouTube integration.');
+          setIsConnected(false);
+          setUserEmail(null);
           return;
         }
       }
-      
-        // Use Supabase service for connection check
-        const connection = await SupabaseYouTubeService.checkConnection();
       
       setIsConnected(connection.isConnected);
       setUserEmail(connection.userEmail);
       
       if (!connection.isConnected) {
-        setConnectionError('Not Connected to YouTube');
+        setConnectionError('Not connected to YouTube');
       }
     } catch (error) {
       console.error('Failed to check YouTube connection:', error);
@@ -101,14 +79,33 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     setConnectionError(null);
     
     try {
-      // Use Supabase service for YouTube OAuth
-      const result = await SupabaseYouTubeService.connect();
+      // Choose service based on configuration
+      let result;
+      if (isYouTubeConfigured()) {
+        // Use frontend service if YouTube is configured with environment variables
+        result = await FrontendYouTubeService.connect();
+      } else {
+        // Use backend service by default
+        try {
+          result = await RealYouTubeService.connect();
+        } catch (error) {
+          // If backend fails, show configuration message
+          if (error.message?.includes('backend configuration') || error.message?.includes('OAuth configuration')) {
+            setConnectionError('Backend server is not running. Please start the backend server to enable YouTube integration.');
+            toast({
+              title: "Backend Required",
+              description: "Please start the backend server to enable YouTube integration",
+              variant: "destructive",
+            });
+            return;
+          } else {
+            throw error;
+          }
+        }
+      }
       
       setIsConnected(true);
       setUserEmail(result.userEmail);
-      
-      // Tokens are already stored by the SupabaseYouTubeService
-      console.log('✅ YouTube connection successful');
       
       toast({
         title: "YouTube Connected",
@@ -122,7 +119,7 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to YouTube. Please check your internet connection and try again.",
+        description: "Failed to connect to YouTube. Please make sure the backend server is running and try again.",
         variant: "destructive",
       });
     } finally {
@@ -132,10 +129,11 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
 
   const disconnectYouTube = useCallback(async () => {
     try {
-      await SupabaseYouTubeService.disconnect();
-      
-      // Clear persistent tokens
-      await PersistentTokenService.clearTokens();
+      if (isYouTubeConfigured()) {
+        await FrontendYouTubeService.disconnect();
+      } else {
+        await RealYouTubeService.disconnect();
+      }
       
       setIsConnected(false);
       setUserEmail(null);
@@ -174,7 +172,12 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
     
     try {
       // Use the appropriate service
-      const result = await SupabaseYouTubeService.uploadVideo(file, title, privacy, onProgress);
+      let result;
+      if (isYouTubeConfigured()) {
+        result = await FrontendYouTubeService.uploadVideo(file, title, privacy, onProgress);
+      } else {
+        result = await RealYouTubeService.uploadVideo(file, title, privacy, onProgress);
+      }
       
       toast({
         title: "Upload Successful",
@@ -199,7 +202,12 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
   const refreshToken = useCallback(async () => {
     try {
       // Use the appropriate service
-      const refreshed = await SupabaseYouTubeService.refreshAccessToken();
+      let refreshed;
+      if (isYouTubeConfigured()) {
+        refreshed = await FrontendYouTubeService.refreshAccessToken();
+      } else {
+        refreshed = await RealYouTubeService.refreshAccessToken();
+      }
       
       if (refreshed) {
         toast({
@@ -232,6 +240,10 @@ export function YouTubeProvider({ children }: { children: ReactNode }) {
       await checkConnection();
     }
   }, [connectionError, connectYouTube, checkConnection]);
+
+  React.useEffect(() => {
+    checkConnection();
+  }, [checkConnection]);
 
   return (
     <YouTubeContext.Provider value={{

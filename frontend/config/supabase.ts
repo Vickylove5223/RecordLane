@@ -7,16 +7,6 @@ export const supabaseConfig = {
   anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvY2N3cXlyeGR5bXJmcWpwd2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMDU3NzQsImV4cCI6MjA3Mjc4MTc3NH0.A-UU51XVrGN-r9OLNrF3ASf9LZXCTy3bXN0pcM9zCno'
 }
 
-// Validate required environment variables
-const hasCustomCredentials = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
-const isUsingDefaults = !hasCustomCredentials;
-
-if (isUsingDefaults) {
-  console.log('✅ Using Supabase credentials for RecordLane project');
-} else {
-  console.log('✅ Using custom Supabase credentials from environment variables');
-}
-
 // TODO: Replace with your actual Supabase credentials
 // 1. Go to https://supabase.com and create a new project
 // 2. Go to Settings > API in your Supabase dashboard  

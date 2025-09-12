@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Play, 
@@ -79,36 +79,21 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   const youtubeEmbedUrl = getYouTubeEmbedUrl(recording.youtubeLink);
-  const videoId = recording.youtubeVideoId || (recording.youtubeLink ? getYouTubeVideoId(recording.youtubeLink) : null);
-  
-  console.log('VideoPreviewPage - recording:', recording);
-  console.log('VideoPreviewPage - videoId:', videoId);
-  console.log('VideoPreviewPage - isConnected:', isConnected);
-  
-  // Helper function to extract video ID from YouTube URL
-  function getYouTubeVideoId(url: string): string | null {
-    if (!url) return null;
-    try {
-      const urlObj = new URL(url);
-      if (urlObj.hostname === 'youtu.be') {
-        return urlObj.pathname.slice(1);
-      } else if (urlObj.hostname.includes('youtube.com')) {
-        return urlObj.searchParams.get('v');
-      }
-    } catch (error) {
-      console.error('Invalid YouTube URL:', url, error);
-    }
-    return null;
-  }
+  const videoId = recording.youtubeVideoId;
 
-  const loadComments = useCallback(async () => {
+  // Load comments when component mounts
+  useEffect(() => {
+    if (videoId && isConnected) {
+      loadComments();
+    }
+  }, [videoId, isConnected]);
+
+  const loadComments = async () => {
     if (!videoId) return;
     
     setLoadingComments(true);
     try {
-      console.log('Loading comments for videoId:', videoId);
       const response = await YouTubeCommentsService.getComments(videoId);
-      console.log('Comments response:', response);
       setComments(response.comments);
     } catch (error) {
       console.error('Failed to load comments:', error);
@@ -120,14 +105,7 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
     } finally {
       setLoadingComments(false);
     }
-  }, [videoId]);
-
-  // Load comments when component mounts
-  useEffect(() => {
-    if (videoId && isConnected) {
-      loadComments();
-    }
-  }, [videoId, isConnected, loadComments]);
+  };
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !videoId) return;
@@ -151,14 +129,14 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   const handleReply = async (parentId: string) => {
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || !videoId) return;
     
     try {
-      const reply = await YouTubeCommentsService.addReply(parentId, replyText.trim());
+      const comment = await YouTubeCommentsService.addComment(videoId, replyText.trim(), parentId);
       setComments(prev => 
         prev.map(c => 
           c.id === parentId 
-            ? { ...c, replies: [...(c.replies || []), reply] }
+            ? { ...c, replies: [...(c.replies || []), comment] }
             : c
         )
       );
@@ -180,73 +158,16 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
 
   const handleLikeComment = async (commentId: string) => {
     try {
-      // Find the comment to check current like status
-      const findComment = (comments: any[], id: string): any => {
-        for (const comment of comments) {
-          if (comment.id === id) return comment;
-          if (comment.replies) {
-            const reply = comment.replies.find((r: any) => r.id === id);
-            if (reply) return reply;
-          }
-        }
-        return null;
-      };
-
-      const comment = findComment(comments, commentId);
-      if (!comment) return;
-
-      const isCurrentlyLiked = comment.viewerRating === 'like';
-      
-      if (isCurrentlyLiked) {
-        // Unlike the comment
-        await YouTubeCommentsService.unlikeComment(commentId);
-        setComments(prev =>
-          prev.map(c => {
-            if (c.id === commentId) {
-              return { ...c, likeCount: Math.max(0, c.likeCount - 1), viewerRating: 'none' };
-            }
-            if (c.replies) {
-              return {
-                ...c,
-                replies: c.replies.map((r: any) =>
-                  r.id === commentId
-                    ? { ...r, likeCount: Math.max(0, r.likeCount - 1), viewerRating: 'none' }
-                    : r
-                )
-              };
-            }
-            return c;
-          })
-        );
-      } else {
-        // Like the comment
       await YouTubeCommentsService.likeComment(commentId);
       setComments(prev =>
-          prev.map(c => {
-            if (c.id === commentId) {
-              return { ...c, likeCount: c.likeCount + 1, viewerRating: 'like' };
-            }
-            if (c.replies) {
-              return {
-                ...c,
-                replies: c.replies.map((r: any) =>
-                  r.id === commentId
-                    ? { ...r, likeCount: r.likeCount + 1, viewerRating: 'like' }
-                    : r
-                )
-              };
-            }
-            return c;
-          })
-        );
-      }
+        prev.map(comment => 
+          comment.id === commentId
+            ? { ...comment, likeCount: comment.likeCount + 1, viewerRating: 'like' }
+            : comment
+        )
+      );
     } catch (error) {
-      console.error('Failed to like/unlike comment:', error);
-      toast({
-        title: "Action Failed",
-        description: "Could not like/unlike the comment",
-        variant: "destructive",
-      });
+      console.error('Failed to like comment:', error);
     }
   };
 
@@ -258,49 +179,26 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   const handleDelete = async () => {
-    console.log('handleDelete called with recording:', recording);
     setIsDeleting(true);
     try {
       if (recording.youtubeVideoId) {
-        console.log('Deleting from YouTube with videoId:', recording.youtubeVideoId);
-        const { SupabaseYouTubeService } = await import('../../services/supabaseYouTubeService');
-        await SupabaseYouTubeService.deleteVideo(recording.youtubeVideoId);
-        console.log('Successfully deleted from YouTube');
-      } else {
-        console.log('No YouTube video ID found, skipping YouTube deletion');
+        const { RealYouTubeService } = await import('../../services/realYouTubeService');
+        await RealYouTubeService.deleteVideo(recording.youtubeVideoId);
       }
       
-      console.log('Dispatching REMOVE_RECORDING with id:', recording.id);
       dispatch({ type: 'REMOVE_RECORDING', payload: recording.id });
-      console.log('REMOVE_RECORDING dispatched successfully');
       
       toast({
         title: "Recording Deleted",
         description: "The recording has been removed from your library",
       });
       
-      console.log('Closing modal');
       onClose();
     } catch (error) {
       console.error('Failed to delete recording:', error);
-      
-      // Show more specific error messages
-      let errorMessage = "Could not delete the recording";
-      if (error.message) {
-        if (error.message.includes('Permission denied')) {
-          errorMessage = "You don't have permission to delete this video from YouTube";
-        } else if (error.message.includes('Video not found')) {
-          errorMessage = "Video not found on YouTube. It may have already been deleted.";
-        } else if (error.message.includes('Authentication required')) {
-          errorMessage = "Please reconnect to YouTube to delete this video";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
       toast({
         title: "Delete Failed",
-        description: errorMessage,
+        description: "Could not delete the recording",
         variant: "destructive",
       });
     } finally {
@@ -338,10 +236,15 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="flex items-center px-6 py-4">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
             <div>
               <h1 className="text-lg font-semibold truncate max-w-md">{recording.title}</h1>
               <div className="flex items-center space-x-4 text-sm text-muted-foreground">
@@ -364,16 +267,48 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
                   )}
                 </Badge>
               </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {recording.youtubeLink && (
+              <Button variant="outline" onClick={handleShare}>
+                {copied ? (
+                  <Check className="h-4 w-4 mr-2" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-2" />
+                )}
+                {copied ? 'Copied!' : 'Copy Link'}
+              </Button>
+            )}
+            
+            {recording.youtubeLink && (
+              <Button 
+                variant="outline" 
+                onClick={() => window.open(recording.youtubeLink, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in YouTube
+              </Button>
+            )}
+            
+            <Button 
+              variant="destructive" 
+              onClick={() => setShowDeleteModal(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex h-[calc(100vh-80px)]">
         {/* Video Player */}
-        <div className="flex-1 flex flex-col pl-6">
+        <div className="flex-1 flex flex-col">
           <div 
             ref={containerRef}
-            className="relative bg-black flex-1 group mb-6"
+            className="relative bg-black flex-1 group"
           >
             {youtubeEmbedUrl && !youtubeError ? (
               <div className="relative w-full h-full">
@@ -412,43 +347,7 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
         </div>
 
         {/* Comments Section */}
-        <div className="w-80 border-l bg-background flex flex-col">
-          {/* Action Buttons */}
-          <div className="p-4 border-b">
-            <div className="flex flex-col space-y-2">
-              {recording.youtubeLink && (
-                <Button variant="outline" onClick={handleShare} className="w-full justify-start">
-                  {copied ? (
-                    <Check className="h-4 w-4 mr-2" />
-                  ) : (
-                    <Copy className="h-4 w-4 mr-2" />
-                  )}
-                  {copied ? 'Copied!' : 'Copy Link'}
-                </Button>
-              )}
-              
-              {recording.youtubeLink && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open(recording.youtubeLink, '_blank')}
-                  className="w-full justify-start"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open in YouTube
-                </Button>
-              )}
-              
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteModal(true)}
-                className="w-full justify-start"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-          </div>
-
+        <div className="w-96 border-l bg-background flex flex-col">
           <div className="p-4 border-b">
             <h3 className="font-semibold flex items-center">
               <MessageCircle className="h-5 w-5 mr-2" />
@@ -502,25 +401,24 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
                       <img
                         src={comment.authorProfileImageUrl}
                         alt={comment.authorDisplayName}
-                        className="w-8 h-8 rounded-full flex-shrink-0"
+                        className="w-8 h-8 rounded-full"
                       />
                       <div className="flex-1 min-w-0">
-                        {/* Name and time - full width layout */}
-                        <div className="w-full">
-                          <div className="font-medium text-sm text-foreground">{comment.authorDisplayName}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-sm">{comment.authorDisplayName}</span>
+                          <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(comment.publishedAt), { addSuffix: true })}
-                          </div>
+                          </span>
                         </div>
-                        <p className="text-sm mt-2 text-foreground">{comment.textDisplay}</p>
+                        <p className="text-sm mt-1">{comment.textDisplay}</p>
                         <div className="flex items-center space-x-4 mt-2">
                           <Button
                             size="sm"
-                            variant={comment.viewerRating === 'like' ? 'default' : 'ghost'}
+                            variant="ghost"
                             onClick={() => handleLikeComment(comment.id)}
                             className="h-6 px-2 text-xs"
                           >
-                            <Heart className={`h-3 w-3 mr-1 ${comment.viewerRating === 'like' ? 'fill-current' : ''}`} />
+                            <Heart className="h-3 w-3 mr-1" />
                             {comment.likeCount}
                           </Button>
                           <Button
@@ -559,31 +457,30 @@ export default function VideoPreviewPage({ recording, onClose }: VideoPreviewPag
 
                     {/* Replies */}
                     {comment.replies && comment.replies.length > 0 && (
-                      <div className="ml-11 space-y-3">
+                      <div className="ml-11 space-y-2">
                         {comment.replies.map((reply) => (
                           <div key={reply.id} className="flex space-x-3">
                             <img
                               src={reply.authorProfileImageUrl}
                               alt={reply.authorDisplayName}
-                              className="w-6 h-6 rounded-full flex-shrink-0"
+                              className="w-6 h-6 rounded-full"
                             />
                             <div className="flex-1 min-w-0">
-                              {/* Name and time - full width layout */}
-                              <div className="w-full">
-                                <div className="font-medium text-xs text-foreground">{reply.authorDisplayName}</div>
-                                <div className="text-xs text-muted-foreground mt-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-xs">{reply.authorDisplayName}</span>
+                                <span className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(reply.publishedAt), { addSuffix: true })}
-                                </div>
+                                </span>
                               </div>
-                              <p className="text-xs mt-2 text-foreground">{reply.textDisplay}</p>
-                              <div className="flex items-center space-x-4 mt-2">
+                              <p className="text-xs mt-1">{reply.textDisplay}</p>
+                              <div className="flex items-center space-x-4 mt-1">
                                 <Button
                                   size="sm"
-                                  variant={reply.viewerRating === 'like' ? 'default' : 'ghost'}
+                                  variant="ghost"
                                   onClick={() => handleLikeComment(reply.id)}
                                   className="h-5 px-2 text-xs"
                                 >
-                                  <Heart className={`h-3 w-3 mr-1 ${reply.viewerRating === 'like' ? 'fill-current' : ''}`} />
+                                  <Heart className="h-3 w-3 mr-1" />
                                   {reply.likeCount}
                                 </Button>
                               </div>

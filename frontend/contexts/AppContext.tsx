@@ -120,13 +120,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
         return updatedRecordingState;
         
       case 'REMOVE_RECORDING':
-        console.log('REMOVE_RECORDING action received with id:', action.payload);
-        console.log('Current recordings before removal:', state.recordings.map(r => ({ id: r.id, title: r.title })));
         const removedRecordingState = {
           ...state,
           recordings: state.recordings.filter(recording => recording.id !== action.payload),
         };
-        console.log('Recordings after removal:', removedRecordingState.recordings.map(r => ({ id: r.id, title: r.title })));
         saveStateToStorage(removedRecordingState);
         return removedRecordingState;
         
@@ -193,7 +190,6 @@ function saveStateToStorage(state: AppState): void {
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
-  refreshRecordings: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -201,110 +197,28 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  const refreshRecordings = React.useCallback(async () => {
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
-      // Try to load recordings from Supabase backend, but fallback gracefully if it fails
-      try {
-        const { metadata } = await import('../supabaseClient');
-        const recordingsResponse = await metadata.list({});
-        
-        if (recordingsResponse.recordings) {
-          const recordings = recordingsResponse.recordings.map((rec: any) => ({
-            id: rec.id,
-            title: rec.title,
-            youtubeVideoId: rec.youtube_video_id,
-            youtubeLink: rec.youtube_link,
-            thumbnail: rec.thumbnail_url,
-            duration: rec.duration * 1000, // Convert seconds to milliseconds
-            createdAt: new Date(rec.created_at),
-            privacy: rec.privacy,
-            uploadStatus: 'completed' as const, // All recordings from backend are synced
-          }));
-          
-          dispatch({ type: 'LOAD_STATE', payload: { recordings } });
-        }
-      } catch (backendError) {
-        console.warn('Backend not available, using local storage only:', backendError);
-        // Don't set error state, just use local storage
-      }
-    } catch (error) {
-      console.error('Failed to refresh recordings:', error);
-      ErrorHandler.logError('RECORDINGS_REFRESH_ERROR', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to refresh recordings' });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
-
   React.useEffect(() => {
     const loadState = async () => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // Load recordings from Supabase backend
-        try {
-          console.log('Loading recordings from Supabase...');
-          
-          // Import Supabase client
-          const { supabase } = await import('../lib/supabase');
-          
-          // Load recordings from Supabase
-          const { data: recordings, error } = await supabase
-            .from('recordings')
-            .select('*')
-            .order('created_at', { ascending: false });
-          
-          if (error) {
-            console.error('Failed to load recordings from Supabase:', error);
-            throw error;
-          }
-          
-          // Transform recordings to match expected format
-          const transformedRecordings = (recordings || []).map((rec: any) => ({
-            id: rec.id,
-            title: rec.title,
-            youtubeVideoId: rec.youtube_video_id,
-            youtubeLink: rec.youtube_link,
-            thumbnail: rec.thumbnail_url,
-            duration: rec.duration * 1000, // Convert seconds to milliseconds
-            createdAt: new Date(rec.created_at),
-            privacy: rec.privacy,
-            uploadStatus: 'completed' as const,
-          }));
-          
-          dispatch({ type: 'LOAD_STATE', payload: { 
-            recordings: transformedRecordings,
-            isOnboarded: true 
-          }});
-          
-          console.log(`✅ Loaded ${transformedRecordings.length} recordings from Supabase`);
-        } catch (supabaseError) {
-          console.warn('Failed to load recordings from Supabase, falling back to local storage:', supabaseError);
-          
-          // Fallback to local storage
-          const savedState = localStorage.getItem('recordlane-app-state');
-          if (savedState) {
-            try {
-              const parsed = JSON.parse(savedState);
-              if (parsed.recordings) {
-                const syncedRecordings = parsed.recordings.filter((rec: any) => 
-                  rec.uploadStatus === 'completed' && rec.youtubeLink
-                );
-                parsed.recordings = syncedRecordings.map((rec: any) => ({
-                  ...rec,
-                  createdAt: new Date(rec.createdAt),
-                }));
-              }
-              parsed.isOnboarded = true;
-              dispatch({ type: 'LOAD_STATE', payload: parsed });
-            } catch (parseError) {
-              console.error('Failed to parse saved state:', parseError);
-              dispatch({ type: 'LOAD_STATE', payload: { recordings: [], isOnboarded: true } });
+        const savedState = localStorage.getItem('recordlane-app-state');
+        if (savedState) {
+          try {
+            const parsed = JSON.parse(savedState);
+            if (parsed.recordings) {
+              parsed.recordings = parsed.recordings.map((rec: any) => ({
+                ...rec,
+                createdAt: new Date(rec.createdAt),
+              }));
             }
-          } else {
-            dispatch({ type: 'LOAD_STATE', payload: { recordings: [], isOnboarded: true } });
+            // Ensure onboarded state is maintained to avoid requiring data saving
+            parsed.isOnboarded = true;
+            dispatch({ type: 'LOAD_STATE', payload: parsed });
+          } catch (error) {
+            console.error('Failed to parse saved state:', error);
+            ErrorHandler.logError('STATE_PARSE_ERROR', error);
+            localStorage.removeItem('recordlane-app-state');
           }
         }
       } catch (error) {
@@ -332,7 +246,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.error]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, refreshRecordings }}>
+    <AppContext.Provider value={{ state, dispatch }}>
       {children}
     </AppContext.Provider>
   );
